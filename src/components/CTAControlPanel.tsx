@@ -164,6 +164,7 @@ export default function CTAControlPanel() {
               <div
                 style={{
                   display: "flex",
+                  flexWrap: "wrap",
                   borderBottom: "1px solid rgba(255,255,255,0.06)",
                 }}
               >
@@ -173,12 +174,12 @@ export default function CTAControlPanel() {
                     type="button"
                     onClick={() => setSelected(i)}
                     style={{
-                      flex: 1,
-                      padding: "1.1rem 1rem",
+                      flex: "1 1 auto",
+                      minWidth: 0,
+                      padding: "1.1rem 0.6rem",
                       background: selected === i ? "rgba(37,99,235,0.08)" : "transparent",
-                      borderBottom: selected === i ? "2px solid var(--accent)" : "2px solid transparent",
                       color: selected === i ? "var(--text-primary)" : "var(--text-muted)",
-                      fontSize: "0.78rem",
+                      fontSize: "0.72rem",
                       fontWeight: 600,
                       letterSpacing: "0.02em",
                       cursor: "pointer",
@@ -190,13 +191,14 @@ export default function CTAControlPanel() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: "0.5rem",
+                      gap: "0.35rem",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {type.label}
                     <span
                       style={{
-                        fontSize: "0.6rem",
+                        fontSize: "0.55rem",
                         fontWeight: 500,
                         color: selected === i ? "var(--accent)" : "var(--text-muted)",
                         opacity: 0.7,
@@ -211,7 +213,7 @@ export default function CTAControlPanel() {
               </div>
 
               {/* ── Form fields ── */}
-              <div style={{ padding: "2.5rem 2.5rem 2rem" }}>
+              <div style={{ padding: "2rem 1.5rem 1.5rem" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
                   {([
                     { label: "Name", value: name, set: setName, placeholder: "Jane Smith", type: "text" },
@@ -267,11 +269,12 @@ export default function CTAControlPanel() {
               {/* ── Submit row ── */}
               <div
                 style={{
-                  padding: "0 2.5rem 2.5rem",
+                  padding: "0 1.5rem 2rem",
                   display: "flex",
+                  flexWrap: "wrap",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  gap: "1.5rem",
+                  gap: "1rem",
                 }}
               >
                 <p
@@ -283,7 +286,7 @@ export default function CTAControlPanel() {
                 <button
                   type="submit"
                   className="btn-primary"
-                  style={{ padding: "0.75rem 2.5rem", fontSize: "0.7rem", flexShrink: 0 }}
+                  style={{ padding: "0.75rem 2rem", fontSize: "0.7rem", flexShrink: 0 }}
                 >
                   Send Request
                 </button>

@@ -206,12 +206,16 @@ export default function EnergyFlowScene() {
           maxWidth: 1100,
           marginLeft: "auto",
           marginRight: "auto",
-          padding: "0 2rem",
+          padding: "0 1rem",
+          overflowX: "auto",
+          overflowY: "hidden",
           background: "rgba(13,13,16,0.5)",
           border: "1px solid var(--color-edge)",
           boxShadow: "0 0 0 1px rgba(37,99,235,0.1), 0 24px 64px rgba(0,0,0,0.6)",
         }}
       >
+        {/* Min-width wrapper so flow nodes don't collapse on mobile */}
+        <div style={{ minWidth: 700, position: "relative", height: "100%" }}>
         {/* Inner ambient glow overlay */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -343,6 +347,7 @@ export default function EnergyFlowScene() {
             </p>
           </div>
         ))}
+        </div>{/* close min-width wrapper */}
       </div>
 
       {/* ── Stats Row ── */}
