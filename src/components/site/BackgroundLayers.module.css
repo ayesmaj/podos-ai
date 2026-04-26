@@ -1,0 +1,227 @@
+/* BACKGROUND LAYERS — reusable cyber-tech atmospherics
+   These layers are composable. Each section picks 2–4 of them to build
+   its signature backdrop. Every layer is light, alive, elegant — never
+   distracting. All layers respect pointer-events: none and live at
+   negative or low z-index beneath content. */
+
+/* ============== GRID FIELD ============== */
+/* Slow-drifting dot/line grid. Architectural, data-center floor-plan feel. */
+.gridField {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, rgba(10, 14, 26, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 14, 26, 0.045) 1px, transparent 1px);
+  background-size: 60px 60px, 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 80%);
+  /* Sped up 40s → 22s for visible drift. Grid feels actively
+     scrolling rather than glacially creeping. */
+  animation: grid-drift 22s linear infinite;
+}
+
+.gridFieldDense {
+  composes: gridField;
+  background-size: 30px 30px, 30px 30px;
+  animation-duration: 14s;
+}
+
+.gridFieldSparse {
+  composes: gridField;
+  background-size: 100px 100px, 100px 100px;
+  opacity: 0.7;
+}
+
+/* Dotted grid variant — nodes only, Palantir-style */
+.gridDots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(10, 14, 26, 0.08) 1px, transparent 0);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 50%, black 10%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 50%, black 10%, transparent 85%);
+}
+
+/* ============== AMBIENT ORBS ============== */
+/* Large soft gradient orbs — floating light sources */
+.orb {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(60px);
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+}
+.orbElectric {
+  background: radial-gradient(circle, var(--electric-glow) 0%, transparent 70%);
+}
+.orbTeal {
+  background: radial-gradient(circle, var(--teal-glow) 0%, transparent 70%);
+}
+.orbSky {
+  background: radial-gradient(circle, var(--sky-glow) 0%, transparent 70%);
+}
+.orbGold {
+  background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+}
+.orbFloat {
+  /* Sped up 14s → 9s. Orbs now visibly pulse-and-drift instead of
+     hanging static. Combined with the wider float-slow amplitude
+     (was -14px, now -22px) the orbs read as breathing light sources. */
+  animation: float-slow 9s ease-in-out infinite, glow-pulse 6s ease-in-out infinite;
+}
+
+/* ============== ENERGY FLOW ============== */
+/* Horizontal energy streamer — looks like electricity flowing through
+   a circuit trace */
+.energyFlow {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  height: 1px;
+  width: 100%;
+  overflow: hidden;
+}
+.energyFlow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--electric) 50%,
+    transparent 100%
+  );
+  /* Intensified glow + sped 9s → 4.5s so streamers visibly race */
+  box-shadow: 0 0 14px var(--electric-glow), 0 0 28px var(--electric-glow);
+  animation: energy-flow 4.5s linear infinite;
+}
+.energyFlowTeal::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--teal-bright) 50%,
+    transparent 100%
+  );
+  box-shadow: 0 0 8px var(--teal-glow);
+}
+.energyFlowSky::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--sky-bright) 50%,
+    transparent 100%
+  );
+  box-shadow: 0 0 8px var(--sky-glow);
+}
+
+/* ============== GRADIENT WASH ============== */
+/* Soft diagonal gradient washes — living light atmosphere */
+.washElectric {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 85% 15%, var(--electric-wash) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 10% 90%, var(--teal-trace) 0%, transparent 70%);
+}
+.washTeal {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 20% 20%, var(--teal-trace) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 85%, var(--sky-trace) 0%, transparent 70%);
+}
+
+/* ============== CIRCUIT SVG WRAPPER ============== */
+.circuitLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+}
+.circuitLayer svg {
+  width: 100%;
+  height: 100%;
+}
+.circuitPath {
+  stroke: var(--electric);
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 4 8;
+  /* Sped up + dasharray scrolls — "current flowing through traces" */
+  animation: circuit-pulse 2.4s ease-in-out infinite, dash-flow 6s linear infinite;
+}
+@keyframes dash-flow {
+  to { stroke-dashoffset: -36; }
+}
+.circuitNode {
+  fill: var(--electric);
+  filter: drop-shadow(0 0 6px var(--electric-glow));
+  /* 3s → 1.8s — node lights pulse like a live PCB */
+  animation: pulse-soft 1.8s ease-in-out infinite;
+}
+.circuitNodeTeal {
+  fill: var(--teal);
+  filter: drop-shadow(0 0 4px var(--teal-glow));
+}
+
+/* ============== PARTICLE MESH ============== */
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--electric);
+  box-shadow: 0 0 10px var(--electric-glow), 0 0 20px var(--electric-glow);
+  opacity: 0;
+  /* 12s → 7s; brighter peak (1.0 vs 0.7) so particles really sparkle */
+  animation: particleDrift 7s ease-in-out infinite;
+}
+.particleTeal {
+  background: var(--teal);
+  box-shadow: 0 0 6px var(--teal-glow);
+}
+.particleSky {
+  background: var(--sky);
+  box-shadow: 0 0 6px var(--sky-glow);
+}
+@keyframes particleDrift {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.5); }
+  10%  { opacity: 1; }
+  50%  { opacity: 1; transform: translate(var(--dx, 40px), var(--dy, -30px)) scale(1.2); }
+  85%  { opacity: 0.55; }
+  100% { opacity: 0; transform: translate(calc(var(--dx, 40px) * 2), calc(var(--dy, -30px) * 2)) scale(0.5); }
+}
+
+/* ============== VIGNETTE ============== */
+.vignetteLight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse 95% 95% at 50% 50%,
+    transparent 0%,
+    transparent 65%,
+    rgba(10, 14, 26, 0.04) 100%
+  );
+}

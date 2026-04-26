@@ -1,0 +1,253 @@
+/*
+ * NavHeader · CSS Module — glass-bubble aesthetic (v2)
+ *
+ * Rewritten from the brutalist black/white v1. What changed:
+ *
+ *   - DROPPED `mix-blend-mode: difference`. That trick only flips
+ *     cleanly between PURE white and PURE black backdrops. Against any
+ *     colored (e.g. blue) backdrop, difference produces muddy off-hues.
+ *     So we can't keep it if we want the bubble to be brand-tinted.
+ *
+ *   - ADDED a translucent blue→cyan glass tint with backdrop-filter
+ *     blur, a specular top-edge highlight (::before), and a soft
+ *     brand-colored outer glow. This matches the site's existing
+ *     --brand-gradient (blue→cyan) from globals.css — the same
+ *     gradient already used in headlines and the logo.
+ *
+ *   - ADDED explicit hover / active color swapping. Because we now
+ *     know WHICH tab the cursor pill is under (via :hover in CSS and
+ *     via the .tabActive class set by JS), we can directly color that
+ *     tab's label white — no blend-mode trickery needed.
+ *
+ * Why a module (not Tailwind utilities):
+ *   globals.css carries an unlayered `* { padding: 0 }` reset. Per the
+ *   CSS cascade, unlayered rules beat `@layer utilities` (where
+ *   Tailwind v4 emits) regardless of specificity — so Tailwind padding
+ *   utilities silently lose. CSS Modules emit hashed single-class
+ *   selectors that also sit outside of layers and win on source order.
+ *   The rest of the site uses the same convention.
+ */
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Outer glass bubble — the <nav>.
+ *
+ * v3 change (logo slot): moved glass treatment from <ul> up to <nav> so
+ * the bubble can wrap an optional `.logoSlot` AND the `<ul.tabs>` as
+ * peer flex items. Padding moved off the bubble onto `.tabs` (so the
+ * cursor pill's `top/bottom: 0.25rem` insets still match its parent).
+ * The logo slot has its own padding rules (denser than tabs) so the
+ * overall capsule height is set by tab line-height, not by the logo.
+ * ────────────────────────────────────────────────────────────────────── */
+.bubble {
+  position: relative;
+  display: flex;
+  align-items: center;                      /* logo + tab row centered */
+  width: fit-content;
+  max-width: calc(100vw - 1.5rem);        /* don't blow out mobile viewport */
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 9999px;
+  overflow: hidden;                         /* contains ::before highlight
+                                             * AND clips cursor pill at the
+                                             * rounded corners. Outer
+                                             * box-shadows are NOT clipped
+                                             * by overflow:hidden. */
+
+  /* Glass tint — a subtle brand wash (blue→cyan diagonal at 14%/12%
+   * opacity) layered over a near-white paper base.
+   *
+   * Paper-base opacity set at 0.78 (not 0.55) so the bubble holds the
+   * same readable backdrop for its dark-slate labels regardless of
+   * what's behind it. Tested: stays legible on the main site's
+   * --paper hero AND on /mockups/industrial's near-black chrome.
+   * Below 0.6 the labels fall off contrast on dark backdrops; above
+   * 0.9 the bubble stops feeling like glass. 0.78 is the sweet spot. */
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.14) 0%,
+      rgba(34, 211, 238, 0.12) 100%
+    ),
+    rgba(247, 249, 251, 0.78);
+
+  /* Frosted-glass blur. `saturate(180%)` boosts whatever is behind so
+   * the frost reads as a tinted lens rather than grey mud. */
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+
+  /* Glass edge — a soft brand-blue stroke replaces the old 2px black
+   * border. Subtle enough to feel like a lens rim, not a UI chrome. */
+  border: 1px solid rgba(37, 99, 235, 0.22);
+
+  /* Depth stack:
+   *   outer brand glow  — the "this thing is lit" signal
+   *   contact shadow    — grounds the pill onto the page
+   *   inset top         — glossy specular highlight along the top edge
+   *   inset bottom      — subtle cyan glint on the underside           */
+  box-shadow:
+    0 10px 32px rgba(37, 99, 235, 0.16),
+    0 2px 8px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(34, 211, 238, 0.14);
+}
+
+/* Glossy top-curve highlight — simulates light hitting the top of a
+ * glass bubble. Pure CSS, no extra DOM. z-index: 2 so it paints over
+ * the cursor pill (z-0) but under the tab labels (z-10). */
+.bubble::before {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 12%;
+  right: 12%;
+  height: 45%;
+  border-radius: 9999px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Logo slot — the optional <a> rendered before the tabs <ul>. Anchors
+ * to "#top" so clicking it scrolls home from anywhere on the page.
+ * Padded slightly tighter on the right than the left so the gap to the
+ * first tab feels visually balanced (the tabs themselves carry their
+ * own px-4-ish padding via .link).
+ * ────────────────────────────────────────────────────────────────────── */
+.logoSlot {
+  position: relative;
+  z-index: 10;                              /* above cursor pill (z-0) */
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem 0.25rem 0.875rem; /* tight-right, generous-left */
+  text-decoration: none;
+  /* Image inherits these — see :where(img) below. */
+  color: rgba(15, 23, 42, 0.78);
+}
+
+.logoSlot:focus-visible {
+  outline: 2px solid var(--cyan, #22D3EE);
+  outline-offset: 3px;
+  border-radius: 9999px;
+}
+
+/* Constrain whatever Image/SVG/img is dropped into the slot to a
+ * tab-row-friendly height. width:auto preserves the brand lockup
+ * aspect ratio (currently 2.91:1 → ~70px wide at 24px tall). */
+.logoSlot :where(img, svg) {
+  height: 1.5rem;                            /* 24px — tracks tab text */
+  width: auto;
+  display: block;
+}
+@media (min-width: 768px) {
+  .logoSlot :where(img, svg) {
+    height: 1.75rem;                         /* 28px — slightly larger desktop */
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Tabs container — the <ul>. Holds the cursor pill (positioned absolute
+ * inside this <ul>, so cursor.offsetLeft math is measured against it).
+ * Padding here is what gives the cursor pill its 0.25rem inset on
+ * top/bottom — moved here from the old `.bubble` rule when the bubble
+ * was promoted to <nav>.
+ * ────────────────────────────────────────────────────────────────────── */
+.tabs {
+  position: relative;
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Tab item — the <li>. `z-10 + relative` creates a stacking context
+ * above the cursor pill, so labels float on top of the moving blue.
+ * ────────────────────────────────────────────────────────────────────── */
+.tab {
+  position: relative;
+  z-index: 10;
+  display: block;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Anchor — typography + padding + color transitions.
+ * ────────────────────────────────────────────────────────────────────── */
+.link {
+  display: block;
+  cursor: pointer;
+
+  padding: 0.375rem 0.75rem;               /* py-1.5 px-3 mobile */
+  font-size: 0.6875rem;                     /* 11px — fits 7 items on mobile */
+  line-height: 1rem;
+
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(15, 23, 42, 0.78);           /* dark slate on translucent glass */
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-weight: 600;
+  white-space: nowrap;
+
+  /* 180ms color transition — lags the pill's spring slightly so the
+   * label "catches up" as the pill arrives under it. */
+  transition: color 180ms ease-out, text-shadow 180ms ease-out;
+}
+
+@media (min-width: 768px) {
+  .link {
+    padding: 0.625rem 1.1rem;              /* md:py-2.5 md:px-4.4 */
+    font-size: 0.8125rem;                   /* 13px — text-[13px]  */
+    line-height: 1.25rem;
+  }
+}
+
+/* Active (current scroll section) OR hover → white label, sitting on
+ * top of the deeper-blue cursor pill. The subtle text-shadow adds a
+ * hint of depth so white-on-bright-blue doesn't feel flat. */
+.tab:hover .link,
+.tabActive .link {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+}
+
+/* Focus-visible ring — cyan reads on any backdrop (glass OR pill). */
+.link:focus-visible {
+  outline: 2px solid var(--cyan, #22D3EE);
+  outline-offset: 3px;
+  border-radius: 9999px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Cursor pill — the motion.li that slides behind tabs. Fills the
+ * bubble's inner height automatically via top/bottom offsets (no
+ * separate mobile/desktop heights needed).
+ * ────────────────────────────────────────────────────────────────────── */
+.cursor {
+  position: absolute;
+  top: 0.25rem;                             /* matches bubble padding */
+  bottom: 0.25rem;
+  z-index: 0;
+  border-radius: 9999px;
+
+  /* Brand gradient — blue #2563EB → cyan #22D3EE at 135°, matching the
+   * logo's signature diagonal. Hard-coded hex rather than var() so the
+   * fallback paints correctly if tokens fail to load. */
+  background: linear-gradient(
+    135deg,
+    #2563EB 0%,
+    #22D3EE 100%
+  );
+
+  /* Glossy depth — brand-colored outer glow, subtle depth shadow, and
+   * inset highlight/shade to give the pill a liquid-chrome feel. */
+  box-shadow:
+    0 6px 18px rgba(37, 99, 235, 0.42),
+    0 2px 4px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.12);
+}

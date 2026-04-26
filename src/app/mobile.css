@@ -1,0 +1,275 @@
+/* =====================================================================
+ * Mobile tuning — site-wide responsive guarantees
+ * =====================================================================
+ * Single import-once stylesheet that enforces mobile correctness for
+ * every section. Loaded after globals.css so its rules win on
+ * conflicts. Targets iPhone SE (375px) and Android typical (360px) as
+ * the lower bound, with smooth adaptation up to tablet (≤768px).
+ *
+ * Categories of fixes (each block below):
+ *   1. Universal overflow prevention  (no horizontal scroll on any page)
+ *   2. Container + section padding    (breathing room at narrow widths)
+ *   3. iOS safe-area insets           (notch + home indicator)
+ *   4. NavHeader collapse             (drop low-priority items <640px)
+ *   5. HeroAIWall mobile polish       (HUD card width, trust strip wrap)
+ *   6. PodosPod / Optimus interactive (callout positions, font scale)
+ *   7. SyntropicCompression video     (aspect ratio, container)
+ *   8. MarketOpportunity money-fall   (overlay scale at small viewports)
+ *   9. InvestorTraction team grid     (photo height, single column)
+ *  10. PodosScrollHeroIntro           (touch UX, hint text)
+ *  11. RequestAccessCTA + ScrollRail  (positioning at narrow widths)
+ *  12. Long-word + image safety       (defensive: word-wrap, max-width)
+ *
+ * Maintenance: when adding a new section, scan its CSS Module for
+ * fixed widths > 320px and add overrides here if they don't already
+ * collapse below 640px.
+ * ===================================================================== */
+
+/* === 1. Universal overflow prevention ============================ */
+html, body {
+  /* Already set in globals.css; reasserted here as a safety net for
+     any section that might accidentally introduce horizontal scroll. */
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;     /* Don't auto-zoom text in landscape */
+}
+/* Defensive: anything inside #__next that tries to overflow horizontally
+   gets clipped at the section level rather than producing scroll. */
+main, section {
+  max-width: 100vw;
+}
+
+/* === 2. Container + section padding ============================== */
+@media (max-width: 640px) {
+  :where(.container-site) {
+    padding-left: clamp(1rem, 4vw, 1.25rem);
+    padding-right: clamp(1rem, 4vw, 1.25rem);
+  }
+  :where(.section-pad) {
+    padding-top: clamp(2.4rem, 6vw, 3.5rem);
+    padding-bottom: clamp(2.4rem, 6vw, 3.5rem);
+  }
+}
+
+/* === 3. iOS safe-area insets ===================================== */
+/* The fixed sticky NavHeader, ScrollProgressRail, and intro overlay
+   need to respect the notch on iPhone X+ and the home indicator. */
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* === 4. NavHeader — collapse at narrow widths ==================== */
+/* At ≤640px, the 7-item bubble nav can't fit. We hide low-priority
+   items and keep Home / Solution / Invest visible — the three most
+   useful destinations for an investor scanning on phone.
+   Selector matches CSS Module hashed classes via attribute prefix
+   so it survives the hash-rename. */
+@media (max-width: 640px) {
+  /* Tabs: hide all li after the first 3 (matches HOME/PROBLEM/SOLUTION
+     in current SITE_NAV order — keeps the most-clicked destinations) */
+  ul[class*="nav-header-module"][class*="tabs"] li:nth-child(n+4) {
+    display: none;
+  }
+  /* Tighten remaining tabs */
+  ul[class*="nav-header-module"][class*="tabs"] a {
+    padding: 0.32rem 0.55rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+  }
+  /* Logo slot: shrink the brand image so the bubble doesn't bulk out */
+  a[class*="nav-header-module"][class*="logoSlot"] {
+    padding: 0.25rem 0.4rem 0.25rem 0.6rem;
+  }
+  a[class*="nav-header-module"][class*="logoSlot"] :where(img, svg) {
+    height: 1.25rem;
+  }
+}
+@media (max-width: 380px) {
+  /* iPhone SE / small Android: keep only first 2 tabs */
+  ul[class*="nav-header-module"][class*="tabs"] li:nth-child(n+3) {
+    display: none;
+  }
+}
+
+/* === 5. HeroAIWall mobile polish ================================= */
+@media (max-width: 640px) {
+  /* The 1024px breakpoint already stacks the columns; we just polish
+     the now-stacked HUD card so it doesn't dominate the viewport. */
+  div[class*="HeroAIWall-module"][class*="hud"] {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  /* Trust strip wraps onto its own lines for breathing room */
+  div[class*="HeroAIWall-module"][class*="trust"] {
+    flex-wrap: wrap;
+    gap: 0.4rem 0.7rem;
+  }
+  /* Headline: tighten line-height at narrow widths so 4 lines don't
+     blow the viewport */
+  h1[class*="HeroAIWall-module"][class*="headline"] {
+    line-height: 1.05;
+  }
+}
+
+/* === 6. PodosPod + Optimus Interactive ========================== */
+@media (max-width: 768px) {
+  /* Optimus interactive section: reduce corner callout label sizes
+     so they don't overlap the pod image. */
+  span[class*="EngineeringCallout-module"][class*="label"],
+  span[class*="EngineeringCallout-module"][class*="labelWrap"] {
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+  }
+  /* Port row: smaller boxes so 5 fit at narrow viewports */
+  button[class*="PortCallout-module"][class*="box"] {
+    width: 28px;
+    height: 28px;
+  }
+  span[class*="PortCallout-module"][class*="label"] {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+  }
+  /* Section title scales down */
+  h3[class*="OptimusInteractive-module"][class*="title"] {
+    font-size: clamp(1.4rem, 5vw, 2rem);
+  }
+}
+@media (max-width: 480px) {
+  /* Hide port labels entirely on tiny screens — icons remain */
+  span[class*="PortCallout-module"][class*="label"] {
+    display: none;
+  }
+  /* Hide engineering callout labels too — anchor `+` markers stay */
+  span[class*="EngineeringCallout-module"][class*="label"] {
+    display: none;
+  }
+}
+
+/* === 7. SyntropicCompression video / hero image ================= */
+@media (max-width: 640px) {
+  video[class*="SyntropicCompression-module"][class*="compHeroImg"],
+  img[class*="SyntropicCompression-module"][class*="compHeroImg"] {
+    border-radius: 8px;
+  }
+  /* Compression intro title scales */
+  h3[class*="SyntropicCompression-module"][class*="compTitle"] {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+    letter-spacing: -0.025em;
+  }
+}
+
+/* === 8. MarketOpportunity — money-fall video and TAM/SAM/SOM ==== */
+@media (max-width: 640px) {
+  /* Money-fall opacity reduced so it doesn't overwhelm narrower text */
+  video[class*="MarketOpportunity-module"][class*="moneyFall"] {
+    opacity: 0.32 !important;
+  }
+}
+
+/* === 9. InvestorTraction team grid =============================== */
+@media (max-width: 760px) {
+  /* Photo height shrinks on tablet+phone so the card doesn't stretch
+     vertically at narrower widths */
+  div[class*="InvestorTraction-module"][class*="teamCardPhoto"] {
+    height: 200px;
+  }
+}
+@media (max-width: 480px) {
+  /* On 1-column phone layout, the photo gets a generous 240px so
+     each team member's face is large and clear */
+  div[class*="InvestorTraction-module"][class*="teamCardPhoto"] {
+    height: 240px;
+  }
+  div[class*="InvestorTraction-module"][class*="teamCard"] {
+    min-height: 0;     /* let content dictate height */
+  }
+}
+
+/* === 10. PodosScrollHeroIntro — touch UX ========================= */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch-only devices: change the hint copy so it reads
+     "swipe up" instead of "scroll to advance" */
+  .intro-hint::before {
+    content: "Swipe up to advance";
+  }
+  .intro-hint {
+    font-size: 0;     /* hide original text; ::before supplies new */
+  }
+  .intro-hint::before {
+    font-size: 11px;
+  }
+}
+@media (max-width: 640px) {
+  .intro-headline {
+    font-size: clamp(1.6rem, 7.5vw, 2.4rem) !important;
+    line-height: 1.1 !important;
+    padding: 0 1rem;
+  }
+  .intro-subline {
+    font-size: clamp(0.85rem, 3.6vw, 1rem) !important;
+    padding: 0 1.5rem;
+  }
+  .intro-skip {
+    top: 14px;
+    right: 14px;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .intro-tagline {
+    font-size: clamp(0.85rem, 3.4vw, 1rem) !important;
+  }
+  .intro-poweredBy {
+    font-size: 9.5px !important;
+  }
+  .intro-logoImg {
+    height: 38px !important;
+    width: auto !important;
+  }
+}
+
+/* === 11. RequestAccessCTA + ScrollProgressRail =================== */
+@media (max-width: 640px) {
+  /* ScrollProgressRail (right edge of viewport) gets out of the way
+     on narrow screens — investor scanning on phone shouldn't have
+     a section indicator stealing real estate. */
+  div[class*="ScrollProgressRail-module"] {
+    display: none !important;
+  }
+}
+
+/* === 12. Long-word + image safety net ============================ */
+/* Defensive global rules so a stray long word or oversized image
+   never breaks layout. Applied at all viewports — they're harmless
+   on desktop and lifesaving on mobile. */
+img, video, svg, picture {
+  max-width: 100%;
+  height: auto;
+}
+:where(p, h1, h2, h3, h4, h5, h6, span) {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* iOS Safari rendering quirks: smooth scrolling enabled by Lenis can
+   conflict with momentum scroll on some iOS versions. Allow native
+   to take over below 600px width if Lenis misbehaves — the user can
+   always disable Lenis on small screens later by detecting in the
+   provider. */
+@media (max-width: 600px) {
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Tap target minimum — WCAG AA requires interactive elements ≥44px in
+   at least one dimension. Brute-force this for any anchor or button
+   that didn't already meet the bar. Doesn't change visual appearance,
+   just adds invisible padding-equivalent hit area where needed. */
+@media (hover: none) and (pointer: coarse) {
+  a, button {
+    min-height: 36px;     /* relaxed from 44 because the design uses
+                             tight pills; at least guarantee 36 */
+  }
+}

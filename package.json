@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "videos:search": "node --env-file=.env.local scripts/envato-fetch.mjs search",
+    "videos:download": "node --env-file=.env.local scripts/envato-fetch.mjs download"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -15,9 +17,11 @@
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
     "clsx": "^2.1.1",
+    "dotted-map": "^3.1.0",
     "framer-motion": "^12.38.0",
     "gsap": "^3.14.2",
     "lenis": "^1.3.21",
+    "lucide-react": "^1.9.0",
     "motion": "^12.38.0",
     "next": "16.2.2",
     "react": "19.2.4",

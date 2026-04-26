@@ -1,0 +1,102 @@
+/* ==================================================================
+ * Bloom · Liquid Glass aesthetic — full hero landing
+ * ==================================================================
+ * Two-tier glass system. Both tiers use the same architectural pattern:
+ *
+ *   - Translucent fill via low-alpha rgba background
+ *   - backdrop-filter: blur(...) for the frosted-glass refraction
+ *   - inset box-shadow at the top edge for the spec highlight
+ *   - ::before pseudo-element with a 1.4px padded gradient that's
+ *     masked to render ONLY as a border (xor composite) — gives the
+ *     iridescent "liquid edge" without any actual border declaration
+ *
+ * .liquid-glass        — light tier, blur 4px, used for pills, chips,
+ *                         small inline glass elements
+ * .liquid-glass-strong — heavy tier, blur 50px, used for the main
+ *                         left-panel overlay, CTA, large feature cards
+ *
+ * Strict grayscale palette (all colors are HSL 0 0% X%). No tint, no
+ * brand-color creep. The vibe lives in the glass refraction, not the
+ * pigment.
+ * ================================================================== */
+
+:root {
+  --radius: 1rem;
+}
+
+@layer components {
+  .liquid-glass {
+    background: rgba(255, 255, 255, 0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: none;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  .liquid-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.15) 20%,
+      transparent 40%,
+      transparent 60%,
+      rgba(255, 255, 255, 0.15) 80%,
+      rgba(255, 255, 255, 0.45) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .liquid-glass-strong {
+    background: rgba(255, 255, 255, 0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    border: none;
+    box-shadow:
+      4px 4px 4px rgba(0, 0, 0, 0.05),
+      inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .liquid-glass-strong::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.2) 20%,
+      transparent 40%,
+      transparent 60%,
+      rgba(255, 255, 255, 0.2) 80%,
+      rgba(255, 255, 255, 0.5) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+/* Font utility hooks — applied inline via the CSS variables emitted
+   by next/font (see page.tsx). `.font-display` defaults to Poppins
+   for headings + body; `.font-serif` is Source Serif 4 for italic
+   emphasis. */
+.font-display { font-family: var(--font-poppins, "Poppins"), system-ui, sans-serif; }
+.font-serif   { font-family: var(--font-source-serif, "Source Serif 4"), Georgia, serif; }

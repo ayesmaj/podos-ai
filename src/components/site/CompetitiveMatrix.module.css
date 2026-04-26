@@ -1,0 +1,498 @@
+/* ==================================================================
+   COMPETITION · Category Position — section CSS
+   ==================================================================
+   Two-block layout:
+     1. Matrix  — 5-column spec sheet with PODOS as highlighted column
+     2. Capex   — horizontal bar chart, "useful tokens per $ deployed"
+   PODOS gets gradient wash + brand ring + cyan markers. Everyone else
+   is neutral gray (no hostile red / strikethrough — the numbers do
+   the work).
+   ================================================================== */
+
+.section {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(15, 23, 42, 0.04) 0,
+      transparent 1px
+    ),
+    linear-gradient(180deg, var(--canvas) 0%, var(--paper) 100%);
+  isolation: isolate;
+}
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+/* ============== HEADER ============== */
+.header {
+  max-width: 920px;
+  margin-bottom: clamp(3rem, 5vw, 4.5rem);
+}
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.eyebrowIdx { font-weight: 600; color: var(--brand); letter-spacing: 0.1em; }
+.eyebrowSep { margin: 0 0.5em; color: var(--ink-whisper); }
+
+.headline {
+  margin: 0.85rem 0 1.2rem;
+  font-size: clamp(2.4rem, 5vw, 4.1rem);
+  font-weight: 800;
+  font-family: var(--font-display);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  color: var(--ink-strong);
+  max-width: 22ch;
+}
+.lede {
+  font-size: clamp(1rem, 1.15vw, 1.12rem);
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 66ch;
+}
+
+/* ============== MATRIX ============== */
+.matrixWrap {
+  position: relative;
+  padding: clamp(1.2rem, 2.4vw, 1.8rem);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 18px 58px -20px rgba(15, 23, 42, 0.14),
+    0 0 0 1px rgba(34, 211, 238, 0.05);
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+/* Matrix is a 5-column grid — the LABEL column sits at a fixed width
+   so numbers below align visually, and the 4 competitor columns share
+   the rest. PODOS gets a slightly wider (1.15fr) to accommodate badge
+   + longer tag text comfortably. */
+.matrixHead,
+.matrixRow {
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 0.95fr)
+    minmax(0, 1.15fr)
+    minmax(0, 1fr)
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+  gap: clamp(0.4rem, 1vw, 0.8rem);
+  align-items: stretch;
+}
+
+.matrixHead {
+  padding: 0.4rem 0 1rem;
+  border-bottom: 1px solid var(--edge);
+  margin-bottom: 0.4rem;
+}
+
+.matrixHeadSpacer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.15rem;
+  padding: 0.4rem 0.8rem;
+}
+.matrixHeadTag {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+.matrixHeadSubtag {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.matrixHeadCell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.75rem 1rem 0.9rem;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+}
+.matrixHeadCellHl {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(37, 99, 235, 0.08) 0%,
+      rgba(34, 211, 238, 0.04) 100%
+    ),
+    var(--panel);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.08),
+    0 8px 26px -10px rgba(37, 99, 235, 0.18);
+}
+
+.matrixHeadBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  padding: 0.2rem 0.55rem;
+  background: var(--status-trace);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--status-deep);
+}
+.matrixHeadBadgeDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--status);
+  box-shadow: 0 0 6px var(--status-glow);
+}
+
+.matrixHeadName {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.3vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-strong);
+}
+.matrixHeadNameBrand {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.matrixHeadTagSmall {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* --- Body rows --- */
+.matrixBody {
+  display: flex;
+  flex-direction: column;
+}
+.matrixRow {
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed var(--edge-faint);
+  transition: background 0.25s;
+}
+.matrixRow:last-child { border-bottom: none; }
+.matrixRow:hover {
+  background: rgba(34, 211, 238, 0.03);
+}
+
+.matrixRowLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  padding: 0.6rem 0.8rem;
+}
+.matrixRowCode {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.matrixRowMetric {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+}
+
+.matrixCell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  font-family: var(--font-display);
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+  border-radius: 8px;
+}
+.matrixCellHl {
+  background: linear-gradient(
+    180deg,
+    rgba(37, 99, 235, 0.05) 0%,
+    rgba(34, 211, 238, 0.03) 100%
+  );
+  border: 1px solid rgba(34, 211, 238, 0.18);
+}
+.matrixCellMarker {
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background: var(--brand-gradient);
+  border-radius: 2px;
+}
+.matrixCellValue {
+  font-size: 0.96rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink-dim);
+  padding-left: 0.5rem;
+}
+.matrixCellValueBrand {
+  color: var(--ink-strong);
+  font-weight: 700;
+  padding-left: 0.85rem;
+}
+
+/* --- Matrix footer --- */
+.matrixFoot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--edge-faint);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  flex-wrap: wrap;
+}
+.matrixFootCode { color: var(--ink-dim); font-weight: 600; }
+.matrixFootSep { color: var(--ink-whisper); }
+
+/* Responsive — at narrow widths, the matrix becomes a horizontally
+   scrollable card deck. Keeps columns aligned without awkward wrapping.
+   A right-edge gradient fade signals that there's more content to scroll
+   to, since the native scrollbar isn't always visible (esp. on trackpads).
+   We also expose a "swipe →" caption below the matrix. */
+@media (max-width: 1040px) {
+  .matrixWrap {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    /* Mask the right edge to hint at more content. When scrolled to
+       the end, the native scroll position removes the fade naturally. */
+    mask-image: linear-gradient(
+      to right,
+      black 0,
+      black calc(100% - 40px),
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      black 0,
+      black calc(100% - 40px),
+      transparent 100%
+    );
+  }
+  .matrixHead,
+  .matrixRow {
+    grid-template-columns:
+      180px
+      minmax(180px, 1.1fr)
+      minmax(160px, 1fr)
+      minmax(160px, 1fr)
+      minmax(160px, 1fr);
+    min-width: 920px;
+  }
+  .matrixFoot {
+    flex-wrap: wrap;
+  }
+  .matrixFoot::after {
+    content: "SWIPE →";
+    margin-left: auto;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    color: var(--brand-deep);
+    text-transform: uppercase;
+  }
+}
+
+/* ============== CAPITAL-EFFICIENCY BAR CHART ============== */
+.capex {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  padding: clamp(1.3rem, 2.4vw, 1.8rem) clamp(1.4rem, 2.6vw, 2rem) 1.6rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 12px 40px -16px rgba(15, 23, 42, 0.1);
+}
+
+.capexHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.2rem;
+  padding-bottom: 1.1rem;
+  margin-bottom: 1.3rem;
+  border-bottom: 1px solid var(--edge-faint);
+  flex-wrap: wrap;
+}
+.capexTag {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand);
+  margin-bottom: 0.25rem;
+}
+.capexTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.5vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-strong);
+  max-width: 60ch;
+}
+.capexUnit {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.capexUnitBrand {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-weight: 700;
+}
+
+.capexBars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.capexRow {
+  display: grid;
+  grid-template-columns: minmax(140px, 160px) minmax(0, 1fr) 80px;
+  align-items: center;
+  gap: 1rem;
+}
+@media (max-width: 640px) {
+  .capexRow { grid-template-columns: 1fr; gap: 0.3rem; }
+}
+
+.capexLabel {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink-dim);
+}
+.capexLabelBrand {
+  color: var(--ink-strong);
+  font-weight: 700;
+}
+
+.capexTrack {
+  position: relative;
+  height: 22px;
+  background: var(--edge-faint);
+  border: 1px solid var(--edge-soft);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.capexFill {
+  position: absolute;
+  inset: 0;
+  background: var(--ink-faint);
+  opacity: 0.4;
+}
+.capexFillBrand {
+  background: var(--brand-gradient);
+  opacity: 1;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.35);
+}
+.capexTicks {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  pointer-events: none;
+}
+.capexTick {
+  border-right: 1px solid rgba(15, 23, 42, 0.07);
+}
+.capexTick:last-child { border-right: none; }
+
+.capexValue {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink-dim);
+  font-feature-settings: "tnum" 1;
+  text-align: right;
+}
+.capexValueBrand {
+  font-size: 1.2rem;
+  font-weight: 800;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.capexFoot {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: 1.3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--edge-faint);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+.capexFootDot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: 0.4rem;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 6px var(--brand-glow);
+}

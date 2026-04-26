@@ -1,0 +1,104 @@
+/* GlobalEnergyLayer · site-wide ambient motion primitives. */
+
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Horizontal scan beam — 90px tall band of cyan-white light that
+   travels top→bottom and loops. mix-blend-mode: screen so it
+   brightens whatever's underneath without obscuring anything. */
+.beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 110px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0.06) 35%,
+    rgba(56, 189, 248, 0.13) 50%,
+    rgba(34, 211, 238, 0.06) 65%,
+    transparent 100%
+  );
+  filter: blur(2px);
+  animation: globalBeamSweep 14s linear infinite;
+  mix-blend-mode: screen;
+}
+
+@keyframes globalBeamSweep {
+  0%   { top: -12%; opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { top: 112%; opacity: 0; }
+}
+
+/* Subtle pulsing dot grid — breathes opacity + scale on 7s cycle.
+   Sits across the entire viewport so even sections with no atmospheric
+   layer still feel "alive". The mask-image keeps the grid soft at
+   the viewport edges. */
+.pulseGrid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(56, 189, 248, 0.10) 1px,
+    transparent 0
+  );
+  background-size: 36px 36px;
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 50%, black 20%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 50%, black 20%, transparent 90%);
+  animation: globalGridPulse 7s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes globalGridPulse {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.015); }
+}
+
+/* Brand-blue sparks at fixed viewport positions, each on its own
+   period so they never blink in sync — that's what makes the page
+   feel "live and unpredictable" rather than mechanical. */
+.spark {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.95);
+  box-shadow:
+    0 0 8px rgba(56, 189, 248, 0.85),
+    0 0 18px rgba(34, 211, 238, 0.55);
+  opacity: 0;
+}
+.spark1 {
+  top: 18%;
+  left: 11%;
+  animation: sparkPulse 4.2s ease-in-out infinite;
+}
+.spark2 {
+  top: 62%;
+  right: 14%;
+  animation: sparkPulse 6.1s ease-in-out infinite;
+  animation-delay: -1.4s;
+}
+.spark3 {
+  top: 38%;
+  left: 78%;
+  animation: sparkPulse 8.4s ease-in-out infinite;
+  animation-delay: -3.7s;
+}
+
+@keyframes sparkPulse {
+  0%, 100% { opacity: 0; transform: scale(0.6); }
+  50%      { opacity: 1; transform: scale(1.4); }
+}
+
+/* Reduced motion — hide entirely. Energy layer is decorative; static
+   experience is fine without it. */
+@media (prefers-reduced-motion: reduce) {
+  .root { display: none; }
+}

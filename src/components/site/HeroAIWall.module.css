@@ -1,0 +1,624 @@
+/* HERO — "THE AI ECONOMY NEEDS A NEW PHYSICAL LAYER"
+   Light cyber-tech. Living grid. Glass HUD telemetry.
+   Electric green + teal on paper. Premium infrastructure posture. */
+
+/* Parallax layer wrapper — used by HeroAIWall.tsx to apply scroll-driven
+   translateY to grouped background elements without disturbing their
+   internal layout. position: absolute + inset: 0 + pointer-events: none
+   so the layer fills the hero without intercepting clicks. The
+   `transform-style: preserve-3d` + `will-change: transform` hint keeps
+   the layer on its own composite layer so the GPU handles parallax
+   without triggering paints. */
+.parallaxLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background:
+    radial-gradient(ellipse 1200px 800px at 85% 15%, var(--electric-wash) 0%, transparent 62%),
+    radial-gradient(ellipse 900px 700px at 8% 90%, var(--teal-trace) 0%, transparent 65%),
+    linear-gradient(180deg, var(--paper) 0%, var(--canvas) 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-top: clamp(1.2rem, 2.5vh, 2rem);
+  padding-bottom: clamp(3rem, 5vh, 4.5rem);
+  isolation: isolate;
+}
+
+/* -------- Top status bar (inline, sits at the top of the hero) --------
+   2026-04-24: the brand lockup moved into the sticky NavHeader (see
+   app/page.tsx). The bar now holds only the LIVE pill, so
+   `justify-content` flipped from `space-between` (two children, one
+   per edge) to `flex-end` (single child, right-aligned). The dead
+   `.logo`, `.logoImg`, and `.logoVer` rules that styled the in-hero
+   lockup were removed — they were dead code after the move. */
+.statusBar {
+  position: relative;
+  z-index: 5;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.85rem clamp(1.25rem, 4vw, 3.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  border-bottom: 1px solid rgba(10, 14, 26, 0.06);
+}
+
+.statusMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.statusMetaItem { display: inline-flex; align-items: center; gap: 0.4rem; }
+.statusMetaItem b { color: var(--ink-strong); font-weight: 600; }
+
+/* LIVE pill — the ONE place neon green is allowed per the palette rules.
+   Signals "system online / real-time telemetry". Everything else in the
+   hero pulls from the blue→cyan brand gradient; green is reserved. */
+.livePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.38rem 0.8rem;
+  border-radius: 999px;
+  background: var(--status-trace);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--status-deep);
+  font-feature-settings: "tnum" 1;
+}
+.liveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status);
+  box-shadow: 0 0 8px var(--status-glow);
+  animation: pulse-soft 1.8s ease-in-out infinite;
+}
+
+/* -------- Main content grid -------- */
+.content {
+  position: relative;
+  z-index: 3;
+  max-width: 1400px;
+  width: 100%;
+  margin: clamp(2rem, 5vh, 4rem) auto 0;
+  padding: 0 clamp(1.25rem, 4vw, 3.5rem);
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: center;
+  flex: 1;
+}
+
+/* -------- Copy column -------- */
+.copy { display: flex; flex-direction: column; gap: clamp(1.1rem, 1.6vw, 1.6rem); }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  background: var(--glass-bg-strong);
+  border: 1px solid rgba(10, 14, 26, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  align-self: flex-start;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.eyebrowDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--electric) 0%, var(--teal) 100%);
+  box-shadow: 0 0 10px var(--electric-glow);
+}
+.eyebrowSep { opacity: 0.35; margin: 0 0.15rem; }
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.6rem, 6.4vw, 6rem);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  color: var(--ink-strong);
+  margin: 0;
+  max-width: 15ch;
+  font-feature-settings: "ss01" 1, "ss02" 1, "cv11" 1, "tnum" 1;
+}
+.headline .word {
+  display: inline-block;
+  overflow: hidden;
+  padding: 0.05em 0.01em 0.1em;
+  vertical-align: top;
+}
+.headline .wordInner { display: inline-block; }
+/* Whitespace between <Word> siblings renders as a real space character so
+   screen readers + copy/paste see "The AI Economy..." with actual spaces. */
+
+/* "Physical Layer" treatment — deep cobalt with a subtle metallic
+   sheen. Was a 4-stop electric→teal→sky rainbow that read as generic
+   SaaS; replaced (2026-04-25) with a tight 180deg cobalt gradient
+   from #1B3FD9 → #0A1F8C so the words feel weighty/industrial.
+   No cyan, no teal — strictly cobalt-disciplined per brand spec. */
+.headlineGradient {
+  background: linear-gradient(180deg, #1B3FD9 0%, #0A1F8C 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  /* Tiny inner shadow gives the metallic-sheen impression without
+     fighting accessibility — pure background-clip text retains
+     selection contrast. */
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* --- Subhead: Inter Tight, neutral body voice, open leading --- */
+.subhead {
+  font-family: var(--font-body);
+  font-size: clamp(1.05rem, 1.25vw, 1.2rem);
+  line-height: 1.65;
+  letter-spacing: -0.005em;
+  color: var(--ink-dim);
+  max-width: 54ch;
+  font-weight: 400;
+  margin: 0;
+}
+.subhead b { color: var(--ink-strong); font-weight: 600; letter-spacing: -0.01em; }
+
+.ctaRow {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.3rem;
+}
+
+.trust {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: clamp(1rem, 1.6vh, 1.6rem);
+  padding-top: clamp(1rem, 1.6vh, 1.6rem);
+  border-top: 1px solid rgba(10, 14, 26, 0.07);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  flex-wrap: wrap;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.trustItem { display: inline-flex; align-items: center; gap: 0.5rem; }
+.trustItem b { color: var(--ink-strong); font-weight: 600; }
+.trustDot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--electric);
+  box-shadow: 0 0 8px var(--electric-glow);
+}
+.trustSep { opacity: 0.25; }
+
+/* ==================================================================
+   DUO-BRAND LEGEND · "One Company. Two Inventions."
+   ==================================================================
+   Two equal-weight product cards for Optimus (hardware) and Syntropic
+   (software). Same surface, same border, same typographic rhythm —
+   the ONLY differentiation is the tiny brand-vs-cyan dot, which
+   establishes the color coding used downstream in each product section.
+   ================================================================== */
+.duoBrand {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.6rem, 1vw, 0.9rem);
+  /* No extra margin — parent .copy flex gap handles vertical rhythm. */
+}
+@media (max-width: 720px) {
+  .duoBrand { grid-template-columns: 1fr; }
+}
+
+.duoCard {
+  padding: clamp(0.85rem, 1.2vw, 1.1rem) clamp(1rem, 1.4vw, 1.2rem);
+  background: var(--glass-bg-strong);
+  border: 1px solid rgba(10, 14, 26, 0.07);
+  border-radius: 12px;
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+.duoCard:hover {
+  transform: translateY(-1px);
+}
+
+.duoCardBrand {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 30px -14px rgba(37, 99, 235, 0.18),
+    inset 0 0 0 1px rgba(37, 99, 235, 0.06);
+}
+.duoCardBrand:hover {
+  border-color: rgba(37, 99, 235, 0.25);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 14px 36px -14px rgba(37, 99, 235, 0.28),
+    inset 0 0 0 1px rgba(37, 99, 235, 0.1);
+}
+
+.duoCardCyan {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 10px 30px -14px rgba(34, 211, 238, 0.22),
+    inset 0 0 0 1px rgba(34, 211, 238, 0.06);
+}
+.duoCardCyan:hover {
+  border-color: rgba(34, 211, 238, 0.28);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 14px 36px -14px rgba(34, 211, 238, 0.3),
+    inset 0 0 0 1px rgba(34, 211, 238, 0.12);
+}
+
+.duoCardHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.45rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.duoCardDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+.duoCardBrand .duoCardDot {
+  background: var(--electric);
+  color: var(--electric-glow, rgba(37, 99, 235, 0.5));
+}
+.duoCardCyan .duoCardDot {
+  background: var(--teal, #22d3ee);
+  color: rgba(34, 211, 238, 0.5);
+}
+
+.duoCardTag {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-strong);
+}
+.duoCardSep {
+  opacity: 0.35;
+  margin: 0 0.1rem;
+}
+.duoCardRole {
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--ink-dim);
+  text-transform: none;
+  font-style: italic;
+}
+
+.duoCardSpec {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.005em;
+}
+
+/* -------- HUD panel (live pod telemetry) -------- */
+.hud {
+  position: relative;
+  padding: clamp(1.2rem, 1.8vw, 1.6rem);
+  border-radius: 20px;
+  background: var(--glass-bg-strong);
+  border: 1px solid rgba(10, 14, 26, 0.06);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  box-shadow:
+    0 20px 60px rgba(10, 14, 26, 0.08),
+    0 4px 18px rgba(10, 14, 26, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+/* subtle scanline across the top of the HUD */
+.hud::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--electric) 50%, transparent);
+  opacity: 0.6;
+}
+
+.hudHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(10, 14, 26, 0.06);
+}
+.hudTitle {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-strong);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.hudTitle span {
+  color: var(--electric-deep);
+  margin-left: 0.45rem;
+  font-weight: 500;
+}
+/* Fleet-context line — small, low-emphasis, but reads as proof of
+   scale (one of 47 deployed pods). Sits below the POD ID block
+   without competing for attention. */
+.hudFleet {
+  display: block;
+  margin-top: 0.35rem;
+  margin-left: 0;
+  color: rgba(15, 23, 42, 0.55);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-feature-settings: "tnum" 1;
+}
+.hudStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.hudStatus::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--electric);
+  box-shadow: 0 0 8px var(--electric-glow);
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+.hudStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(10, 14, 26, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(10, 14, 26, 0.06);
+}
+.statLabel {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.statValue {
+  display: flex;
+  align-items: baseline;
+  gap: 0.28rem;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--ink-strong);
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+}
+.statUnit {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+  letter-spacing: 0;
+}
+.statBar {
+  position: relative;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(10, 14, 26, 0.08);
+  overflow: hidden;
+  margin-top: 0.3rem;
+}
+.statBarFill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  background: linear-gradient(90deg, var(--electric) 0%, var(--teal) 100%);
+  border-radius: 3px;
+  box-shadow: 0 0 6px var(--electric-glow);
+}
+
+/* -------- Sparkline -------- */
+.sparkWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.85rem 0.95rem 0.95rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(10, 14, 26, 0.05);
+}
+.sparkHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.sparkLabel {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.sparkValue {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--electric-deep);
+  letter-spacing: -0.03em;
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+}
+.sparkSvg {
+  width: 100%;
+  height: 54px;
+  display: block;
+}
+.sparkPath {
+  fill: none;
+  stroke: var(--electric);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px var(--electric-glow));
+}
+.sparkArea {
+  fill: url(#spark-gradient);
+  opacity: 0.25;
+}
+
+.hudFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.85rem;
+  margin-top: 0.1rem;
+  border-top: 1px solid rgba(10, 14, 26, 0.06);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.hudFooterTag {
+  color: var(--electric-deep);
+  font-weight: 600;
+}
+
+/* -------- Responsive -------- */
+
+/* Tablet & below — content stacks to single column, status bar simplifies
+   to logo + live pill only (meta items become clutter at these widths). */
+@media (max-width: 1024px) {
+  .content {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .hud {
+    max-width: 540px;
+    width: 100%;
+    justify-self: start;
+  }
+  .headline { font-size: clamp(2.4rem, 7vw, 4rem); }
+  .statusMeta { display: none; }
+  .statusBar { justify-content: space-between; }
+}
+
+/* Mobile — stack status bar if it still overflows, tighten CTAs to full-width,
+   collapse HUD stat grid, abbreviate the trust strip. */
+@media (max-width: 680px) {
+  .statusBar {
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    padding: 0.7rem 1rem;
+  }
+  .logo { font-size: 0.875rem; gap: 0.55rem; }
+  /* Mobile bump 26px → 40px keeps the same proportional jump as the
+     desktop bump (32→52). Aspect 2.91 means width ~116px — still fits
+     the mobile header row alongside the LIVE pill and version tag. */
+  .logoImg { height: 40px; }
+  .livePill {
+    font-size: 0.875rem;
+    padding: 0.32rem 0.65rem;
+    letter-spacing: 0.04em;
+  }
+  .headline { font-size: clamp(2rem, 9.5vw, 3.2rem); max-width: 14ch; letter-spacing: -0.042em; }
+  .subhead { font-size: 0.98rem; line-height: 1.6; }
+  .ctaRow { flex-direction: column; align-items: stretch; }
+  .ctaRow > * { width: 100%; justify-content: center; }
+  .trust {
+    font-size: 0.875rem;
+    letter-spacing: 0.14em;
+    gap: 0.55rem;
+  }
+  .trustSep { display: none; }
+  .hudStats { grid-template-columns: 1fr; }
+  .hud { padding: 1.1rem; }
+  .statValue { font-size: 1.45rem; }
+
+  /* Collapse the eyebrow pill to just the primary tag at mobile.
+     The secondary ( "/ Series Seed · April 2026" ) is already echoed
+     in the live pill up top, so this removes redundancy and keeps the
+     pill on a single tight line. */
+  .eyebrow {
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    gap: 0.5rem;
+  }
+  .eyebrowSep { display: none; }
+  .eyebrow > span:last-child { display: none; }
+}

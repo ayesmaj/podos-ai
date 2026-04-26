@@ -1,0 +1,980 @@
+/* ==================================================================
+   PODOS · The Physical Layer — section CSS
+   ==================================================================
+   Blueprint pod on the left, manufacturer spec nameplate on the right,
+   deploy timeline across the bottom. Engineering-drawing aesthetic —
+   thin strokes, mono callouts, NO glassy marketing sheen.
+   ================================================================== */
+
+.section {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(15, 23, 42, 0.04) 0,
+      transparent 1px
+    ),
+    linear-gradient(180deg, var(--paper) 0%, var(--canvas) 100%);
+  isolation: isolate;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.inner { position: relative; z-index: 2; }
+
+/* ============== HEADER ============== */
+.header {
+  max-width: 900px;
+  margin-bottom: clamp(3rem, 5vw, 4.5rem);
+}
+.eyebrowIdx {
+  font-weight: 600;
+  color: var(--brand);
+  letter-spacing: 0.1em;
+}
+.eyebrowSep {
+  margin: 0 0.5em;
+  color: var(--ink-whisper);
+}
+.headline {
+  margin: 0.85rem 0 1.2rem;
+  font-size: clamp(2.4rem, 5vw, 4.1rem);
+  font-weight: 800;
+  font-family: var(--font-display);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  color: var(--ink-strong);
+  max-width: 22ch;
+}
+.lede {
+  font-size: clamp(1rem, 1.15vw, 1.12rem);
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 62ch;
+}
+
+/* ==================================================================
+   STUDIO · sticky scroll-choreographed pairing of 3D + schematic
+   ==================================================================
+   The "studio" hosts the 3D rack alone, locked into the viewport via
+   position:sticky for a tight scroll runway of ~15vh. As the user
+   scrolls through it, framer-motion's `useScroll` reports progress
+   0→1 to the rack, which lerps from a hero 3/4 angle to a marketing-
+   isometric "lock" angle. The schematic + spec nameplate live in the
+   .main grid directly underneath.
+
+   Why 115vh outer + ~90vh sticky inner? The ~25vh delta is the
+   choreography runway — enough scroll distance to drive a smooth
+   progress 0→1 without leaving a giant trailing white space below
+   the rack before .main appears. The rotation lerp itself uses
+   `delta * 5` (frame-rate-independent) inside useFrame, so the
+   choreography always feels graceful regardless of how fast the
+   user scrolls through the runway.
+   ================================================================== */
+.studio {
+  position: relative;
+  /* The outer wrapper is just taller than the sticky stage; the
+     difference (~25vh) is the scroll runway that drives `useScroll`
+     progress. Tighter than this and the choreography fires within
+     a single wheel notch; longer and the empty trailing space below
+     the rack reads as "broken layout" before .main scrolls in. */
+  height: 115vh;
+  margin-bottom: clamp(2rem, 3.5vw, 3rem);
+}
+@media (max-width: 1020px) {
+  /* Below 1020px we drop sticky entirely — side-by-side becomes
+     stacked, and pinning a tall section feels broken on small screens.
+     We keep the studio as a normal block so the rack and schematic
+     simply stack with regular page flow. */
+  .studio {
+    height: auto;
+  }
+}
+
+.studioStage {
+  position: sticky;
+  /* Sit just below the persistent nav (~5rem). The clamp keeps it
+     reasonable on tall and short viewports alike. */
+  top: clamp(4rem, 8vh, 6rem);
+  height: calc(100vh - clamp(5rem, 10vh, 7rem));
+  display: flex;
+  align-items: center;
+}
+@media (max-width: 1020px) {
+  .studioStage {
+    position: static;
+    height: auto;
+    display: block;
+  }
+}
+
+/* Single-column wrapper. The rack now sits centered at full width
+   inside the sticky stage instead of competing for horizontal real
+   estate with the schematic — the schematic + specs duo lives
+   underneath in the original .main grid. With ~1100px of horizontal
+   room and the camera fov of 35°, the rack's projected silhouette
+   fits comfortably without right-edge clipping. */
+.studioGrid {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ==================================================================
+   3D RACK · the WebGL viewer column · NO CARD CHROME
+   ==================================================================
+   Per design direction the rack reads as a 3D object floating freely
+   on the page, not as a widget contained inside a glass card. So we
+   strip every surface that would imply containment:
+     • no background        → the WebGL canvas (alpha:true) composites
+                              directly over the section's GridField +
+                              CircuitTraces + AmbientOrbs layers
+     • no border            → no rectangle outline to box the rack in
+     • no border-radius     → no rounded edges hint at a card shape
+     • no box-shadow        → no card lift / no soft drop
+     • no backdrop-filter   → IMPORTANT: a blur on a transparent box
+                              creates a ghost-glass rectangle even with
+                              no visible background, so we have to
+                              explicitly clear this too
+     • overflow: visible    → the contact shadow inside the canvas can
+                              spill softly onto the column gap if it
+                              wants — sells "floating" better than a
+                              hard clip
+   The contact shadow rendered INSIDE the WebGL scene
+   (`<ContactShadows>` in PodosRack3D.tsx) is what actually anchors
+   the rack visually so it reads as "in air" not "PNG cutout".
+   ================================================================== */
+.studioRack {
+  position: relative;
+  height: 100%;
+  min-height: 380px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: visible;
+}
+@media (max-width: 1020px) {
+  .studioRack {
+    height: clamp(380px, 60vh, 560px);
+  }
+}
+
+/* Header labels overlaid on the 3D scene — now NO background gradient
+   (the previous white-fade strip read as card chrome). The labels sit
+   as plain floating typography against the section's grid background.
+   `pointer-events: none` keeps them transparent to drag, so the user's
+   pointer always reaches the canvas underneath. */
+.studioRackHead {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  background: transparent;
+  pointer-events: none;
+}
+.studioRackHead b {
+  color: var(--ink-dim);
+  font-weight: 600;
+}
+.studioRackHeadDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.7);
+  margin-right: 0.45rem;
+  vertical-align: middle;
+  animation: pulse-soft 1.8s ease-in-out infinite;
+}
+
+/* Bottom "scroll hint" — appears when the rack is at hero angle and
+   fades as scroll progress increases. Tells the user the rotation is
+   tied to scroll, not to drag. Hidden on touch devices since "scroll
+   to rotate" is intuitive there but the cursor-style hint reads as
+   a desktop affordance. */
+.studioScrollHint {
+  position: absolute;
+  bottom: 0.85rem;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--edge-faint);
+  backdrop-filter: blur(8px);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  pointer-events: none;
+}
+.studioScrollHint svg {
+  width: 11px;
+  height: 11px;
+  opacity: 0.7;
+}
+@media (hover: none) {
+  .studioScrollHint { display: none; }
+}
+
+/* Loader fallback — shown while three.js + GLB are still streaming */
+.studioRackLoader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ==================================================================
+   MAIN — pod blueprint + spec nameplate · side-by-side data sheet
+   ==================================================================
+   Sits directly below the .studio. Reads as the engineering source-of-
+   truth document: front elevation on the left (1.45fr — wider so the
+   dimensioned drawing breathes), manufacturer nameplate on the right
+   (1fr — narrower, tabular). Below 1020px the grid collapses to a
+   single column to match the studio's same breakpoint.
+   ================================================================== */
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: clamp(1.2rem, 2.5vw, 2.5rem);
+  margin-bottom: clamp(3rem, 5vw, 4.5rem);
+}
+@media (max-width: 1020px) {
+  .main { grid-template-columns: 1fr; }
+}
+
+/* ============== BLUEPRINT ============== */
+.blueprint {
+  position: relative;
+  background:
+    /* faint grid paper effect */
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 24px,
+      rgba(15, 23, 42, 0.035) 24px,
+      rgba(15, 23, 42, 0.035) 25px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 24px,
+      rgba(15, 23, 42, 0.035) 24px,
+      rgba(15, 23, 42, 0.035) 25px
+    ),
+    var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  padding: 1rem 1.2rem 1.2rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 12px 40px -16px rgba(15, 23, 42, 0.09);
+}
+
+.blueprintHead,
+.blueprintFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.blueprintHead {
+  border-bottom: 1px solid var(--edge-faint);
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+.blueprintFoot {
+  border-top: 1px solid var(--edge-faint);
+  padding-top: 0.6rem;
+  margin-top: 0.6rem;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+.blueprintFootSep {
+  color: var(--ink-whisper);
+}
+.blueprintCode {
+  color: var(--ink-dim);
+  font-weight: 600;
+}
+
+.podSvg {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 920 / 560;
+}
+.podSvgLabel {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: var(--ink-dim);
+}
+.podSvgDim {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  fill: var(--ink-dim);
+  font-feature-settings: "tnum" 1;
+}
+.podSvgCallout {
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: var(--brand-deep);
+}
+.podSvgStatus {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: var(--status-deep);
+}
+
+/* ============== SPEC NAMEPLATE ============== */
+.specs {
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  padding: 0;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 12px 40px -16px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.specsHead {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 1rem 1.2rem 0.9rem;
+  border-bottom: 1px solid var(--edge-faint);
+  background: linear-gradient(
+    180deg,
+    rgba(37, 99, 235, 0.04) 0,
+    transparent 100%
+  );
+}
+.specsBrand {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.specsVer {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+.specsTag {
+  margin-left: auto;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--edge);
+  border-radius: 3px;
+}
+
+.specsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.specRow {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  align-items: baseline;
+  gap: 0.8rem;
+  padding: 0.75rem 1.2rem;
+  border-bottom: 1px dashed var(--edge-faint);
+}
+.specRow:last-child {
+  border-bottom: none;
+}
+
+.specLabel {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.specValueWrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-family: var(--font-display);
+  font-feature-settings: "tnum" 1;
+}
+.specValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--ink-strong);
+}
+.specUnit {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.specNote {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-ghost);
+  text-align: right;
+}
+
+.specsFoot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0.04) 100%
+  );
+  border-top: 1px solid var(--edge-faint);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.specsFootDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status);
+  box-shadow: 0 0 6px var(--status-glow);
+}
+
+/* ============== DEPLOY TIMELINE ============== */
+.timelineWrap {
+  margin-top: clamp(2rem, 4vw, 3.5rem);
+}
+.timelineHead {
+  margin-bottom: 1.1rem;
+}
+.timeline {
+  position: relative;
+}
+.timelineTrack {
+  position: relative;
+  height: 3px;
+  background: var(--edge);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 1.2rem;
+}
+.timelineFill {
+  position: absolute;
+  inset: 0;
+  background: var(--brand-gradient);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.4);
+}
+
+.timelineStops {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  position: relative;
+}
+.timelineStop {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  position: relative;
+  padding-top: 0.4rem;
+}
+.timelineNode {
+  position: absolute;
+  top: -14px;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 2px solid var(--brand);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+.timelineStop:last-child .timelineNode {
+  background: var(--cyan);
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2), 0 0 14px rgba(34, 211, 238, 0.5);
+}
+.timelineDay {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand);
+  font-feature-settings: "tnum" 1;
+}
+.timelineLabel {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink-strong);
+}
+.timelineDetail {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--ink-dim);
+  max-width: 28ch;
+}
+
+@media (max-width: 760px) {
+  .timelineStops { grid-template-columns: 1fr 1fr; gap: 1.5rem 1rem; }
+}
+@media (max-width: 440px) {
+  .timelineStops { grid-template-columns: 1fr; }
+}
+
+/* ==================================================================
+   PRODUCT LADDER · POD (1 MW) → MEGA SILO (20 MW)
+   ==================================================================
+   Two-tile product strip. Same tile anatomy across both tiers so the
+   asymmetric numbers register as the argument. The SILO tile carries
+   a slightly warmer brand-ring (brand + cyan) to signal "next tier,
+   bigger bet" without dominating the POD tile, which is the proof
+   point that anchors the whole product family.
+   ================================================================== */
+.ladder {
+  margin-top: clamp(2.4rem, 4.5vw, 3.6rem);
+}
+
+.ladderHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: clamp(1rem, 2vw, 1.4rem);
+  padding-bottom: clamp(0.8rem, 1.5vw, 1.1rem);
+  border-bottom: 1px dashed var(--edge);
+}
+.ladderHeadNote {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  font-feature-settings: "tnum" 1;
+}
+
+.ladderGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.8rem, 1.8vw, 1.4rem);
+  position: relative;
+}
+@media (max-width: 780px) {
+  .ladderGrid { grid-template-columns: 1fr; }
+}
+
+/* Connector line between the two tiles at desktop — reads as
+   "1 MW scales to 20 MW" without needing an arrow label. */
+@media (min-width: 781px) {
+  .ladderGrid::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: calc(50% - 0.5rem);
+    width: 1rem;
+    height: 2px;
+    background: linear-gradient(90deg, var(--brand) 0%, var(--cyan) 100%);
+    border-radius: 2px;
+    z-index: 1;
+    pointer-events: none;
+  }
+}
+
+.ladderTile {
+  position: relative;
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: transform 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.ladderTile:hover {
+  transform: translateY(-2px);
+}
+
+.ladderTilePod {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 14px 40px -20px rgba(37, 99, 235, 0.2),
+    inset 0 0 0 1px rgba(37, 99, 235, 0.06);
+}
+.ladderTilePod:hover {
+  border-color: rgba(37, 99, 235, 0.28);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 18px 46px -18px rgba(37, 99, 235, 0.3),
+    inset 0 0 0 1px rgba(37, 99, 235, 0.1);
+}
+
+.ladderTileSilo {
+  background:
+    linear-gradient(180deg, rgba(34, 211, 238, 0.03) 0%, transparent 55%),
+    var(--panel);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 14px 40px -20px rgba(34, 211, 238, 0.24),
+    inset 0 0 0 1px rgba(34, 211, 238, 0.08);
+}
+.ladderTileSilo:hover {
+  border-color: rgba(34, 211, 238, 0.3);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 18px 46px -18px rgba(34, 211, 238, 0.32),
+    inset 0 0 0 1px rgba(34, 211, 238, 0.14);
+}
+
+/* ---- Tile head: code pill + availability badge ---- */
+.ladderTileHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.ladderCode {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.ladderBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.ladderBadgeDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+.ladderBadgeSigned {
+  background: var(--status-trace);
+  color: var(--status-deep);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+}
+.ladderBadgeValidated {
+  background: rgba(34, 211, 238, 0.08);
+  color: var(--cyan-deep);
+  border: 1px solid rgba(34, 211, 238, 0.22);
+}
+
+/* ---- Tile body: icon + name/tag ---- */
+.ladderTileBody {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.ladderIconWrap {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(34, 211, 238, 0.05));
+  color: var(--brand);
+}
+.ladderTileSilo .ladderIconWrap {
+  background:
+    linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(37, 99, 235, 0.05));
+  color: var(--cyan-deep);
+}
+
+.ladderTileTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.ladderName {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.7vw, 1.4rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--ink-strong);
+  line-height: 1.05;
+}
+.ladderTag {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+/* ---- Subtitle ---- */
+.ladderSubtitle {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  max-width: 40ch;
+}
+
+/* ---- Spec grid (2×2 dl) ---- */
+.ladderSpecs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 0.8rem;
+  margin: 0;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--edge-faint);
+}
+.ladderSpec {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.ladderSpecKey {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0;
+}
+.ladderSpecVal {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-strong);
+  font-feature-settings: "tnum" 1, "zero" 1;
+  margin: 0;
+}
+
+/* ==================================================================
+   ENGINEERING PRINCIPLES · four-card panel · the "why" beneath the
+   product ladder.  Tiles intentionally lighter-weight than the product
+   ladder tiles above — these are supporting evidence, not the product.
+   Uses the same card radius, font ladder, and spacing rhythm so the
+   section reads as one continuous document.
+   ================================================================== */
+.principles {
+  margin-top: clamp(2.4rem, 4.5vw, 3.6rem);
+}
+
+.principlesHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: clamp(1rem, 2vw, 1.4rem);
+  padding-bottom: clamp(0.8rem, 1.5vw, 1.1rem);
+  border-bottom: 1px dashed var(--edge);
+}
+.principlesHeadNote {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  max-width: 48ch;
+}
+
+.principlesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.8rem, 1.5vw, 1.2rem);
+}
+@media (max-width: 1040px) {
+  .principlesGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .principlesGrid { grid-template-columns: 1fr; }
+}
+
+.principleTile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: clamp(1rem, 1.8vw, 1.35rem);
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  transition: transform 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease;
+  overflow: hidden;
+}
+.principleTile::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--brand-gradient);
+  opacity: 0.45;
+  transition: opacity 0.25s ease;
+}
+.principleTile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.22);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 14px 36px -18px rgba(37, 99, 235, 0.22);
+}
+.principleTile:hover::before { opacity: 0.85; }
+
+.principleHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.principleCode {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand-deep);
+  padding: 0.3rem 0.55rem;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 999px;
+  line-height: 1;
+}
+.principleMetric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  line-height: 1;
+}
+.principleMetricValue {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+  background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 45%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.principleMetricLabel {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.principleTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.5vw, 1.3rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-strong);
+  line-height: 1.2;
+  margin: 0;
+}
+.principleDetail {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  margin: 0;
+}

@@ -1,214 +1,661 @@
 @import "tailwindcss";
 
-:root {
-  --void: #050507;
-  --surface: #0a0a0f;
-  --surface-2: #0f0f16;
-  --border: rgba(255,255,255,0.08);
-  --border-accent: rgba(37,99,235,0.3);
-  --accent: #2563eb;
-  --accent-bright: #3b82f6;
-  --accent-dim: #1d4ed8;
-  --accent-glow: rgba(37,99,235,0.15);
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #475569;
-  --text-accent: #60a5fa;
+/* Fonts are loaded via next/font/google in src/app/layout.tsx.
+   Next.js self-hosts them for zero CLS and auto-preloads for LCP.
+   Design direction: premium cyber-tech investor site — light,
+   architectural, Tesla/Nvidia/Palantir/SpaceX energy. Bright neutrals
+   with electric-green + deep-teal + subtle-blue energy. Geometric
+   sans-serif throughout, no serif italics, no romantic typography. */
 
-  /* Legacy aliases so existing code still works */
-  --color-void: var(--void);
-  --color-graphite: var(--surface);
-  --color-edge: rgba(255,255,255,0.08);
-  --color-accent: var(--accent);
-  --color-accent-dim: var(--accent-dim);
-  --color-accent-bright: var(--accent-bright);
-  --color-accent-glow: var(--accent-glow);
-  --color-chrome: #94a3b8;
-  --color-mist: #64748b;
-  --color-white: #f1f5f9;
-  --color-white-dim: #94a3b8;
-  --color-panel: var(--surface-2);
-  --color-steel: #1a1a28;
+:root {
+  /* ============== BASE SURFACES — LOGO-DERIVED LIGHT ============== */
+  /* Off-white / cool grays. Avoid pure white. Keep depth through tonal lift. */
+  --paper: #F7F9FB;              /* off-white — primary surface */
+  --canvas: #EEF2F6;             /* light cool gray — section wash */
+  --panel: #FFFFFF;              /* card surface (above paper, selectively) */
+  --panel-secondary: #E6ECF2;    /* secondary panel / elevated surface */
+  --mist: #DCE3EB;               /* subtle divider / inactive surface */
+  --steel: #C0CAD6;              /* muted element / disabled */
+  --graphite: #475569;           /* secondary graphic */
+  --ink: #0F172A;                /* deep navy — type + dark contrast panels */
+  --ink-deep: #111827;           /* slate — full-bleed dark pivot (rare) */
+
+  /* Glass layers — light frosted, layered above bright surfaces */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-bg-strong: rgba(255, 255, 255, 0.82);
+  --glass-edge: rgba(0, 0, 0, 0.05);
+
+  /* Edges — dark strokes on light surface (tuned to new ink) */
+  --edge: rgba(15, 23, 42, 0.08);
+  --edge-bright: rgba(15, 23, 42, 0.16);
+  --edge-faint: rgba(15, 23, 42, 0.04);
+  --edge-soft: rgba(15, 23, 42, 0.06);
+
+  /* ============== BRAND COLORS — FROM LOGO ============== */
+  /* The blue→cyan gradient IS the brand. Use for:
+     key words in headlines, buttons, highlights, lines, dividers,
+     interactive elements. Apply tokens OR --brand-gradient directly. */
+
+  /* Deep blue — PRIMARY brand ink */
+  --brand: #2563EB;
+  --brand-bright: #3B82F6;
+  --brand-deep: #1D4ED8;
+  --brand-darker: #1E3A8A;
+  --brand-glow: rgba(37, 99, 235, 0.22);
+  --brand-trace: rgba(37, 99, 235, 0.08);
+  --brand-wash: rgba(37, 99, 235, 0.04);
+
+  /* Electric cyan — SECONDARY brand ink (right side of logo gradient) */
+  --cyan: #22D3EE;
+  --cyan-bright: #67E8F9;
+  --cyan-deep: #0891B2;
+  --cyan-darker: #0E7490;
+  --cyan-glow: rgba(34, 211, 238, 0.22);
+  --cyan-trace: rgba(34, 211, 238, 0.08);
+  --cyan-wash: rgba(34, 211, 238, 0.04);
+
+  /* Brand gradients — the signature look */
+  --brand-gradient: linear-gradient(135deg, #2563EB 0%, #22D3EE 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(34, 211, 238, 0.12));
+  --brand-gradient-glow: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.18), rgba(37, 99, 235, 0.06) 55%, transparent 75%);
+
+  /* ============== STATUS ACCENT (MINIMAL) ============== */
+  /* Neon green — status only: LIVE pills, healthy metrics, uptime indicators.
+     Never in body copy, never in headlines. Strictly functional. */
+  --status: #22C55E;
+  --status-bright: #4ADE80;
+  --status-deep: #15803D;
+  --status-glow: rgba(34, 197, 94, 0.22);
+  --status-trace: rgba(34, 197, 94, 0.08);
+
+  /* ============== TYPE COLOURS (ink on paper) ============== */
+  --ink-strong: #0F172A;              /* deep navy — primary type */
+  --ink-dim: #475569;                 /* steel gray — secondary type */
+  --ink-faint: #94A3B8;                /* light text — tertiary / captions */
+  --ink-ghost: rgba(15, 23, 42, 0.32);
+  --ink-whisper: rgba(15, 23, 42, 0.18);
+
+  /* Type on DARK panels (contrast sections: deep-navy #0F172A / slate #111827) */
+  --bone: #F3F6FA;
+  --bone-dim: rgba(243, 246, 250, 0.72);
+  --bone-faint: rgba(243, 246, 250, 0.48);
+
+  /* ============== TYPE FAMILIES ============== */
+  /* Geist          — display / headlines. Tight neo-grotesk, 700–900. Not friendly. Engineered.
+     Inter Tight    — body / lede. Slightly condensed Inter, neutral, 400–600.
+     Geist Mono     — data / telemetry / pills. Tabular figures. */
+  --font-display: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body:    var(--font-inter-tight), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:    var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, monospace;
+
+  /* ============== LEGACY SHIMS ============== */
+  /* Existing components reference --electric / --teal / --sky / --gold.
+     Remap every one to the logo's blue→cyan gradient endpoints so the entire
+     site adopts the new palette automatically. New code should prefer
+     --brand / --cyan / --status directly — these shims keep old CSS alive. */
+
+  /* --electric was neon green → now brand blue (primary). */
+  --electric: var(--brand);
+  --electric-bright: var(--cyan);
+  --electric-deep: var(--brand-deep);
+  --electric-glow: var(--brand-glow);
+  --electric-trace: var(--brand-trace);
+  --electric-wash: var(--brand-wash);
+
+  /* --teal was deep teal → now cyan (gradient right endpoint). */
+  --teal: var(--cyan);
+  --teal-bright: var(--cyan-bright);
+  --teal-deep: var(--cyan-deep);
+  --teal-glow: var(--cyan-glow);
+  --teal-trace: var(--cyan-trace);
+
+  /* --sky was sky blue → collapse onto --brand (gradient left endpoint). */
+  --sky: var(--brand);
+  --sky-bright: var(--brand-bright);
+  --sky-glow: var(--brand-glow);
+  --sky-trace: var(--brand-trace);
+
+  /* --gold retired → recycled into cyan depth to keep legacy CSS rendering. */
+  --gold: var(--cyan-deep);
+  --gold-bright: var(--cyan);
+  --gold-deep: var(--cyan-darker);
+  --gold-glow: var(--cyan-glow);
+  --gold-trace: var(--cyan-trace);
+
+  /* Pre-pivot dark-theme names — keep rendering on the light system. */
+  --obsidian: var(--paper);
+  --basalt: var(--canvas);
+  --viridian: var(--brand);
+  --viridian-bright: var(--brand-bright);
+  --viridian-deep: var(--brand-deep);
+  --viridian-glow: var(--brand-glow);
+  --viridian-trace: var(--brand-trace);
+  --ember: var(--cyan);
+  --ember-trace: var(--cyan-trace);
+  --color-accent: var(--brand);
+  --color-background: var(--paper);
+  --color-foreground: var(--ink-strong);
+
+  /* ============== MOTION ============== */
+  --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
 }
 
 @theme inline {
-  --color-background: var(--void);
-  --color-foreground: var(--text-primary);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--paper);
+  --color-foreground: var(--ink-strong);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-body);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
-  background: var(--void);
-  color: var(--text-primary);
+  background: var(--paper);
+  color: var(--ink-strong);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
-  scroll-behavior: smooth;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* "cv11" single-story a + "ss03" open 4 in Inter Tight; "tnum" tabular nums
+     for inline numbers that need alignment. "kern" + "liga" always on. */
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "cv11" 1, "ss03" 1;
   overflow-x: hidden;
+  /* Smooth-scroll for in-page anchor nav. Was `auto` before the sticky
+     NavHeader landed — the pill-rail sends users to #problem / #podos / etc.
+     via real <a href>, so we need CSS-level smooth scrolling (no JS handler
+     involved). The reduced-motion media query below restores `auto` for
+     users who've opted out. */
+  scroll-behavior: smooth;
+  /* Anchor-jump offset. The sticky NavHeader lives at top-4..top-6 plus its
+     own ~40–60px pill height, so a jump to #problem would otherwise land
+     the section top UNDER the nav. `scroll-padding-top` tells the browser
+     to leave this much breathing room above the landing point. The clamp
+     covers mobile (smaller pill, top-4) through desktop (bigger pill,
+     top-6) without a media query. */
+  scroll-padding-top: clamp(64px, 10vh, 104px);
 }
 
-body { background: var(--void); overflow-x: hidden; }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: var(--void); }
-::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.3); border-radius: 2px; }
-
-/* ── Typography ── */
-.text-display {
-  font-size: clamp(2.8rem, 7vw, 6.5rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.0;
-}
-.text-headline {
-  font-size: clamp(2rem, 4.5vw, 4rem);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
-}
-.text-subhead {
-  font-size: clamp(1rem, 1.8vw, 1.2rem);
+body {
+  background: var(--paper);
+  overflow-x: hidden;
+  min-height: 100vh;
+  font-family: var(--font-body);
   font-weight: 400;
-  letter-spacing: 0em;
-  line-height: 1.7;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  color: var(--ink-strong);
 }
-.text-label {
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+
+/* Scrollbar — thin, graphite on paper */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(10, 14, 26, 0.12);
+  border-radius: 4px;
+  transition: background 0.2s;
 }
-.text-mono {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+::-webkit-scrollbar-thumb:hover { background: rgba(10, 14, 26, 0.24); }
+
+/* Selection */
+::selection { background: var(--electric-glow); color: var(--ink-strong); }
+
+/* ============== TYPOGRAPHY UTILITIES ============== */
+/* Hierarchy philosophy — engineered, not editorial.
+   Headlines: heavy (800+), very tight (−0.04em), tight leading (1.04).
+   Body:      light (400), slightly tight (−0.005em), open leading (1.6).
+   Data:      mono, tabular numerals, wider letter-spacing (0.16–0.22em). */
+
+/* --- Display — architectural hero type --- */
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(3.4rem, 8vw, 8rem);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  color: var(--ink-strong);
+  font-feature-settings: "ss01" 1, "ss02" 1, "cv11" 1;
+}
+.t-display--mega {
+  font-size: clamp(5rem, 12vw, 13rem);
+  font-weight: 900;
+  line-height: 0.94;
+  letter-spacing: -0.055em;
+}
+
+/* --- Headline — section headers --- */
+.t-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 4.8vw, 4.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.038em;
+  color: var(--ink-strong);
+  font-feature-settings: "ss01" 1, "cv11" 1;
+}
+
+/* --- Subhead / lede — Inter Tight body font --- */
+.t-lede {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1.3vw, 1.25rem);
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  color: var(--ink-dim);
+}
+
+/* --- Body --- */
+.t-body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  letter-spacing: -0.005em;
+  color: var(--ink-dim);
+  font-weight: 400;
+}
+
+/* --- Monospaced callouts — stats, spec labels --- */
+.t-mono {
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  font-feature-settings: "tnum" 1, "zero" 1;
+  color: var(--ink-dim);
+}
+
+/* --- Number display — for giant stats (85×, 99.998%, etc.) --- */
+.t-number {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+  letter-spacing: -0.035em;
+  color: var(--ink-strong);
+}
+
+/* --- Eyebrow label — section markers --- */
+.t-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
   letter-spacing: 0.04em;
-  color: var(--text-muted);
+  text-transform: uppercase;
+  color: var(--ink-faint);
 }
 
-/* Gradient text */
-.text-gradient {
-  background: linear-gradient(135deg, #fff 30%, var(--accent-bright) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* --- Accent hues inline --- */
+.t-electric { color: var(--electric-deep); }
+.t-electric-bright { color: var(--electric); }
+.t-teal { color: var(--teal); }
+.t-teal-bright { color: var(--teal-bright); }
+.t-sky { color: var(--sky); }
+.t-gold { color: var(--gold-deep); }
+.t-ink { color: var(--ink-strong); }
+
+/* --- Gradient sweep for emphasis words ---
+   The headline paint. Use --t-sweep-brand on the 1-2 words per hero/section
+   that carry the meaning ("new physical layer", "85×", "compresses AI").
+   Never paint a whole line — gradient text stops reading as type. */
+.t-sweep-brand {
+  background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 45%, var(--cyan) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+/* Aliases — old class names kept working so existing components don't break. */
+.t-sweep-electric {
+  background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 45%, var(--cyan) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.t-sweep-teal {
+  background: linear-gradient(135deg, var(--cyan-deep) 0%, var(--cyan) 55%, var(--cyan-bright) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.t-sweep-ink {
+  background: linear-gradient(135deg, var(--ink-strong) 0%, #1f2635 60%, var(--ink-dim) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
 }
 
-/* ── Container ── */
+/* ============== LAYOUT UTILITIES ============== */
 .container-site {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 clamp(1.25rem, 4vw, 3.5rem);
 }
 
-/* ── Glass ── */
+.section-pad {
+  padding-top: clamp(5rem, 10vh, 9rem);
+  padding-bottom: clamp(5rem, 10vh, 9rem);
+}
+
+/* ============== SURFACES ============== */
 .glass {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(20px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  border-radius: 14px;
 }
 
-/* ── PRIMARY BUTTON ── */
+.glass-strong {
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border-radius: 14px;
+  /* Shadows tuned to new ink #0F172A (rgb 15,23,42) — cooler, sits
+     against the #F7F9FB paper with just enough lift to read as glass. */
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 40px -12px rgba(15, 23, 42, 0.08);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 4px 20px -8px rgba(15, 23, 42, 0.06);
+}
+
+.card-lift {
+  transition: transform 0.35s var(--ease-out-quart),
+              box-shadow 0.35s var(--ease-out-quart),
+              border-color 0.25s;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  /* Hover adds a faint cyan rim — the signature micro-interaction across
+     the site. Keeps the "cool, engineered, electric" feel on every card. */
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 20px 50px -12px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(34, 211, 238, 0.18);
+  border-color: rgba(15, 23, 42, 0.14);
+}
+
+/* ============== BUTTONS ==============
+   Primary CTA — the brand gradient, rendered as a button. White type
+   on 135deg deep-blue → cyan. Shadows are blue-tinted (never green),
+   and the inset highlight keeps the gradient from going flat.
+   The ::after sweep is the signature — a quick 900ms diagonal shine
+   on hover that reads as "power-on", not "glossy marketing button". */
 .btn-primary {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.8rem 2rem;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.75rem;
+  gap: 0.55rem;
+  padding: 0.95rem 1.6rem;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: 1px solid transparent;
-  border-radius: 6px;
+  letter-spacing: -0.005em;
+  color: #ffffff;
+  background: var(--brand-gradient);
+  border: 1px solid rgba(29, 78, 216, 0.55);
+  border-radius: 10px;
   cursor: pointer;
   overflow: hidden;
-  transition: background 0.25s, box-shadow 0.25s, transform 0.15s;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.28) inset,
+    0 1px 2px rgba(37, 99, 235, 0.28),
+    0 10px 30px -10px rgba(34, 211, 238, 0.45);
+  transition: transform 0.25s var(--ease-out-quart),
+              box-shadow 0.25s var(--ease-out-quart),
+              filter 0.25s;
 }
-.btn-primary::before {
+.btn-primary::after {
   content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
-  transform: translateX(-100%);
-  transition: transform 0.5s ease;
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.38) 50%, transparent 60%);
+  transform: translateX(-120%);
+  transition: transform 0.9s var(--ease-out-quart);
 }
-.btn-primary:hover::before { transform: translateX(100%); }
 .btn-primary:hover {
-  background: var(--accent-bright);
-  box-shadow: 0 0 20px rgba(37,99,235,0.5), 0 0 40px rgba(37,99,235,0.2);
+  /* Gradient can't swap via `background:` without re-computing —
+     filter:brightness() lifts luminance without shifting hue, keeping
+     the blue→cyan relationship stable. */
+  filter: brightness(1.07) saturate(1.05);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.38) inset,
+    0 2px 4px rgba(37, 99, 235, 0.34),
+    0 18px 44px -10px rgba(34, 211, 238, 0.6);
   transform: translateY(-1px);
 }
-.btn-primary:active { transform: translateY(0); }
+.btn-primary:hover::after { transform: translateX(120%); }
+.btn-primary:active { transform: translateY(0); filter: brightness(1); }
 
-/* ── GHOST BUTTON ── */
 .btn-ghost {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.8rem 2rem;
-  background: rgba(255,255,255,0.04);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
+  gap: 0.55rem;
+  padding: 0.9rem 1.6rem;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
   font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  letter-spacing: 0.01em;
+  color: var(--ink-strong);
+  background: transparent;
+  border: 1px solid var(--edge-bright);
+  border-radius: 10px;
   cursor: pointer;
   transition: border-color 0.25s, color 0.25s, background 0.25s, transform 0.15s;
 }
 .btn-ghost:hover {
-  border-color: rgba(255,255,255,0.25);
-  color: var(--text-primary);
-  background: rgba(255,255,255,0.07);
+  border-color: var(--ink-strong);
+  background: rgba(10, 14, 26, 0.03);
   transform: translateY(-1px);
 }
-.btn-ghost:active { transform: translateY(0); }
 
-/* ── Card corner brackets (from 21st.dev Features 10) ── */
-.card-bracket {
-  position: relative;
+/* ============== MOTION PRIMITIVES ============== */
+@keyframes drift-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.card-bracket::before,
-.card-bracket::after {
-  content: "";
-  position: absolute;
-  width: 10px;
-  height: 10px;
-}
-/* Use data attributes for per-corner styling via JS/React */
-
-/* ── Animations ── */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-@keyframes scan-sweep {
-  0%   { transform: translateY(-100%); opacity: 0; }
-  10%  { opacity: 0.08; }
-  90%  { opacity: 0.08; }
-  100% { transform: translateY(500%); opacity: 0; }
-}
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+/* Site-wide energy boost (2026-04-25):
+   Amplitudes widened and timings tightened so every section using
+   these primitives reads as ALIVE. Specifically:
+     • opacity floors dropped + ceilings raised → bigger contrast pulses
+     • translation amplitudes ~1.5× → more visible drift
+     • energy-flow now travels brighter at higher peak alpha
+   The actual `animation-duration` overrides live in the consumer
+   classes (.gridField, .energyFlow, .particle, .orbFloat) — those
+   were also tightened in BackgroundLayers.module.css. */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
 }
 @keyframes glow-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.7; }
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 1; }
 }
-@keyframes border-rotate {
-  from { --angle: 0deg; }
-  to   { --angle: 360deg; }
+@keyframes grid-drift {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 60px 60px, 60px 60px; }
+}
+@keyframes energy-flow {
+  0%   { transform: translateX(-30%); opacity: 0; }
+  12%  { opacity: 0.95; }
+  88%  { opacity: 0.95; }
+  100% { transform: translateX(130%); opacity: 0; }
+}
+@keyframes circuit-pulse {
+  0%, 100% { stroke-dashoffset: 0; opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-22px); }
+}
+
+/* Site-wide scan beam — a thin horizontal line of brand light that
+   sweeps top→bottom of any container with .scan-sweep applied.
+   Pure CSS so any section can opt in by adding the class to a
+   pointer-events:none div nested inside it. The `::after` carries
+   the actual beam so consumers can also use ::before for other
+   atmospherics without conflicts. */
+@keyframes scan-sweep {
+  0%   { top: -8%;   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 108%;  opacity: 0; }
+}
+.scan-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+.scan-sweep::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0.10) 35%,
+    rgba(56, 189, 248, 0.18) 50%,
+    rgba(34, 211, 238, 0.10) 65%,
+    transparent 100%
+  );
+  filter: blur(2px);
+  animation: scan-sweep 11s linear infinite;
+  mix-blend-mode: screen;
+}
+
+/* Charge-surge — a very subtle full-page brightness pulse, applied
+   globally via body so the entire site breathes together. Tiny
+   amplitude (98% ↔ 102%) so it's never obvious — it just makes the
+   page feel "powered on" rather than static. */
+@keyframes charge-surge {
+  0%, 100% { filter: brightness(0.99) saturate(1); }
+  50%      { filter: brightness(1.015) saturate(1.04); }
+}
+
+/* ============== AMBIENT LIVING LAYER ==============
+   Site-wide micro-motion that keeps surfaces feeling awake without any
+   per-component JavaScript. Every animation uses transform/opacity
+   only (GPU-accelerated) or stroke/box-shadow cycling (cheap on a
+   small number of elements). The prefers-reduced-motion block below
+   clamps all animation-duration to near-zero, so these utilities are
+   accessibility-safe by construction.
+
+   Usage rules:
+     • `.live-pulse`     — tiny status dot with an expanding ring. One
+                           per "LIVE" indicator, not an ambient field.
+     • `.breathe`        — slow scale 1 ↔ 1.025 on a HALO element.
+                           Never on text (jitters antialiasing).
+     • `.glow-breathe`   — box-shadow cycles brand↔cyan on a framed
+                           card. Selective use — one climax card per
+                           section max, or it reads as noise.
+     • `.data-stream`    — stroke-dashoffset on an SVG path that
+                           simulates flowing current. Pair with dashed
+                           stroke.
+     • `.digit-blink`    — subtle opacity dip on mono counters that
+                           otherwise sit static.
+*/
+@keyframes live-pulse-ring {
+  0%   { transform: scale(0.9); opacity: 0.65; }
+  80%  { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(1);     opacity: 0.88; }
+  50%      { transform: scale(1.025); opacity: 1; }
+}
+@keyframes brand-glow-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(37, 99, 235, 0.22),
+      0 0 18px -2px rgba(37, 99, 235, 0.22);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(34, 211, 238, 0.32),
+      0 0 28px -2px rgba(34, 211, 238, 0.32);
+  }
+}
+@keyframes data-stream {
+  from { stroke-dashoffset: 24; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes digit-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.78; }
+}
+@keyframes scanline-drift {
+  0%   { transform: translateY(-12%); opacity: 0; }
+  15%  { opacity: 0.42; }
+  85%  { opacity: 0.42; }
+  100% { transform: translateY(112%); opacity: 0; }
+}
+
+/* --- Live status dot with an outward-expanding ring ---
+   The ::after is a clone of the dot that scales + fades outward.
+   Default color is --status (green) for "healthy / live" semantics.
+   Modifier classes retint for brand and cyan contexts. */
+.live-pulse {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--status);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
+  flex-shrink: 0;
+}
+.live-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  animation: live-pulse-ring 2.2s ease-out infinite;
+  pointer-events: none;
+}
+.live-pulse--brand {
+  background: var(--brand);
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.55);
+}
+.live-pulse--cyan {
+  background: var(--cyan);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.55);
+}
+.live-pulse--sm { width: 6px; height: 6px; }
+
+/* --- Subtle scale-breath for climax halos and status cells --- */
+.breathe          { animation: breathe 6s ease-in-out infinite; }
+.breathe-slow     { animation: breathe 9s ease-in-out infinite; }
+
+/* --- Card glow that cycles between brand blue and cyan --- */
+.glow-breathe     { animation: brand-glow-breathe 5.5s ease-in-out infinite; }
+
+/* --- Flowing current on SVG paths (pair with dashed stroke) --- */
+.data-stream {
+  stroke-dasharray: 8 4;
+  animation: data-stream 1.4s linear infinite;
+}
+.data-stream--slow { animation-duration: 2.8s; }
+.data-stream--fast { animation-duration: 0.85s; }
+
+/* --- Digit blink for static mono counters that should feel alive --- */
+.digit-blink { animation: digit-blink 1.9s ease-in-out infinite; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

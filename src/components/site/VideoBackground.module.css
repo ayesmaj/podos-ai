@@ -1,0 +1,167 @@
+/* ==================================================================
+   VIDEO BACKGROUND · design-control overlay system
+   ==================================================================
+   The raw video is never shown directly. It's always pushed through:
+
+     (1) a CSS filter on the <video> that rotates hue toward the brand
+         palette and saturates cyan/blue channels
+     (2) a tint overlay gradient locked to brand tokens (mix-blend-mode
+         multiply keeps luminance from the video but forces hue)
+     (3) a vignette ring for depth + center-focus
+     (4) an optional top/bottom blend that feathers the video edges
+         into the section background (avoids hard crops in transitions)
+
+   This is the pipeline that converts any Envato clip into something
+   that reads as "custom-built" rather than "stock footage".
+
+   Custom properties this module writes/reads:
+     --vb-overlay-alpha   (0–1, controlled by .intensity-*)
+     --vb-tint-from       (hex/rgba, controlled by .tint-*)
+     --vb-tint-to         (hex/rgba, controlled by .tint-*)
+     --vb-opacity-override (optional, set from TSX via inline style)
+   ================================================================== */
+
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+
+  /* Defaults — overridden by .intensity-* + .tint-* modifiers below. */
+  --vb-overlay-alpha: 0.55;
+  --vb-tint-from: rgba(37, 99, 235, 0.45);
+  --vb-tint-to: rgba(34, 211, 238, 0.25);
+  --vb-media-opacity: 0.7;
+}
+
+/* ============== MEDIA (video OR poster img) ============== */
+.media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  /* Brand-shift filter — this is the secret sauce.
+     - saturate(1.15) pushes color-heavy frames further toward brand
+     - hue-rotate(-10deg) nudges any cyan/teal content toward our cyan
+     - contrast(0.95) tames over-punchy stock footage */
+  filter: saturate(1.15) hue-rotate(-10deg) contrast(0.95) brightness(0.9);
+
+  /* Opacity managed by intensity modifiers (unless overridden inline). */
+  opacity: var(--vb-opacity-override, var(--vb-media-opacity));
+
+  /* Avoid layout shift during video metadata load. */
+  background: var(--ink, #0f172a);
+}
+
+/* ============== TINT LAYER (brand palette lock) ============== */
+.tint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    var(--vb-tint-from) 0%,
+    var(--vb-tint-to) 100%
+  );
+  mix-blend-mode: multiply;
+  opacity: var(--vb-overlay-alpha);
+  pointer-events: none;
+}
+
+/* ============== VIGNETTE (center focus + edge darkening) ============== */
+.vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      transparent 45%,
+      rgba(15, 23, 42, 0.4) 100%
+    );
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* ============== SECTION BLEND (top/bottom feather) ============== */
+.blend {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      var(--paper, #f7f9fb) 0%,
+      transparent 15%,
+      transparent 85%,
+      var(--paper, #f7f9fb) 100%
+    );
+  pointer-events: none;
+}
+
+.noBlend .blend { display: none; }
+
+/* ============== INTENSITY MODIFIERS ==============
+   Controls how much of the raw video shows through the overlay stack.
+   'subtle'  → overlay ~35% alpha, video 80% visible (texture only)
+   'medium'  → overlay ~55% alpha, video 70% visible (default)
+   'strong'  → overlay ~72% alpha, video 55% visible (branded mood)
+   ============================================================ */
+.intensity-subtle {
+  --vb-overlay-alpha: 0.35;
+  --vb-media-opacity: 0.8;
+}
+.intensity-medium {
+  --vb-overlay-alpha: 0.55;
+  --vb-media-opacity: 0.7;
+}
+.intensity-strong {
+  --vb-overlay-alpha: 0.72;
+  --vb-media-opacity: 0.55;
+}
+
+/* ============== TINT MODIFIERS ==============
+   Locks the tint gradient to a specific brand direction.
+   - brand   → deep blue → cyan (default hero / data-center)
+   - cyan    → cyan-heavy (compression, data-flow sections)
+   - deep    → navy-heavy (fusion, power infrastructure)
+   - neutral → desaturated ink (fallback / legacy assets)
+   ============================================================ */
+.tint-brand {
+  --vb-tint-from: rgba(29, 78, 216, 0.55);
+  --vb-tint-to: rgba(34, 211, 238, 0.3);
+}
+.tint-cyan {
+  --vb-tint-from: rgba(8, 145, 178, 0.5);
+  --vb-tint-to: rgba(34, 211, 238, 0.35);
+}
+.tint-deep {
+  --vb-tint-from: rgba(15, 23, 42, 0.7);
+  --vb-tint-to: rgba(37, 99, 235, 0.3);
+}
+.tint-neutral {
+  --vb-tint-from: rgba(15, 23, 42, 0.5);
+  --vb-tint-to: rgba(15, 23, 42, 0.25);
+}
+
+/* ============== REDUCED MOTION GUARD ==============
+   TSX already serves a static poster under prefers-reduced-motion,
+   but when the reduce preference flips mid-session the browser may
+   keep the currently-mounted <video> alive. These rules short-circuit
+   any residual motion (transforms/animations) defensively.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .media {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ============== PRINT ==============
+   Videos + overlays suppressed in print — the section's underlying
+   background color takes over so exported PDFs stay clean.
+   ============================================================ */
+@media print {
+  .root { display: none; }
+}

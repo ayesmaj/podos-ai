@@ -1,0 +1,504 @@
+/* ============================================================
+   SYNTROPIC OPERATOR CONSOLE — mockup/syntropic-console
+   The product-UI glimpse: what a Day-1 pilot customer actually
+   sees when they deploy PODOS. 2×2 grid of operator tiles that
+   together read as "the software is productized, not a lab demo".
+
+     ┌──────────────────┬──────────────────┐
+     │  FLEET MAP       │  DEPLOYMENT FEED │
+     ├──────────────────┼──────────────────┤
+     │  TOKENS/SEC CHART│  CAPABILITY CARDS│
+     └──────────────────┴──────────────────┘
+
+   Light-mode only; the "console" feel comes from brand-gradient
+   accents + monospace-numeric figures + measured motion, not
+   from a dark tech-aesthetic (which the project intentionally
+   avoids).
+   ============================================================ */
+
+.section {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      1100px 700px at 15% 10%,
+      rgba(34, 211, 238, 0.06),
+      transparent 60%
+    ),
+    radial-gradient(
+      1000px 600px at 85% 90%,
+      rgba(37, 99, 235, 0.05),
+      transparent 60%
+    ),
+    var(--paper);
+  border-top: 1px solid var(--edge-faint);
+  border-bottom: 1px solid var(--edge-faint);
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+}
+
+/* ==================================================================
+   HEADER
+   ================================================================== */
+.header {
+  margin-bottom: clamp(1.8rem, 3vw, 2.6rem);
+  max-width: 68ch;
+}
+
+.eyebrowIdx {
+  font-weight: 700;
+  color: var(--brand-deep);
+}
+.eyebrowSep {
+  color: var(--ink-whisper);
+  margin: 0 0.15rem;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 4.4vw, 3.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ink-strong);
+  margin: 0.6rem 0 1rem;
+}
+
+.lede {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.15vw, 1.1rem);
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 60ch;
+}
+
+/* ==================================================================
+   GRID · the 2×2 console
+   ================================================================== */
+.grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  grid-template-rows: auto auto;
+  gap: clamp(0.8rem, 1.4vw, 1.1rem);
+}
+@media (max-width: 960px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+.tile {
+  position: relative;
+  padding: clamp(1.1rem, 1.9vw, 1.5rem);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+.tile::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--brand-gradient);
+  opacity: 0.35;
+}
+
+/* Shared tile head */
+.tileHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+.tileTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brand-deep);
+}
+.tileTagDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
+  animation: scPulse 2s ease-in-out infinite;
+}
+.tileMeta {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.tileTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ink-strong);
+  margin: 0 0 0.3rem;
+  line-height: 1.2;
+}
+.tileSubtitle {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  margin: 0 0 1rem;
+}
+
+/* ==================================================================
+   TILE 1 · FLEET MAP
+   ================================================================== */
+.mapTile {
+  grid-row: 1;
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+}
+.mapFrame {
+  position: relative;
+  flex: 1 1 auto;
+  /* Dimensional insurance: the tile row is grid-template-rows: auto, and
+     a flex-grow child has nothing to grow into when the row is auto-sized.
+     Without a concrete floor, the map's aspect-ratio container could
+     collapse to zero height when Tailwind's JIT skips an arbitrary value.
+     min-height guarantees the map always has enough room to draw. */
+  min-height: clamp(280px, 30vw, 420px);
+  border-radius: 10px;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(34, 211, 238, 0.04),
+      transparent 70%
+    );
+}
+.mapBadge {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-strong);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px -8px rgba(15, 23, 42, 0.12);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.mapBadgeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.65);
+  animation: scPulse 1.8s ease-in-out infinite;
+}
+
+/* ==================================================================
+   TILE 2 · DEPLOYMENT FEED
+   ================================================================== */
+.feedTile {
+  grid-row: 1;
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+}
+.feedList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  max-height: 340px;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 78%,
+    transparent 100%
+  );
+}
+.feedItem {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--edge-faint);
+  border-radius: 10px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.feedItem:hover {
+  border-color: rgba(37, 99, 235, 0.2);
+  transform: translateX(2px);
+}
+.feedIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+.feedIconBrand {
+  background: linear-gradient(135deg, var(--brand-deep), var(--brand));
+}
+.feedIconCyan {
+  background: linear-gradient(135deg, var(--cyan-deep), var(--cyan));
+}
+.feedIconStatus {
+  background: linear-gradient(135deg, var(--status-deep), var(--status));
+}
+.feedIconMixed {
+  background: linear-gradient(135deg, var(--brand-deep), var(--cyan));
+}
+.feedBody {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.feedTitle {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: var(--ink-strong);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.feedDetail {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  color: var(--ink-dim);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.feedTime {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  font-feature-settings: "tnum" 1, "zero" 1;
+  flex-shrink: 0;
+}
+
+/* ==================================================================
+   TILE 3 · TOKENS/SEC CHART
+   ================================================================== */
+.chartTile {
+  grid-row: 2;
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+}
+.chartFrame {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 240px;
+  padding: 0.5rem 0.5rem 0;
+}
+.chartSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.chartLegend {
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--edge-faint);
+}
+.chartLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+}
+.chartSwatch {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+.chartSwatchPodos {
+  background: linear-gradient(90deg, var(--brand), var(--cyan));
+}
+.chartSwatchTrad {
+  background: var(--ink-faint);
+}
+.chartReadout {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--brand-deep);
+  font-feature-settings: "tnum" 1, "zero" 1;
+  margin-left: auto;
+}
+
+/* ==================================================================
+   TILE 4 · CAPABILITY CARDS
+   ================================================================== */
+.capTile {
+  grid-row: 2;
+  grid-column: 2;
+  padding: 0;
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+}
+.capTile::before { display: none; }
+
+.capGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(0.6rem, 1vw, 0.85rem);
+  height: 100%;
+}
+@media (max-width: 640px) {
+  .capGrid { grid-template-columns: 1fr; }
+}
+
+.capCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: clamp(1rem, 1.7vw, 1.3rem);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+.capCard::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--brand-gradient);
+  opacity: 0.4;
+  transition: opacity 0.25s ease;
+}
+.capCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.25);
+}
+.capCard:hover::before { opacity: 0.9; }
+
+.capTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brand-deep);
+}
+.capIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--brand);
+}
+.capTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.35vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ink-strong);
+  margin: 0.15rem 0 0.2rem;
+  line-height: 1.25;
+}
+.capDetail {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+.capArrow {
+  margin-top: auto;
+  align-self: flex-end;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--edge);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-deep);
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  font-size: 0.9rem;
+}
+.capCard:hover .capArrow {
+  transform: translate(2px, -2px);
+  background: var(--brand-wash);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+/* ==================================================================
+   MOTION
+   ================================================================== */
+@keyframes scPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tileTagDot,
+  .mapBadgeDot { animation: none; }
+  .capCard,
+  .feedItem { transition: none; }
+}

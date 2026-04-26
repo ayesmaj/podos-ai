@@ -1,0 +1,373 @@
+/* ============================================================
+   SECTION 09 — USE OF FUNDS
+   Horizontal allocation bar + 6 bucket cards + governance footer.
+   Reads as an investor ledger, not a fundraising pitch.
+   ============================================================ */
+
+.section {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      1000px 600px at 85% 10%,
+      rgba(34, 211, 238, 0.05),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 600px at 15% 90%,
+      rgba(37, 99, 235, 0.05),
+      transparent 60%
+    ),
+    var(--paper);
+  border-top: 1px solid var(--edge-faint);
+  border-bottom: 1px solid var(--edge-faint);
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ------------------ header ------------------ */
+.header {
+  position: relative;
+  z-index: 2;
+  margin-bottom: clamp(2rem, 3vw, 2.6rem);
+  max-width: 68ch;
+}
+
+.eyebrowIdx {
+  font-weight: 700;
+  color: var(--brand-deep);
+}
+.eyebrowSep {
+  color: var(--ink-whisper);
+  margin: 0 0.15rem;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.4rem, 5.2vw, 4.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ink-strong);
+  margin: 0.8rem 0 1.2rem;
+}
+
+.lede {
+  font-family: var(--font-body);
+  font-size: clamp(1.05rem, 1.2vw, 1.2rem);
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 62ch;
+}
+
+/* ==================================================================
+   TOTAL BAR · proportional allocation
+   Horizontal stacked bar showing the six buckets at correct
+   percentage. Each segment's flex-basis animates from 0% to its
+   pct on entry — reads as "here's how the dollars actually land".
+   ================================================================== */
+.totalBar {
+  position: relative;
+  z-index: 2;
+  margin-bottom: clamp(1.8rem, 3vw, 2.6rem);
+  padding: clamp(1.2rem, 2vw, 1.6rem);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+}
+.totalBarHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.totalBarLabel {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-strong);
+}
+.totalBarMeta {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--ink-faint);
+}
+.totalBarTrack {
+  display: flex;
+  width: 100%;
+  height: clamp(44px, 6vw, 54px);
+  gap: 2px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--edge-faint);
+  border: 1px solid var(--edge);
+}
+.totalBarSeg {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 0.4rem;
+  color: white;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-feature-settings: "tnum" 1, "zero" 1;
+  line-height: 1;
+  transition: filter 0.25s ease;
+}
+.totalBarSeg:hover {
+  filter: brightness(1.08);
+}
+.totalBarSegLabel {
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+}
+
+/* Tier tones — hero tile carries full brand-gradient, primary tiles
+   pick up a deep-brand wash, secondary tiles stay muted. */
+.segTone-hero {
+  background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 45%, var(--cyan) 100%);
+}
+.segTone-primary {
+  background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 100%);
+}
+.segTone-secondary {
+  background: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ==================================================================
+   BUCKET GRID · six cards
+   Each card mirrors layout so the dollar figures do the rhetorical
+   work. Hero tone (largest bucket) gets visible gradient edge.
+   ================================================================== */
+.grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.8rem, 1.8vw, 1.3rem);
+  margin-bottom: clamp(1.6rem, 2.6vw, 2.2rem);
+}
+@media (max-width: 960px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+.bucket {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: clamp(1.1rem, 1.9vw, 1.5rem);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  transition: transform 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.bucket::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--brand-gradient);
+  opacity: 0.3;
+  transition: opacity 0.25s ease;
+}
+.bucket:hover {
+  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.25);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 16px 40px -18px rgba(37, 99, 235, 0.22);
+}
+.bucket:hover::before { opacity: 0.75; }
+
+.bucketTone-hero {
+  border-color: rgba(34, 211, 238, 0.35);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 14px 40px -18px rgba(34, 211, 238, 0.24);
+  background:
+    linear-gradient(180deg, rgba(34, 211, 238, 0.04) 0%, transparent 55%),
+    var(--glass-bg-strong);
+}
+.bucketTone-hero::before {
+  opacity: 1;
+  height: 4px;
+}
+
+.bucketHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.bucketCode {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand-deep);
+  padding: 0.25rem 0.55rem;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 4px;
+  line-height: 1;
+}
+.bucketPct {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.bucketTone-hero .bucketPct { color: var(--brand-deep); }
+
+.bucketAmount {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.2vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--ink-strong);
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+}
+.bucketTone-hero .bucketAmount {
+  background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 45%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.bucketCategory {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ink-strong);
+  margin: 0;
+  line-height: 1.2;
+}
+.bucketDetail {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+/* ==================================================================
+   GOVERNANCE FOOTER
+   Raise · Allocated · Reserve arithmetic + deck-quoted promise
+   ================================================================== */
+.governance {
+  position: relative;
+  z-index: 2;
+  padding: clamp(1.2rem, 2vw, 1.6rem);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+}
+
+.govRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.8rem, 2vw, 1.6rem);
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--edge-faint);
+  margin-bottom: 1rem;
+}
+.govItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  line-height: 1;
+}
+.govLabel {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.govValue {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ink-strong);
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+}
+.govSep {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  font-weight: 300;
+  color: var(--ink-whisper);
+  line-height: 1;
+}
+
+.govNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+  text-align: center;
+  line-height: 1.45;
+}
+.govDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.45);
+  flex-shrink: 0;
+  animation: uofDotPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes uofDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bucket,
+  .totalBarSeg {
+    transition: none;
+  }
+  .govDot { animation: none; }
+}

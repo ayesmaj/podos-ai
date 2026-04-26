@@ -1,0 +1,68 @@
+/* FeatureRibbon · 5-col bottom strip below the pod. */
+
+.ribbon {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 1.25rem 1.5rem 0;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+@media (max-width: 900px) {
+  .ribbon {
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 1.25rem;
+  }
+}
+@media (max-width: 600px) {
+  .ribbon { grid-template-columns: repeat(2, 1fr); }
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-body);
+}
+
+.iconBox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: rgba(30, 64, 175, 0.95);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+/* Feature ribbon labels — sit at the bottom as the section's "spec
+   sheet footer". Use the same mono token + tracking as the rest of
+   the section so the whole page reads as one typographic system. */
+.title {
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.20em;
+  color: rgba(15, 23, 42, 0.95);
+  text-transform: uppercase;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+.sub {
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.20em;
+  color: rgba(15, 23, 42, 0.6);
+  text-transform: uppercase;
+  margin-top: 3px;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}

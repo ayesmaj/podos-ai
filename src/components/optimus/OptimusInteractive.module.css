@@ -1,0 +1,64 @@
+/* OptimusInteractive · the section wrapper around the spec view. */
+
+/* Typography aligns to the global tokens defined in globals.css:
+     --font-display  → Geist (architectural hero / section headlines)
+     --font-body     → Inter Tight (body, lede)
+     --font-mono     → Geist Mono (data, telemetry, eyebrows on tech sections)
+
+   The previous version inherited the body font for the title via the
+   section's default — which is why the heading read as "subtitle-y"
+   instead of carrying the same display weight as the rest of the
+   site's section headers. Switching the title to var(--font-display)
+   with -0.03em tracking + tnum figures fixes the mismatch. */
+
+.section {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 2rem);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0 0.5rem 1.5rem;
+  text-align: left;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(15, 23, 42, 0.5);
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display, "Geist", ui-sans-serif, system-ui);
+  /* Slightly smaller than the site's .t-headline (clamp 2.4–4.4rem)
+     because this is a sub-section header, not a hero. Tracking and
+     line-height pulled from the .t-headline token for visual rhyme. */
+  font-size: clamp(1.85rem, 3.6vw, 2.85rem);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.05;
+  color: rgba(10, 14, 26, 0.97);
+  text-transform: uppercase;
+  font-feature-settings: "ss01" 1, "ss02" 1, "tnum" 1;
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--font-body, "Inter Tight", ui-sans-serif, system-ui);
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: rgba(15, 23, 42, 0.62);
+  line-height: 1.55;
+  max-width: 62ch;
+}

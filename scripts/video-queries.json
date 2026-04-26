@@ -1,0 +1,97 @@
+{
+  "_doc": "Envato Market discovery queries, one per asset slot on the site. Run `npm run videos:search` (or `-- <variant>`) to get ranked shortlists. Each entry has: query (string), site (defaults to videohive.net), minDuration (videos only), and optional hints. The filename that a downloaded Elements asset must be saved as matches the variant key.",
+
+  "_videos": "── VIDEO BACKGROUNDS ────────────────────────",
+
+  "data-center": {
+    "query": "server room AI data center loop",
+    "site": "videohive.net",
+    "minDuration": 8
+  },
+  "modular-infra": {
+    "query": "modular data center aerial drone",
+    "site": "videohive.net",
+    "minDuration": 6
+  },
+  "data-flow": {
+    "query": "abstract data flow cyan particles loop",
+    "site": "videohive.net",
+    "minDuration": 8
+  },
+  "fusion": {
+    "query": "energy core plasma loop dark blue",
+    "site": "videohive.net",
+    "minDuration": 6
+  },
+  "solar-grid": {
+    "query": "solar panel field aerial sunrise",
+    "site": "videohive.net",
+    "minDuration": 8
+  },
+  "blueprint-cosmos": {
+    "query": "abstract blueprint lines network dark blue",
+    "site": "videohive.net",
+    "minDuration": 6
+  },
+  "traction-factory": {
+    "query": "high-tech factory robotic assembly line modern manufacturing",
+    "site": "videohive.net",
+    "minDuration": 6
+  },
+
+  "_photos": "── PREMIUM STILL PHOTOGRAPHY (PhotoDune) ──",
+
+  "photo-factory": {
+    "query": "factory interior industrial production",
+    "site": "photodune.net"
+  },
+  "photo-datacenter": {
+    "query": "server room data center",
+    "site": "photodune.net"
+  },
+  "photo-solar-farm": {
+    "query": "solar panel farm aerial drone sunrise",
+    "site": "photodune.net"
+  },
+  "photo-containers": {
+    "query": "shipping container yard aerial industrial",
+    "site": "photodune.net"
+  },
+  "photo-engineer": {
+    "query": "engineer data center server technician professional",
+    "site": "photodune.net"
+  },
+
+  "_graphics": "── SUPPORTING GRAPHICS / ICONS (GraphicRiver) ──",
+
+  "graphic-tech-icons": {
+    "query": "tech line icons vector",
+    "site": "graphicriver.net"
+  },
+  "graphic-data-viz": {
+    "query": "dashboard infographic",
+    "site": "graphicriver.net"
+  },
+  "graphic-gradient-bg": {
+    "query": "dark gradient background",
+    "site": "graphicriver.net"
+  },
+
+  "_audio": "── OPTIONAL AMBIENT AUDIO (AudioJungle) ──",
+
+  "audio-ambient": {
+    "query": "ambient tech corporate investor inspiring",
+    "site": "audiojungle.net"
+  },
+
+  "_3d": "── OPTIONAL 3D MODELS (3DOcean) ──",
+
+  "3d-server-rack": {
+    "query": "server rack",
+    "site": "3docean.net"
+  },
+  "3d-shipping-container": {
+    "query": "shipping container 3d model modular",
+    "site": "3docean.net"
+  }
+}

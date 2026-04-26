@@ -1,0 +1,688 @@
+/* ==================================================================
+   FUSION · The 85× Climax — section CSS
+   ==================================================================
+   Horizontal equation layout:
+     [ Factor A ]  ×  [ Factor B ]  =  [ RESULT ]
+   Result cell is ~1.6× the width of either factor cell and carries
+   the only radial gradient-halo on the entire page. Numbers in the
+   result are ~1.8× the scale of factor numbers so the 85× is
+   unambiguously the hero.
+   ================================================================== */
+
+.section {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(15, 23, 42, 0.04) 0,
+      transparent 1px
+    ),
+    linear-gradient(180deg, var(--paper) 0%, var(--canvas) 65%, var(--paper) 100%);
+  isolation: isolate;
+}
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+/* ============== HEADER ============== */
+.header {
+  max-width: 980px;
+  margin-bottom: clamp(3rem, 5vw, 4.5rem);
+}
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.eyebrowIdx {
+  font-weight: 600;
+  color: var(--brand);
+  letter-spacing: 0.1em;
+}
+.eyebrowSep { margin: 0 0.5em; color: var(--ink-whisper); }
+
+.headline {
+  margin: 0.85rem 0 1.2rem;
+  font-size: clamp(2.5rem, 5vw, 4.3rem);
+  font-weight: 800;
+  font-family: var(--font-display);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  color: var(--ink-strong);
+  max-width: 22ch;
+}
+.lede {
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 66ch;
+}
+
+/* ============== EQUATION LAYOUT ============== */
+.equation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.6fr);
+  gap: clamp(0.8rem, 1.6vw, 1.5rem);
+  align-items: stretch;
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+/* Collapse to vertical stack on narrower screens. Operators rotate
+   90° so the math still parses vertically. */
+@media (max-width: 1100px) {
+  .equation {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  .operator {
+    justify-self: center;
+    min-width: 40px;
+  }
+  .operatorSvg { transform: rotate(90deg); }
+}
+
+/* ============== FACTOR CELL ============== */
+.factor {
+  position: relative;
+  padding: clamp(1.3rem, 2.4vw, 1.8rem) clamp(1.3rem, 2.4vw, 1.8rem) 1.6rem;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 14px 44px -18px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(34, 211, 238, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  /* Small gradient tick in the top-left — marks this as a factor in
+     the equation, consistent with the ProblemDiagnosis cards. */
+}
+.factor::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 38px;
+  height: 3px;
+  background: var(--brand-gradient);
+  border-radius: 0 0 3px 0;
+}
+
+.factorHead {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  margin-top: 0.2rem;
+}
+.factorIdx {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+.factorLabel {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.factorSub {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+  margin-bottom: 0.5rem;
+}
+
+.factorNumberWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.1rem;
+  font-family: var(--font-display);
+  color: var(--ink-strong);
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+.factorNumber {
+  font-size: clamp(3.4rem, 5.2vw, 4.6rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+.factorUnit {
+  font-size: clamp(2.4rem, 3.8vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--brand);
+}
+
+.factorTagline {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 0.9rem;
+}
+
+/* 10-segment progress bar — filled proportionally by scaleX. */
+.factorBar {
+  position: relative;
+  height: 8px;
+  background: var(--edge-faint);
+  border: 1px solid var(--edge-soft);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.95rem;
+}
+.factorBarFill {
+  position: absolute;
+  inset: 0;
+  background: var(--brand-gradient);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.45);
+}
+.factorBarTicks {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  pointer-events: none;
+}
+.factorBarTick {
+  border-right: 1px solid rgba(255, 255, 255, 0.45);
+}
+.factorBarTick:last-child { border-right: none; }
+
+.factorLines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: auto;
+}
+.factorLine {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--ink-dim);
+  font-feature-settings: "tnum" 1;
+}
+
+/* ============== OPERATOR ============== */
+.operator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-faint);
+  min-width: 44px;
+}
+.operatorSvg {
+  width: 42px;
+  height: 42px;
+  display: block;
+}
+
+/* ============== RESULT CELL ============== */
+.result {
+  position: relative;
+  padding: clamp(1.6rem, 3vw, 2.2rem) clamp(1.6rem, 3vw, 2.4rem) 1.8rem;
+  /* Slightly tinted glass — still light, but with a faint brand
+     wash that separates the RESULT from the factor cells. */
+  background:
+    linear-gradient(
+      140deg,
+      rgba(37, 99, 235, 0.06) 0%,
+      rgba(34, 211, 238, 0.05) 55%,
+      rgba(255, 255, 255, 0.85) 100%
+    ),
+    var(--glass-bg-strong);
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  border-radius: 16px;
+  backdrop-filter: blur(24px) saturate(1.25);
+  -webkit-backdrop-filter: blur(24px) saturate(1.25);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 24px 70px -20px rgba(37, 99, 235, 0.24),
+    0 0 0 1px rgba(34, 211, 238, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.result::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: var(--brand-gradient);
+  border-radius: 0 0 4px 0;
+  z-index: 2;
+}
+
+/* Soft radial halo behind the 85× — the only place on the page
+   where --brand-gradient-glow is used as atmosphere, not fill.
+ *
+ * Centering uses the standalone `translate` property (CSS Transforms
+ * Level 2) rather than the legacy combined `transform: translate(...)`.
+ * Why: framer-motion animates `scale` via the `transform` property on
+ * this element, and legacy `transform: translate(-50%, -50%)` would be
+ * clobbered by framer's inline `transform: scale(...)`. Because the
+ * individual `translate` property composes independently with the
+ * `transform` property at the browser level, the halo stays centered
+ * while scale pulses. Browser support: all modern evergreens (Chrome
+ * 104+, Safari 14.1+, Firefox 72+) — fine for an investor-deck
+ * deployment, no SSR concerns. */
+.resultHalo {
+  position: absolute;
+  top: 36%;
+  left: 50%;
+  width: 110%;
+  height: 110%;
+  translate: -50% -50%;
+  background: var(--brand-gradient-glow);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(6px);
+}
+
+.resultHead,
+.resultSub,
+.resultNumberWrap,
+.resultTagline,
+.resultDecompose,
+.resultFootnote {
+  position: relative;
+  z-index: 1;
+}
+
+.resultHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+.resultIdx {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.resultStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--status-deep);
+}
+.resultStatusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status);
+  box-shadow: 0 0 8px var(--status-glow);
+  animation: fusionPulse 1.8s ease-in-out infinite;
+}
+@keyframes fusionPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.8); }
+}
+
+.resultSub {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.3vw, 1.2rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink-strong);
+  margin-bottom: 0.6rem;
+}
+
+.resultNumberWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.15rem;
+  font-family: var(--font-display);
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+  line-height: 0.95;
+  margin-bottom: 0.6rem;
+}
+/* The hero number — sized to be the largest number on the page. */
+.resultNumber {
+  font-size: clamp(6rem, 12vw, 10rem);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 40%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.resultUnit {
+  font-size: clamp(3.8rem, 7vw, 6rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.resultTagline {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-strong);
+  margin-bottom: 1.2rem;
+}
+
+/* Decomposition strip: 10× × 8.5× = 85× */
+.resultDecompose {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.resultDecomposeCell {
+  font-size: clamp(1.15rem, 1.5vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--ink-strong);
+}
+.resultDecomposeOp {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--ink-faint);
+  margin: 0 0.2rem;
+}
+.resultDecomposeResult {
+  margin-left: auto;
+  font-size: clamp(1.35rem, 1.8vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.resultFootnote {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+/* ============== TRANSLATION STRIP ============== */
+.translation {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  padding: clamp(1.2rem, 2vw, 1.6rem) clamp(1.4rem, 2.4vw, 1.8rem) 1.4rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 10px 32px -14px rgba(15, 23, 42, 0.08);
+}
+.translationHead {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.1rem;
+  border-bottom: 1px solid var(--edge-faint);
+  flex-wrap: wrap;
+}
+.translationTag {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+.translationCaption {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--ink-dim);
+  max-width: 70ch;
+}
+
+.translationRows {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.8rem, 1.4vw, 1.4rem);
+}
+@media (max-width: 1040px) {
+  .translationRows { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 540px) {
+  .translationRows { grid-template-columns: 1fr; }
+}
+
+.translationRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--panel-secondary);
+  border: 1px solid var(--edge-faint);
+  border-radius: 8px;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+.translationRow:hover {
+  border-color: rgba(34, 211, 238, 0.32);
+  background: var(--panel);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.1);
+}
+.translationMetric {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-feature-settings: "tnum" 1;
+  line-height: 1;
+  padding-top: 0.1rem;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.translationBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.translationLabel {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+}
+.translationNote {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  color: var(--ink-faint);
+}
+
+/* ==================================================================
+   ECONOMICS LEDGER · Slide-7 like-for-like comparison
+   Reads as an accounting statement: one header row + four data rows.
+   Value columns lean numeric (tabular figures) and the "Δ" column
+   is tinted green to register the win without shouting.
+   ================================================================== */
+.economics {
+  margin-top: clamp(2rem, 3.5vw, 3rem);
+  padding: clamp(1.4rem, 2.4vw, 2rem);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--edge);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+
+.economicsHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--edge-faint);
+}
+.economicsTag {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brand-deep);
+}
+.economicsCaption {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  max-width: 48ch;
+}
+
+.economicsTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.economicsHeader {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 0.9fr;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--edge);
+}
+
+.economicsRow {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 0.9fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 0.9rem 0.75rem;
+  border-bottom: 1px dashed var(--edge-faint);
+  position: relative;
+}
+.economicsRow:last-child { border-bottom: none; }
+
+.economicsMetric {
+  font-family: var(--font-body);
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: var(--ink-strong);
+}
+.economicsCell {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.6vw, 1.4rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+  line-height: 1;
+}
+.economicsTrad {
+  color: var(--ink-faint);
+  text-decoration: line-through;
+  text-decoration-color: rgba(15, 23, 42, 0.22);
+  text-decoration-thickness: 1.5px;
+}
+.economicsPodos {
+  background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 45%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.economicsDelta {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink-dim);
+  text-align: right;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+.economicsDeltaWin {
+  color: #059669;
+}
+.economicsNote {
+  grid-column: 1 / -1;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--ink-dim);
+  padding-top: 0.25rem;
+}
+
+@media (max-width: 760px) {
+  .economicsHeader,
+  .economicsRow {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 0.5rem;
+  }
+  .economicsHeader span:nth-child(4),
+  .economicsHeader span:nth-child(1) {
+    grid-column: span 1;
+  }
+  .economicsNote {
+    grid-column: 1 / -1;
+  }
+}

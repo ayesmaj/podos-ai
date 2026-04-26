@@ -1,0 +1,300 @@
+/* BREAKTHROUGH — "We rewrote the physics."
+   The narrative pivot. Crisis → solution. Cold grid → open void again.
+   Serif-italic manifesto quote at center. Two brand names converge
+   on a single glyph: one product, two halves. */
+
+.section {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  padding: clamp(6rem, 12vh, 10rem) clamp(1.25rem, 4vw, 3.5rem);
+  background:
+    radial-gradient(ellipse 1000px 700px at 50% 50%, rgba(47, 210, 127, 0.045), transparent 60%),
+    radial-gradient(ellipse 800px 600px at 50% 0%, rgba(233, 186, 111, 0.035), transparent 55%),
+    linear-gradient(180deg, #070912 0%, var(--ink) 50%, #050709 100%);
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Slow-drifting distant motes — subtle */
+.motes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.mote {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--viridian-bright);
+  box-shadow: 0 0 10px var(--viridian-glow);
+  opacity: 0;
+  animation: moteDriftBT linear infinite;
+}
+.moteGold {
+  background: var(--gold-bright);
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+@keyframes moteDriftBT {
+  0% { transform: translate(0, 0); opacity: 0; }
+  14% { opacity: 0.7; }
+  75% { opacity: 0.35; }
+  100% { transform: translate(-180px, -140px); opacity: 0; }
+}
+
+/* Animated scan beam on enter — signature cinematic move */
+.beam {
+  position: absolute;
+  top: 0;
+  left: -30%;
+  width: 60%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(47, 210, 127, 0.10) 48%,
+    rgba(233, 186, 111, 0.08) 52%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  will-change: transform, opacity;
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  z-index: 2;
+  mix-blend-mode: overlay;
+  background-image:
+    radial-gradient(circle at 20% 35%, rgba(255, 255, 255, 0.04) 0, transparent 1.2px),
+    radial-gradient(circle at 75% 65%, rgba(255, 255, 255, 0.03) 0, transparent 1px);
+  background-size: 6px 6px, 9px 9px;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(
+    ellipse 85% 85% at 50% 50%,
+    transparent 0%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+}
+
+/* --- Content --- */
+.content {
+  position: relative;
+  z-index: 3;
+  max-width: 1080px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(1.8rem, 3.2vw, 2.8rem);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bone-faint);
+}
+
+.brandDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--viridian);
+  box-shadow: 0 0 0 3px var(--viridian-trace), 0 0 14px var(--viridian-glow);
+  animation: pulse-soft 2.6s ease-in-out infinite;
+}
+
+.sep { opacity: 0.35; }
+
+/* --- Manifesto quote --- */
+.quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.8rem, 7.4vw, 7rem);
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  color: var(--bone);
+  max-width: 20ch;
+  margin: 0;
+}
+.quoteLine {
+  display: block;
+  overflow: hidden;
+  padding-top: 0.08em;
+  padding-bottom: 0.02em;
+}
+.quoteInner {
+  display: inline-block;
+}
+.quoteAccent {
+  color: var(--viridian-bright);
+}
+.quoteGold {
+  color: var(--gold-bright);
+}
+
+/* --- Divider (draws outward from center) --- */
+.divider {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  height: 1px;
+  margin: 0 auto;
+  background: transparent;
+  overflow: visible;
+  transform-origin: 50% 50%;
+}
+.dividerInner {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(233, 186, 111, 0.18) 20%,
+    rgba(47, 210, 127, 0.35) 50%,
+    rgba(233, 186, 111, 0.18) 80%,
+    transparent 100%
+  );
+  filter: blur(0.5px);
+  box-shadow: 0 0 22px rgba(47, 210, 127, 0.2);
+  transform-origin: 50% 50%;
+}
+
+/* --- Reveal row: PODOS | glyph | SYNTROPIC --- */
+.reveal {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: clamp(1.5rem, 3.5vw, 3rem);
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.brandBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.brandBlockLeft { align-items: flex-end; text-align: right; }
+.brandBlockRight { align-items: flex-start; text-align: left; }
+
+.brandTag {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bone-ghost);
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.8rem, 3.6vw, 3rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  font-feature-settings: "ss01" 1, "kern" 1;
+}
+.brandNameGold {
+  color: var(--gold-bright);
+}
+.brandNameViridian {
+  color: var(--viridian-bright);
+}
+
+.brandRole {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  color: var(--bone-dim);
+  letter-spacing: -0.008em;
+  margin-top: 0.25rem;
+}
+
+/* --- Center glyph: gold+viridian diamond --- */
+.glyph {
+  width: clamp(52px, 5.8vw, 76px);
+  height: clamp(52px, 5.8vw, 76px);
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.glyph::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(233, 186, 111, 0.28) 0%, transparent 55%),
+    radial-gradient(circle at 50% 70%, rgba(47, 210, 127, 0.32) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: -1;
+}
+.glyphSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Caption --- */
+.caption {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 1.3vw, 1.25rem);
+  line-height: 1.6;
+  letter-spacing: -0.004em;
+  color: var(--bone-dim);
+  max-width: 58ch;
+  font-weight: 400;
+  margin: 0 auto;
+}
+.captionEm {
+  color: var(--bone);
+  font-weight: 500;
+}
+.captionGold {
+  color: var(--gold-bright);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.06em;
+}
+.captionViridian {
+  color: var(--viridian-bright);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.06em;
+}
+
+/* --- Responsive --- */
+@media (max-width: 780px) {
+  .quote { font-size: clamp(2rem, 10vw, 3.4rem); max-width: 16ch; }
+  .reveal { grid-template-columns: 1fr; gap: 1.6rem; justify-items: center; text-align: center; }
+  .brandBlockLeft, .brandBlockRight { align-items: center; text-align: center; }
+  .brandName { font-size: clamp(1.6rem, 9vw, 2.4rem); }
+  .divider { max-width: 320px; }
+}

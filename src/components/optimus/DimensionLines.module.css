@@ -1,0 +1,41 @@
+/* DimensionLines · engineering-callout overlays on the pod canvas. */
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  /* Sit ABOVE the pod image but BELOW the pins so a hovered pin
+     doesn't get covered by a dimension label. */
+  z-index: 2;
+}
+
+/* Dimension lines render as a clean solid stroke after the initial
+   draw-in completes. The previous dimensionShimmer animation +
+   framer-motion's pathLength implementation combined to render the
+   left-side "2 591 mm" line as segmented blue rectangles, which
+   read as visual noise. Now: draw in once on viewport entry, hold
+   solid. No dashed flow. */
+
+/* Dimension labels — same mono spec-sheet treatment as the engineering
+   callouts. Bumped tracking from 0.12em → 0.20em and color from
+   slate-400 → ink-700 for better optical weight against the bright
+   paper background. Sizes are in viewBox units (scaled by canvas). */
+.label {
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: 1.7px;
+  font-weight: 500;
+  letter-spacing: 0.20em;
+  fill: rgba(15, 23, 42, 0.78);
+  text-transform: uppercase;
+}
+
+.bannerLabel {
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: 1.8px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  fill: rgba(30, 64, 175, 0.95);
+  text-transform: uppercase;
+}

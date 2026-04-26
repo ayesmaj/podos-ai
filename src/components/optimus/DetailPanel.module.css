@@ -1,0 +1,237 @@
+/* DetailPanel · slide-in spec drawer.
+   ----------------------------------------------------------------
+   Desktop: 38% width, slides in from right.
+   Mobile:  100% width, slides up from bottom.
+   The component itself uses framer-motion for the desktop slide;
+   the mobile transform is overridden by CSS via @media so we don't
+   need to detect viewport in JS.
+*/
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 38%;
+  min-width: 420px;
+  max-width: 560px;
+  height: 100dvh;
+  z-index: 60;                       /* above sticky nav (z:50) */
+  display: flex;
+  flex-direction: column;
+  background: rgba(8, 12, 28, 0.96);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border-left: 1px solid rgba(27, 63, 217, 0.4);
+  box-shadow: -24px 0 64px rgba(8, 12, 28, 0.4);
+  color: rgba(226, 232, 240, 0.95);
+  font-family: var(--font-body);
+}
+
+.topBar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 20px 0;
+}
+
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.7);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease;
+}
+.closeBtn:hover {
+  background: rgba(226, 232, 240, 0.08);
+  color: rgba(226, 232, 240, 1);
+}
+.closeBtn:focus-visible {
+  outline: 2px solid var(--cyan, #22D3EE);
+  outline-offset: 2px;
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 48px 32px;
+}
+@media (max-width: 700px) {
+  .body { padding: 8px 24px 24px; }
+}
+
+/* Category badge */
+.badge {
+  --cat-color: #1B3FD9;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--cat-color) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cat-color) 40%, transparent);
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--cat-color) 60%, #ffffff);
+}
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--cat-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cat-color) 30%, transparent);
+}
+
+.title {
+  margin: 18px 0 6px;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.subtitle {
+  margin: 0 0 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+/* Hero metric card — large number + label + delta. */
+.metric {
+  background:
+    linear-gradient(135deg,
+      rgba(34, 211, 238, 0.12) 0%,
+      rgba(27, 63, 217, 0.08) 100%);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+.metricLabel {
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.95);
+  margin-bottom: 4px;
+}
+.metricValue {
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.1;
+  font-feature-settings: "tnum" 1;
+}
+.metricDelta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(34, 211, 238, 0.85);
+  font-weight: 500;
+}
+
+/* Specs table — DL with row layout. */
+.specs {
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+.specRow {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+.specLabel {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(148, 163, 184, 0.95);
+  text-transform: uppercase;
+  margin: 0;
+}
+.specValue {
+  margin: 0;
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
+  text-align: right;
+}
+
+.description {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 400;
+  color: rgba(203, 213, 225, 0.92);
+  line-height: 1.65;
+}
+
+/* Footer prev/next nav */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(8, 12, 28, 0.6);
+}
+
+.navBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: rgba(226, 232, 240, 0.85);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
+  flex: 1;
+  justify-content: center;
+}
+.navBtn:hover {
+  border-color: rgba(34, 211, 238, 0.6);
+  color: #ffffff;
+  background: rgba(34, 211, 238, 0.08);
+}
+.navBtn:focus-visible {
+  outline: 2px solid var(--cyan, #22D3EE);
+  outline-offset: 2px;
+}
+
+/* Mobile: slide up from bottom, full-width drawer. */
+@media (max-width: 700px) {
+  .panel {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 88dvh;
+    top: auto;
+    bottom: 0;
+    right: 0;
+    border-left: 0;
+    border-top: 1px solid rgba(27, 63, 217, 0.4);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -24px 64px rgba(8, 12, 28, 0.4);
+  }
+  .title { font-size: 24px; }
+}

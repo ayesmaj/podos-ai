@@ -1,0 +1,39 @@
+/* PodCanvas · stacked-layer container for the pod spec view.
+   ----------------------------------------------------------------
+   Aspect-ratio lock via padding-bottom so the % coordinate space
+   the callouts use is invariant under viewport changes. The pod
+   render is 1:0.46 (~16:7.4); we use a slightly TALLER box because
+   the port callouts sit below the pod and need their own runway.
+*/
+
+.canvas {
+  position: relative;
+  width: 100%;
+  /* Aspect math:
+       image native 1822×863 → aspect 2.111:1
+       imageWrap should match exactly (so object-fit: contain doesn't
+       letterbox). With top:8% bottom:14% (sum 22%), imageWrap height
+       is 78% of canvas height. Required canvas paddingBottom:
+       1 / (image_aspect × 0.78) = 1 / (2.111 × 0.78) = 60.7%
+     Tune both this and the top/bottom margins below if the render
+     is replaced with a different aspect. */
+  padding-bottom: 60.7%;
+  margin: 0 auto;
+  max-width: 1280px;
+}
+
+.imageWrap {
+  position: absolute;
+  inset: 0;
+  /* See the aspect math comment on .canvas above. Top 8% leaves room
+     for the corner-callout labels and the "6 096 mm" dimension line.
+     Bottom 14% reserves the port-callout strip (PWR IN, COOL IN,
+     etc.) which sits under the pod. */
+  top: 8%;
+  bottom: 14%;
+}
+
+.image {
+  object-fit: contain;
+  object-position: center;
+}

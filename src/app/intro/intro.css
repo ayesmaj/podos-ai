@@ -1,0 +1,282 @@
+/* =====================================================================
+ * PodosScrollHeroIntro · cinematic intro overlay (autoplay version)
+ * =====================================================================
+ * 2026-04-25 rewrite: replaced the 400vh sticky-scroll runway with a
+ * `position: fixed` overlay. The intro now:
+ *   - Covers the entire viewport via inset:0 + z-index 9999
+ *   - Locks document scroll (page underneath stays pinned, no scroll
+ *     of any kind possible while intro is active — set in TSX)
+ *   - Plays the video naturally start→finish (no scroll scrubbing,
+ *     no flickering from frame seeks)
+ *   - Fades out smoothly when the video ends or the user skips
+ *
+ * The legacy .intro-wrap/.intro-stage rules below are kept for the
+ * standalone `/intro` route which still uses the scroll-pinned model.
+ * ===================================================================== */
+
+/* === New: fixed-overlay intro (used on `/`) ===================== */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: #000;
+  overflow: hidden;
+  /* Smooth fade-out when [data-fading] flips on. */
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.intro-overlay[data-fading] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Skip button — top-right, glass pill. Appears 800ms after mount. */
+.intro-skip {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 10010;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-geist, "Geist"), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  opacity: 0;
+  animation: intro-skip-fade 400ms 0ms forwards ease-out;
+  transition: background 200ms ease, transform 200ms ease;
+}
+@keyframes intro-skip-fade {
+  to { opacity: 1; }
+}
+.intro-skip:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+/* Scroll-to-advance hint — sits just above the progress dots. Fades
+   in after 1.2s, gently pulses to draw attention to the interaction
+   model on first viewing. */
+.intro-hint {
+  position: absolute;
+  bottom: calc(clamp(1.5rem, 3vw, 2.5rem) + 28px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-geist-mono, "Geist Mono"), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  opacity: 0;
+  z-index: 10005;
+  animation:
+    intro-hint-in 600ms 1200ms forwards ease-out,
+    intro-hint-pulse 2.4s 1800ms infinite ease-in-out;
+}
+@keyframes intro-hint-in {
+  to { opacity: 1; }
+}
+@keyframes intro-hint-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+/* === Legacy: 400vh scroll-pinned wrapper (used by `/intro` route) === */
+.intro-wrap {
+  position: relative;
+  height: 400vh;
+  width: 100%;
+  background: #000;
+}
+
+.intro-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* === Video layer (z:0) — full-bleed, scrubbed via JS === */
+.intro-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 0;
+  /* Keeping a black background prevents a brief flash of white on
+     the very first paint while the first frame is decoding. */
+  background: #000;
+}
+
+/* === Dim overlay (z:1) — radial vignette + bottom darkening for
+   text contrast. The opacity is animated in TSX. === */
+.intro-dim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(
+      ellipse 90% 70% at 50% 50%,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.35) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.0) 0%,
+      rgba(0, 0, 0, 0.2) 60%,
+      rgba(0, 0, 0, 0.5) 100%
+    );
+}
+
+/* === Foreground (z:2) — text steps + logo === */
+.intro-fg {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 clamp(1rem, 5vw, 4rem);
+  text-align: center;
+  /* Each step is positioned absolutely on top of every other so we
+     can crossfade them with opacity + blur without layout jumps. */
+}
+
+/* === Step text card === */
+.intro-step {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 clamp(1rem, 5vw, 4rem);
+  pointer-events: none;
+  /* Will-change hints — the transforms are GPU-cheap, but flagging
+     them lets the compositor allocate a layer up-front. */
+  will-change: opacity, filter, transform;
+}
+
+.intro-headline {
+  font-family: var(--font-geist, "Geist"), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(2rem, 5.5vw, 5rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  color: #ffffff;
+  margin: 0;
+  max-width: 18ch;
+  /* Subtle text shadow lifts the headline off the video without
+     looking like a heavy-handed black-overlay treatment. */
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5);
+}
+
+.intro-subline {
+  font-family: var(--font-inter-tight, "Inter Tight"), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.95rem, 1.4vw, 1.2rem);
+  font-weight: 400;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 1.25rem 0 0;
+  max-width: 56ch;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+}
+
+/* === Logo reveal === */
+.intro-logo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  pointer-events: none;
+  will-change: opacity, filter, transform;
+}
+
+.intro-logoImg {
+  width: clamp(220px, 28vw, 360px);
+  height: auto;
+  filter: drop-shadow(0 12px 40px rgba(0, 0, 0, 0.45));
+}
+
+.intro-tagline {
+  font-family: var(--font-geist, "Geist"), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+}
+
+.intro-poweredBy {
+  font-family: var(--font-geist-mono, "Geist Mono"), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+/* === Progress dots === */
+.intro-dots {
+  position: absolute;
+  bottom: clamp(1.5rem, 3vw, 2.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+}
+
+.intro-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.3);
+  transition: width 350ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 350ms ease;
+}
+
+.intro-dotActive {
+  width: 22px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+/* === Mobile === */
+@media (max-width: 768px) {
+  .intro-wrap { height: 350vh; }
+  .intro-headline { max-width: 14ch; }
+}
+
+/* === Reduced motion ===
+   The TSX collapses blur+y to zero under prefers-reduced-motion, but
+   we ALSO skip the dot scaling animation so users don't see any motion
+   chrome they didn't ask for. */
+@media (prefers-reduced-motion: reduce) {
+  .intro-dot { transition: none; }
+}

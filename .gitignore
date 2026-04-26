@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+---
+
+# Dev artifacts (added 2026-04-25)
+.claude-debug/
+.tmp-screens/
+WhatsApp Image*.png
+WhatsApp Image*.jpeg
