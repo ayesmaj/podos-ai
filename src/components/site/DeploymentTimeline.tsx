@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./DeploymentTimeline.module.css";
 
 /**
@@ -73,10 +73,30 @@ export default function DeploymentTimeline() {
   const progressPctRef = useRef<HTMLDivElement>(null);
   const stepperFillRef = useRef<HTMLDivElement>(null);
 
+  // Mobile detection: on phones we use a smaller (4.6 MB vs 45 MB) re-encode
+  // and autoplay-loop it instead of scrubbing currentTime by scroll. Reason:
+  // iOS Safari defers `preload="auto"` until user interaction, and setting
+  // `currentTime = X` only succeeds when X is buffered — with a 45 MB scrub
+  // file the buffered range is small and the video stays blank.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   useEffect(() => {
     const section = sectionRef.current;
     const video = videoRef.current;
     if (!section || !video) return;
+    // On mobile we don't drive the video by scroll — just let the lighter
+    // /factory-mobile.mp4 autoplay+loop. Step titles + stepper still update
+    // via a separate effect below; everything else (progress bar, percent)
+    // is desktop-only chrome.
+    if (isMobile) return;
 
     let stopped = false;
     let lenisHooked: { off: (e: string, cb: () => void) => void } | null = null;
@@ -198,7 +218,77 @@ export default function DeploymentTimeline() {
       lenisHooked?.off("scroll", onScroll);
       visObserver.disconnect();
     };
-  }, []);
+  }, [isMobile]);
+
+  // Mobile-only: drive step title crossfade + stepper highlight by scroll
+  // progress through the section, WITHOUT touching video.currentTime.
+  // The mobile video runs as autoplay+loop independently. Same math as the
+  // desktop effect — just no video scrubbing or progress chrome.
+  useEffect(() => {
+    if (!isMobile) return;
+    const section = sectionRef.current;
+    if (!section) return;
+
+    let lenisHooked: { off: (e: string, cb: () => void) => void } | null = null;
+    const stepCount = STEPS.length;
+    const halfWidth = 1 / (stepCount * 1.4);
+
+    const onScroll = () => {
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const sectionScrollDist = Math.max(1, rect.height - vh);
+      const scrolledIntoSection = Math.max(0, -rect.top);
+      const progress = Math.max(0, Math.min(1, scrolledIntoSection / sectionScrollDist));
+
+      let activeIdx = 0;
+      let bestDist = Infinity;
+      for (let i = 0; i < stepCount; i++) {
+        const center = (i + 0.5) / stepCount;
+        const d = Math.abs(progress - center);
+        if (d < bestDist) {
+          bestDist = d;
+          activeIdx = i;
+        }
+      }
+
+      titleRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const center = (i + 0.5) / stepCount;
+        const dist = Math.abs(progress - center);
+        const t = Math.max(0, 1 - dist / halfWidth);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.style.opacity = String(eased);
+        el.style.setProperty("--title-y", `${(1 - eased) * 22}px`);
+        el.style.filter = `blur(${(1 - eased) * 6}px)`;
+      });
+
+      stepperDotRefs.current.forEach((el, i) => {
+        if (!el) return;
+        if (i === activeIdx) el.classList.add(styles.dotActive);
+        else el.classList.remove(styles.dotActive);
+        if (i < activeIdx) el.classList.add(styles.dotPast);
+        else el.classList.remove(styles.dotPast);
+      });
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    const tryHookLenis = () => {
+      const lenis = (window as unknown as { __lenis?: { on: (e: string, cb: () => void) => void; off: (e: string, cb: () => void) => void } }).__lenis;
+      if (lenis && !lenisHooked) {
+        lenis.on("scroll", onScroll);
+        lenisHooked = lenis;
+      }
+    };
+    tryHookLenis();
+    const lenisPoll = window.setInterval(tryHookLenis, 100);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.clearInterval(lenisPoll);
+      lenisHooked?.off("scroll", onScroll);
+    };
+  }, [isMobile]);
 
   return (
     <section
@@ -209,12 +299,23 @@ export default function DeploymentTimeline() {
     >
       <div className={styles.sticky}>
         <video
+          /* The desktop "scrub by scroll" video is 45 MB at 1080p — iOS
+             Safari can't reliably play it (deferred preload + tiny buffered
+             range vs. currentTime jumps). On mobile we serve a 4.6 MB 720p
+             re-encode and just autoplay-loop it; scroll still drives the
+             step titles, but it doesn't drive the video.
+             The poster paints instantly so the section never flashes blank
+             while metadata loads. */
           ref={videoRef}
           className={styles.video}
-          src="/factory-scrub.mp4"
+          key={isMobile ? "mobile" : "desktop"}
+          src={isMobile ? "/factory-mobile.mp4" : "/factory-scrub.mp4"}
+          poster="/factory-poster.jpg"
           muted
           playsInline
-          preload="auto"
+          preload={isMobile ? "metadata" : "auto"}
+          autoPlay={isMobile}
+          loop={isMobile}
         />
         <div className={styles.vignette} aria-hidden />
 
