@@ -65,36 +65,18 @@ main, section {
   }
 }
 
-/* === 4. NavHeader — collapse at narrow widths ==================== */
-/* At ≤640px, the 7-item bubble nav can't fit. We hide low-priority
-   items and keep Home / Solution / Invest visible — the three most
-   useful destinations for an investor scanning on phone.
-   Selector matches CSS Module hashed classes via attribute prefix
-   so it survives the hash-rename. */
+/* === 4. NavHeader — mobile hamburger menu ======================== */
+/* At ≤640px the inline tab list is hidden by nav-header.module.css and
+   replaced by a hamburger button + full-screen overlay menu (rendered
+   inside the same NavHeader component). Mobile.css only needs to keep
+   the bubble compact: shrink the logo so the pill doesn't bulk out
+   when it shows just `logo + hamburger`. */
 @media (max-width: 640px) {
-  /* Tabs: hide all li after the first 3 (matches HOME/PROBLEM/SOLUTION
-     in current SITE_NAV order — keeps the most-clicked destinations) */
-  ul[class*="nav-header-module"][class*="tabs"] li:nth-child(n+4) {
-    display: none;
-  }
-  /* Tighten remaining tabs */
-  ul[class*="nav-header-module"][class*="tabs"] a {
-    padding: 0.32rem 0.55rem;
-    font-size: 0.68rem;
-    letter-spacing: 0.05em;
-  }
-  /* Logo slot: shrink the brand image so the bubble doesn't bulk out */
   a[class*="nav-header-module"][class*="logoSlot"] {
     padding: 0.25rem 0.4rem 0.25rem 0.6rem;
   }
   a[class*="nav-header-module"][class*="logoSlot"] :where(img, svg) {
     height: 1.25rem;
-  }
-}
-@media (max-width: 380px) {
-  /* iPhone SE / small Android: keep only first 2 tabs */
-  ul[class*="nav-header-module"][class*="tabs"] li:nth-child(n+3) {
-    display: none;
   }
 }
 
@@ -139,6 +121,28 @@ main, section {
   /* Section title scales down */
   h3[class*="OptimusInteractive-module"][class*="title"] {
     font-size: clamp(1.4rem, 5vw, 2rem);
+  }
+  /* The fixed nav pill (top:16px, ~50px tall = ~70px clearance needed)
+     was overlapping the section header. Add scroll-margin-top so anchor
+     jumps land the heading below the nav, and push the header itself
+     down a notch so it doesn't open immediately under the bubble. */
+  header[class*="OptimusInteractive-module"][class*="header"] {
+    padding-top: 80px;
+  }
+}
+
+/* === 6b. Section anchor offsets — fixed-nav clearance =============
+ * The nav pill is position:fixed at top:16px and is ~50px tall on mobile,
+ * so anchor links (#podos, #deployment, #use-cases, #design, #access)
+ * landing at viewport top would put their headings BEHIND the nav.
+ * scroll-margin-top reserves clearance above each anchor so the
+ * browser's anchor-scroll lands the heading below the nav pill. */
+:where(#podos, #deployment, #use-cases, #design, #access, #market) {
+  scroll-margin-top: 84px;
+}
+@media (min-width: 769px) {
+  :where(#podos, #deployment, #use-cases, #design, #access, #market) {
+    scroll-margin-top: 96px;
   }
 }
 @media (max-width: 480px) {

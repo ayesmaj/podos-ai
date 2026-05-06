@@ -456,6 +456,25 @@
   }
 }
 
+/* On narrow phones the 6-column grid (~60px per cell) is too tight to
+   fit phase labels like "CONFIGURATION" or "COMMISSIONING" — they wrap
+   then overflow and visually concatenate with adjacent labels.
+   Hide the phase text below the dot and keep ONLY the number — the
+   active phase is already displayed prominently as the floating step
+   title above. Numbers + active dot communicate "step N of 6" cleanly. */
+@media (max-width: 560px) {
+  .stepperLabelPhase {
+    display: none;
+  }
+  .stepperLabelN {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+  }
+  .stepperLabel {
+    gap: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .title {
     transition: none;

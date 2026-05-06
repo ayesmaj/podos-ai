@@ -115,6 +115,11 @@ function NavHeader({
   const [hoveredHref, setHoveredHref] = useState<string | null>(null);
   const currentHref = hoveredHref ?? activeHref;
 
+  // Mobile menu open/closed. The hamburger button (visible ≤640px) toggles
+  // this; the full-screen overlay menu reads it. Independent of hover/active
+  // state so opening the menu doesn't disturb the desktop pill animation.
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   // Cursor pill position — measured from the DOM each time currentHref
   // changes (or on window resize).
   const [position, setPosition] = useState<CursorPosition>({
@@ -201,6 +206,39 @@ function NavHeader({
     [],
   );
 
+  // ── Mobile menu: ESC closes, body scroll locks, auto-close on resize ──
+  // Single effect handles all three. Body-scroll lock prevents the page
+  // behind the overlay from scrolling under touch — important on iOS where
+  // the rubber-band would otherwise leak through. Auto-close on resize
+  // covers the orientation/zoom case where a phone-width viewport widens
+  // past the breakpoint while the menu is open.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (mobileOpen) {
+      const previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setMobileOpen(false);
+      };
+      document.addEventListener("keydown", onKey);
+      return () => {
+        document.body.style.overflow = previousOverflow;
+        document.removeEventListener("keydown", onKey);
+      };
+    }
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 641px)");
+    const handler = (e: MediaQueryListEvent) => {
+      if (e.matches) setMobileOpen(false);
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   // Bubble structure (v3 — adds logo slot):
   //   <nav class=bubble>             ← outer glass shell, rounded, blurred
   //     <a class=logoSlot>{logo}</a> ← optional brand lockup, anchors home
@@ -223,31 +261,96 @@ function NavHeader({
   const homeHref = items[0]?.href ?? "#top";
 
   return (
-    <nav aria-label={ariaLabel} className={styles.bubble}>
-      {logo && (
-        <a href={homeHref} className={styles.logoSlot} aria-label="Home">
-          {logo}
-        </a>
-      )}
-      <ul
-        className={styles.tabs}
-        onMouseLeave={() => setHoveredHref(null)}
-      >
-        {items.map((item) => (
-          <Tab
-            key={item.href}
-            href={item.href}
-            active={item.href === activeHref}
-            onHover={setHoveredHref}
-            registerRef={registerTab(item.href)}
-          >
-            {item.label}
-          </Tab>
-        ))}
+    <>
+      <nav aria-label={ariaLabel} className={styles.bubble}>
+        {logo && (
+          <a href={homeHref} className={styles.logoSlot} aria-label="Home">
+            {logo}
+          </a>
+        )}
+        <ul
+          className={styles.tabs}
+          onMouseLeave={() => setHoveredHref(null)}
+        >
+          {items.map((item) => (
+            <Tab
+              key={item.href}
+              href={item.href}
+              active={item.href === activeHref}
+              onHover={setHoveredHref}
+              registerRef={registerTab(item.href)}
+            >
+              {item.label}
+            </Tab>
+          ))}
 
-        <Cursor position={position} />
-      </ul>
-    </nav>
+          <Cursor position={position} />
+        </ul>
+
+        {/* Hamburger button — visible only ≤640px (CSS-driven). Replaces
+            the truncated tab list on mobile; opens a full-screen overlay
+            menu with all `items`. The 3 bars use absolute positioning so
+            the open-state X transform pivots cleanly around their center. */}
+        <button
+          type="button"
+          className={`${styles.menuToggle} ${mobileOpen ? styles.menuToggleOpen : ""}`.trim()}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
+          aria-controls="nav-mobile-menu"
+          onClick={() => setMobileOpen((v) => !v)}
+        >
+          <span className={styles.menuToggleBar} aria-hidden />
+          <span className={styles.menuToggleBar} aria-hidden />
+          <span className={styles.menuToggleBar} aria-hidden />
+        </button>
+      </nav>
+
+      {/* Mobile overlay menu — full-screen frosted backdrop with stacked
+          link tiles. Conditional render keeps it out of the DOM when
+          closed. Backdrop click + link click + ESC + resize-to-desktop
+          all dismiss it. */}
+      {mobileOpen && (
+        <div
+          id="nav-mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site navigation"
+          className={styles.menuOverlay}
+          onClick={(e) => {
+            // Backdrop click only — ignore clicks bubbled from the panel
+            if (e.target === e.currentTarget) setMobileOpen(false);
+          }}
+        >
+          <div className={styles.menuPanel}>
+            <button
+              type="button"
+              className={styles.menuClose}
+              aria-label="Close menu"
+              onClick={() => setMobileOpen(false)}
+            >
+              <span aria-hidden>×</span>
+            </button>
+            <ul className={styles.menuList}>
+              {items.map((item, i) => (
+                <li key={item.href} className={styles.menuItem} style={{ animationDelay: `${i * 40}ms` }}>
+                  <a
+                    href={item.href}
+                    className={`${styles.menuLink} ${item.href === activeHref ? styles.menuLinkActive : ""}`.trim()}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <span className={styles.menuLinkIdx}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className={styles.menuLinkLabel}>{item.label}</span>
+                    <span className={styles.menuLinkArrow} aria-hidden>→</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

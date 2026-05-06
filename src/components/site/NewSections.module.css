@@ -656,6 +656,18 @@
   }
 }
 
+/* On phones the fixed-position helicopter overlay (100vw × 100vh,
+   z-index:30) covers the section header and use-case cards because
+   the WebM's landscape composition gets cropped to a portrait viewport
+   — the helicopter ends up clipped to the right side and the body
+   sits over the cards. The animation also hurts scroll perf on phones.
+   Hide the overlay on narrow viewports so the content reads cleanly. */
+@media (max-width: 768px) {
+  .helicopterWrap {
+    display: none !important;
+  }
+}
+
 .cardTitle {
   font-family: var(--font-display);
   font-weight: 700;

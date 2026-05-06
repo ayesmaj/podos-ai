@@ -275,6 +275,11 @@ export default function UseCases() {
 
   useEffect(() => {
     if (reduce) return;
+    // Skip on mobile — the fixed-position 100vw×100vh helicopter overlay
+    // crops awkwardly on narrow portrait viewports (its WebM is composed
+    // for landscape) and the rAF loop is wasted work since the CSS media
+    // query hides the wrap. Save bandwidth + CPU on phones.
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches) return;
     const sec = sectionRef.current;
     const target = targetRef.current;
     const wrap = heliWrapRef.current;
@@ -464,6 +469,7 @@ export default function UseCases() {
       <div
         ref={heliWrapRef}
         aria-hidden
+        className={styles.helicopterWrap}
         style={{
           display: "none",
           position: "fixed",

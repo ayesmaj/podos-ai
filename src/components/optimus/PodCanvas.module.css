@@ -37,3 +37,47 @@
   object-fit: contain;
   object-position: center;
 }
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Port row container (mobile reflow)
+ *
+ * Desktop: `display: contents` makes this wrapper invisible to layout —
+ * each PortCallout child keeps its inline `left: X%` anchoring to its
+ * GPU-bay position on the pod render (clusters at x = 17/25/33/41/49,
+ * the cutaway midpoint). Coordinate space stays exactly as before.
+ *
+ * Mobile (≤760px): swap to a real flex row anchored to the bottom strip
+ * the canvas already reserves (the 14% under the pod image). Override
+ * each child's absolute positioning so they flow as flex items, evenly
+ * spread under the WHOLE pod width rather than clustering left.
+ * ────────────────────────────────────────────────────────────────────── */
+.portRow {
+  display: contents;
+}
+
+@media (max-width: 760px) {
+  .portRow {
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 14%;
+    align-items: flex-start;
+    justify-content: space-evenly;
+    padding: 0.4rem clamp(0.5rem, 3vw, 1.25rem) 0;
+    z-index: 4;
+  }
+
+  /* Reset each PortCallout root's absolute % positioning so the parent's
+     flexbox owns horizontal spacing. We keep `position: relative` so the
+     internal riser line + spark dot pseudo-elements still anchor to the
+     icon (they use `position: absolute; top: 0;` against `.root`). */
+  .portRow > :where(div) {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    flex: 0 0 auto;
+  }
+}

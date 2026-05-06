@@ -293,4 +293,16 @@
     top: clamp(4.5rem, 10vh, 7rem);
     padding: 0 1.25rem;
   }
+  /* The fixed nav pill is centered at top:16px and on mobile widens
+     to roughly fill the viewport — it overlaps the skip button at
+     top:22px. Re-anchor the skip button to the BOTTOM-right where
+     it has its own real estate clear of the nav pill, the chapter
+     text, and the scroll hint (which is hidden on mobile anyway). */
+  .skip {
+    top: auto;
+    bottom: clamp(1rem, 3vh, 1.75rem);
+    right: 14px;
+    padding: 7px 12px;
+    font-size: 11px;
+  }
 }

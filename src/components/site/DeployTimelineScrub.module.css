@@ -61,4 +61,37 @@
   .stage {
     border-radius: 0.75rem;
   }
+  /* On phones the long eyebrow ("DEPLOY · 90–120 DAYS · FACTORY TO FIRST MW")
+     wrapped to 2–3 lines inside a 335px-wide stage — three letter-spaced
+     mono words don't fit at 0.72rem with 0.22em tracking.
+     - shrink font + letter-spacing to free horizontal room
+     - center the pill at the top of the stage so any residual wrap reads
+       as a tidy stack (instead of a left-anchored ragged block)
+     - cap max-width so the pill stays inside the rounded corners
+     - allow controlled wrap with tight line-height as a fallback */
+  .eyebrow {
+    top: 0.65rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    padding: 0.32rem 0.7rem;
+    line-height: 1.3;
+    max-width: calc(100% - 1.5rem);
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+
+/* Very narrow phones (≤380px, e.g. iPhone SE): keep one line by
+   tightening font + letter-spacing further rather than letting the
+   pill wrap (a wrapped centered pill reads as broken metadata, not
+   tidy chrome). At these sizes the text still has plenty of weight
+   to read; the chrome priority is "single tidy pill". */
+@media (max-width: 380px) {
+  .eyebrow {
+    font-size: 0.52rem;
+    letter-spacing: 0.10em;
+    padding: 0.3rem 0.6rem;
+  }
 }

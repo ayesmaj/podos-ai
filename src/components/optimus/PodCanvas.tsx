@@ -111,16 +111,25 @@ export default function PodCanvas({ activeId, filterCategory, onActivate }: Prop
         />
       ))}
 
-      {/* Port callouts — sit below the pod (pod baseline is ~y=86). */}
-      {portCallouts.map((c) => (
-        <PortCallout
-          key={c.id}
-          component={c as typeof c & { placement: { kind: "port" } }}
-          active={c.id === activeId}
-          dimmed={isDimmed(c.id, c.category)}
-          onActivate={onActivate}
-        />
-      ))}
+      {/* Port callouts — sit below the pod (pod baseline is ~y=86).
+          Wrapped in a `.portRow` container that's `display: contents`
+          on desktop (zero layout effect — children still use their
+          inline `left: X%` to anchor to GPU-bay positions) and switches
+          to a centered flex row on mobile (≤760px) so the 5 icons
+          spread evenly under the pod instead of clustering on the
+          left half. PortCallout's inline absolute positioning is
+          overridden inside the mobile rule. */}
+      <div className={styles.portRow}>
+        {portCallouts.map((c) => (
+          <PortCallout
+            key={c.id}
+            component={c as typeof c & { placement: { kind: "port" } }}
+            active={c.id === activeId}
+            dimmed={isDimmed(c.id, c.category)}
+            onActivate={onActivate}
+          />
+        ))}
+      </div>
     </div>
   );
 }

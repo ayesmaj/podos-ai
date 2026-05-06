@@ -251,3 +251,239 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     inset 0 -1px 0 rgba(15, 23, 42, 0.12);
 }
+
+/* ──────────────────────────────────────────────────────────────────────
+ * Mobile hamburger button + overlay menu (≤640px)
+ *
+ * The desktop pill cannot fit 6 tab labels at narrow widths, so on phones
+ * we hide `.tabs` entirely and surface a hamburger button on the right
+ * edge of the bubble. Tapping it renders a full-screen overlay listing
+ * every `item` from `DEFAULT_ITEMS` as a large, thumb-friendly tile.
+ *
+ * Why this lives in the same module (not a separate MobileNav):
+ *   - shares the `items` prop and `activeHref` state with the desktop pill
+ *   - one component = one hydration boundary = no SSR mismatch flash
+ *   - CSS-driven visibility (display:none → display:flex at breakpoint)
+ *     means React renders both modes; only the visible one paints.
+ * ────────────────────────────────────────────────────────────────────── */
+
+.menuToggle {
+  display: none;                            /* desktop hides this */
+  position: relative;
+  z-index: 10;
+  width: 2.5rem;
+  height: 2rem;
+  margin: 0.25rem 0.4rem 0.25rem 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 9999px;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menuToggle:focus-visible {
+  outline: 2px solid var(--cyan, #22D3EE);
+  outline-offset: 2px;
+}
+
+.menuToggleBar {
+  display: block;
+  width: 20px;
+  height: 1.75px;
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: 2px;
+  transform-origin: center;
+  transition: transform 220ms ease, opacity 180ms ease;
+}
+
+/* When open, morph the 3 bars into an X. Bar 1 rotates +45° and slides
+   down ~6.75px; bar 2 fades out; bar 3 rotates -45° and slides up. */
+.menuToggleOpen .menuToggleBar:nth-child(1) {
+  transform: translateY(6.75px) rotate(45deg);
+}
+.menuToggleOpen .menuToggleBar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0.4);
+}
+.menuToggleOpen .menuToggleBar:nth-child(3) {
+  transform: translateY(-6.75px) rotate(-45deg);
+}
+
+/* ── Full-screen overlay ─────────────────────────────────────────── */
+.menuOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;                             /* over the nav bubble (z=50) and hero */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  background: rgba(2, 6, 18, 0.78);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  backdrop-filter: blur(28px) saturate(160%);
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  animation: navOverlayFadeIn 200ms ease-out;
+}
+
+@keyframes navOverlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.menuPanel {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  padding: 5rem 1.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.menuClose {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 1.5rem;
+  line-height: 1;
+  border-radius: 9999px;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menuClose:hover,
+.menuClose:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(34, 211, 238, 0.45);
+  transform: rotate(90deg);
+  outline: none;
+}
+
+.menuList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+/* Per-item slide-in. inline `animation-delay` (set in JSX) staggers the
+   tiles so they cascade in rather than all appearing at once. */
+.menuItem {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: navMenuItemIn 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes navMenuItemIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.menuLink {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  text-decoration: none;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menuLink:hover,
+.menuLink:focus-visible {
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.28) 0%, rgba(34, 211, 238, 0.18) 100%),
+    rgba(255, 255, 255, 0.04);
+  border-color: rgba(34, 211, 238, 0.42);
+  transform: translateX(4px);
+  outline: none;
+}
+
+.menuLinkActive {
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.32) 0%, rgba(34, 211, 238, 0.22) 100%),
+    rgba(255, 255, 255, 0.04);
+  border-color: rgba(34, 211, 238, 0.55);
+  box-shadow: 0 8px 24px -10px rgba(34, 211, 238, 0.45);
+}
+
+.menuLinkIdx {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: rgba(103, 232, 249, 0.95);
+  min-width: 1.6rem;
+}
+
+.menuLinkLabel {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+}
+
+.menuLinkArrow {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.55);
+  transition: transform 200ms ease, color 200ms ease;
+}
+
+.menuLink:hover .menuLinkArrow,
+.menuLink:focus-visible .menuLinkArrow,
+.menuLinkActive .menuLinkArrow {
+  color: var(--cyan, #22D3EE);
+  transform: translateX(3px);
+}
+
+/* ── Breakpoint switch — mobile vs desktop ───────────────────────── */
+@media (max-width: 640px) {
+  .menuToggle {
+    display: inline-flex;
+  }
+  /* Hide the inline tabs entirely on mobile (replaced by hamburger menu).
+     Keeps the bubble compact: just logo + hamburger. */
+  .tabs {
+    display: none;
+  }
+}
+
+/* Respect reduced-motion: kill the slide-in stagger and morph */
+@media (prefers-reduced-motion: reduce) {
+  .menuOverlay,
+  .menuItem,
+  .menuToggleBar,
+  .menuClose,
+  .menuLink,
+  .menuLinkArrow {
+    animation: none !important;
+    transition: none !important;
+  }
+}
