@@ -1,0 +1,1814 @@
+/* Shared styles for the new public-website sections.
+   Design language matches the existing site: light cool surfaces,
+   deep-blue/cyan brand accents, Geist for display, Inter Tight for body,
+   Geist Mono for technical labels. */
+
+.section {
+  position: relative;
+  overflow: hidden;
+  background: var(--paper);
+  border-top: 1px solid var(--edge-faint);
+}
+
+.sectionDeep {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(1200px 700px at 80% 10%, rgba(34, 211, 238, 0.08), transparent 60%),
+    radial-gradient(900px 600px at 10% 90%, rgba(37, 99, 235, 0.10), transparent 60%),
+    var(--canvas);
+  border-top: 1px solid var(--edge-faint);
+}
+
+/* ============================================================
+   .sectionBlueprint — white drafting-paper surface with a two-tier
+   blueprint-blue grid drawn on top.
+
+   Layer stack (bottom → top), all stacked into one background:
+     1. var(--paper)            — clean white base
+     2. Major grid (100×100)    — heavier lines, brand-deep at 8% α
+     3. Minor grid (20×20)      — hairlines, brand-deep at 4% α
+     4. Edge fade (radial)      — softens grid at corners so it
+                                  reads as "paper" not "graph paper"
+
+   Pairs with FactoryScene / SiteScene SVGs that use the same
+   bp-grid visual language at 10% α inside the build-model card.
+   ============================================================ */
+.sectionBlueprint {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(ellipse at center, transparent 55%, rgba(255, 255, 255, 0.55) 100%),
+    linear-gradient(rgba(37, 99, 235, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(37, 99, 235, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100px 100px,
+    100px 100px,
+    20px 20px,
+    20px 20px;
+  background-position: center;
+  border-top: 1px solid var(--edge-faint);
+  color: var(--ink-strong);
+}
+
+/* Corner registration marks — small "+" glyphs that real blueprints
+   use as alignment fiducials. Pure decoration; aria-hidden via CSS. */
+.sectionBlueprint::before,
+.sectionBlueprint::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.35), rgba(37, 99, 235, 0.35)),
+    linear-gradient(rgba(37, 99, 235, 0.35), rgba(37, 99, 235, 0.35));
+  background-size: 1px 100%, 100% 1px;
+  background-position: center, center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.sectionBlueprint::before { top: 24px; left: 24px; }
+.sectionBlueprint::after  { bottom: 24px; right: 24px; }
+
+.sectionDark {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(900px 700px at 85% 15%, rgba(34, 211, 238, 0.12), transparent 60%),
+    radial-gradient(800px 600px at 12% 88%, rgba(37, 99, 235, 0.18), transparent 65%),
+    var(--ink-deep);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--bone);
+}
+
+/* ============================================================
+   .sectionLightShow — dark blue background with LIVE motion lights.
+
+   Three layered effects working together:
+     1. Base — deep navy with brand-color radial glow vignettes
+     2. Animated orbs — three large floating cyan/blue orbs that
+        drift slowly across the section (each with different speed
+        and trajectory so the motion never feels mechanical)
+     3. Light beams — thin diagonal gradient beams that sweep
+        periodically (suggests scanning / activity)
+
+   All animations use cubic-bezier easings + long durations
+   (12–28s) so the motion feels organic, not jittery. Pointer
+   events disabled so it never blocks card interaction.
+   ============================================================ */
+.sectionLightShow {
+  position: relative;
+  overflow: hidden;
+  /* WHITE paper base — the zigzag pattern + moving orbs sit on top */
+  background: var(--paper);
+  border-top: 1px solid var(--edge-faint);
+  color: var(--ink-strong);
+  isolation: isolate;
+}
+
+/* ============================================================
+   Zigzag Lightning pattern — 4 repeating-linear-gradient layers
+   at 0°, 90°, 60°, 150° at very low alpha. Creates a subtle
+   crisscross of gray lines (lightning-bolt-grid feel) on the
+   white paper background.
+
+   Applied as a separate ::before so it can layer with the
+   animated orbs cleanly.
+   ============================================================ */
+.sectionLightShow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(75, 85, 99, 0.08) 20px, rgba(75, 85, 99, 0.08) 21px),
+    repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(107, 114, 128, 0.06) 30px, rgba(107, 114, 128, 0.06) 31px),
+    repeating-linear-gradient(60deg, transparent, transparent 40px, rgba(55, 65, 81, 0.05) 40px, rgba(55, 65, 81, 0.05) 41px),
+    repeating-linear-gradient(150deg, transparent, transparent 35px, rgba(31, 41, 55, 0.04) 35px, rgba(31, 41, 55, 0.04) 36px);
+}
+
+/* Light show layer — sits absolutely behind content. Three orbs +
+   two scanning beams. */
+.lightShow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.lightShow::before,
+.lightShow::after,
+.lightShow > .lightOrb {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  will-change: transform, opacity;
+}
+
+/* Orb 1 — large cyan, drifts upper-left to lower-right.
+   Lower opacity than the dark version since white background
+   amplifies the perceived brightness of any color. */
+.lightShow::before {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.35), transparent 65%);
+  top: -10%;
+  left: -10%;
+  animation: orbDriftA 22s ease-in-out infinite;
+}
+
+/* Orb 2 — large brand blue, drifts opposite direction */
+.lightShow::after {
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.32), transparent 65%);
+  bottom: -15%;
+  right: -10%;
+  animation: orbDriftB 28s ease-in-out infinite;
+}
+
+/* Orb 3 — middle electric blue */
+.lightOrb {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.30), transparent 65%);
+  top: 35%;
+  left: 45%;
+  animation: orbDriftC 18s ease-in-out infinite;
+}
+
+/* Diagonal scanning beam — a thin gradient that sweeps across */
+.lightBeam {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(122, 195, 255, 0.06) 48%,
+    rgba(122, 195, 255, 0.12) 50%,
+    rgba(122, 195, 255, 0.06) 52%,
+    transparent 70%
+  );
+  animation: beamSweep 12s linear infinite;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.lightBeam2 {
+  composes: lightBeam;
+  animation-duration: 18s;
+  animation-direction: reverse;
+  opacity: 0.6;
+  background: linear-gradient(
+    65deg,
+    transparent 35%,
+    rgba(34, 211, 238, 0.05) 49%,
+    rgba(34, 211, 238, 0.10) 50%,
+    rgba(34, 211, 238, 0.05) 51%,
+    transparent 65%
+  );
+}
+
+@keyframes orbDriftA {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.9; }
+  33% { transform: translate(40vw, 25vh) scale(1.15); opacity: 1; }
+  66% { transform: translate(20vw, 50vh) scale(0.95); opacity: 0.85; }
+}
+
+@keyframes orbDriftB {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.85; }
+  40% { transform: translate(-30vw, -30vh) scale(1.2); opacity: 1; }
+  70% { transform: translate(-15vw, -50vh) scale(0.9); opacity: 0.8; }
+}
+
+@keyframes orbDriftC {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+  25% { transform: translate(-20%, -30%) scale(1.25); opacity: 1; }
+  50% { transform: translate(-70%, -50%) scale(0.85); opacity: 0.6; }
+  75% { transform: translate(-30%, -70%) scale(1.1); opacity: 0.9; }
+}
+
+@keyframes beamSweep {
+  0% { transform: translate(-30%, -30%); }
+  100% { transform: translate(30%, 30%); }
+}
+
+/* Respect reduced-motion: orbs hold position, beams don't sweep */
+@media (prefers-reduced-motion: reduce) {
+  .lightShow::before,
+  .lightShow::after,
+  .lightOrb,
+  .lightBeam,
+  .lightBeam2 {
+    animation: none;
+  }
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 1560px);
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 0 clamp(0.5rem, 1.5vw, 1.5rem);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand-deep);
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--edge-bright);
+  border-radius: 999px;
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(8px);
+  margin-bottom: 1.75rem;
+}
+
+.sectionDark .eyebrow {
+  color: var(--cyan-bright);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Light-show eyebrow stays the brand-blue / glass styling that
+   matches the OTHER light sections (Solution, Use Cases, etc).
+   Just bumped z-index to layer above the orbs. */
+.sectionLightShow .eyebrow {
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrowIdx {
+  font-weight: 800;
+  color: var(--cyan-deep);
+}
+
+.sectionDark .eyebrowIdx {
+  color: var(--cyan-bright);
+}
+
+.eyebrowSep {
+  opacity: 0.4;
+  margin: 0 0.15rem;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.4rem, 5.4vw, 4.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--ink-strong);
+  max-width: 22ch;
+  margin: 0 0 1.25rem;
+}
+
+.sectionDark .headline {
+  color: var(--bone);
+}
+
+/* Light-show headline keeps dark ink (white background); just lift
+   it above the orb layer with z-index. */
+.sectionLightShow .headline {
+  position: relative;
+  z-index: 1;
+}
+
+.lede {
+  font-family: var(--font-body);
+  font-size: clamp(1.05rem, 1.2vw, 1.2rem);
+  line-height: 1.6;
+  color: var(--ink-dim);
+  max-width: 60ch;
+  margin: 0 0 clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.sectionDark .lede {
+  color: var(--bone-dim);
+}
+
+.sectionLightShow .lede {
+  position: relative;
+  z-index: 1;
+}
+
+/* Make sure container content sits above the .lightShow layer */
+.sectionLightShow .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* ================ Card grids ================ */
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1.25rem;
+}
+
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.1rem;
+}
+
+/* Featured grids — first 1-2 items span 2× width, rest span 1×.
+   Used by SolutionCards (6 items, 4-col base) and UseCases (8 items,
+   6-col base) to introduce visual hierarchy: hero items get more
+   real estate, supporting items pack densely below. */
+.gridFeatured4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+.gridFeatured4 .cardFeatured {
+  grid-column: span 2;
+}
+
+.gridFeatured6 {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1.25rem;
+}
+.gridFeatured6 .cardFeatured {
+  grid-column: span 3;
+}
+.gridFeatured6 .card:not(.cardFeatured) {
+  grid-column: span 2;
+}
+
+@media (max-width: 880px) {
+  .gridFeatured4,
+  .gridFeatured6 {
+    grid-template-columns: 1fr;
+  }
+  .gridFeatured4 .cardFeatured,
+  .gridFeatured6 .cardFeatured,
+  .gridFeatured6 .card:not(.cardFeatured) {
+    grid-column: span 1;
+  }
+}
+
+/* ---------------- card surface ---------------- */
+.card {
+  position: relative;
+  padding: 1.6rem 1.5rem 1.4rem;
+  border: 1px solid var(--edge);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border-radius: 14px;
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 280ms ease;
+  isolation: isolate; /* keep ::before mask contained */
+  overflow: hidden;
+}
+
+/* Gradient outline that fades in on hover. ::before is masked so
+   only the 1px stroke is visible — single GPU layer, no DOM cost. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--brand-gradient);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 280ms ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Soft inner glow that pulses on hover. Sits BEHIND content via z-index 0. */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--brand-gradient-glow);
+  opacity: 0;
+  transition: opacity 320ms ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card > * {
+  position: relative;
+  z-index: 2;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: transparent;
+  box-shadow:
+    0 18px 44px -22px var(--brand-glow),
+    0 4px 14px -8px rgba(15, 23, 42, 0.08);
+}
+
+.card:hover::before { opacity: 1; }
+.card:hover::after  { opacity: 1; }
+
+.sectionDark .card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.sectionDark .card:hover {
+  border-color: transparent;
+  box-shadow:
+    0 18px 44px -22px var(--cyan-glow),
+    0 4px 14px -8px rgba(0, 0, 0, 0.4);
+}
+
+.sectionDark .card::after {
+  background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.10), transparent 65%);
+}
+
+/* ============================================================
+   .sectionLightShow card variant — Apple iOS Liquid Glass on
+   a WHITE background. The cards are translucent with heavy
+   backdrop-blur, so when an orb drifts behind a card, the card
+   subtly tints blue. Cards stay readable (dark text on
+   light/white frosted glass).
+   ============================================================ */
+.sectionLightShow .card {
+  /* CSS variable defeats Lightning-CSS prefix dedup of backdrop-filter */
+  --liquid-glass: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: var(--liquid-glass);
+  backdrop-filter: var(--liquid-glass);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.65) 0%,
+      rgba(245, 250, 255, 0.55) 50%,
+      rgba(255, 255, 255, 0.65) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 22px;
+  box-shadow:
+    /* Bright top-edge highlight — polished glass bezel */
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+    /* Subtle inner shadow at bottom for thickness */
+    inset 0 -1px 0 0 rgba(15, 23, 42, 0.04),
+    /* Outer drop with brand-blue tint, grounds the card */
+    0 10px 30px -8px rgba(37, 99, 235, 0.18),
+    0 4px 14px -4px rgba(15, 23, 42, 0.10);
+  z-index: 1;
+}
+
+.sectionLightShow .card:hover {
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 0 rgba(15, 23, 42, 0.05),
+    0 16px 40px -10px rgba(37, 99, 235, 0.30),
+    0 6px 18px -4px rgba(15, 23, 42, 0.14);
+}
+
+/* Card text colors — DARK ink colors (light theme over white bg) */
+.sectionLightShow .cardTitle {
+  color: var(--ink-strong);
+}
+
+.sectionLightShow .cardBody {
+  color: var(--ink-dim);
+}
+
+.sectionLightShow .cardIdx {
+  color: var(--brand-deep);
+}
+
+/* Featured card variant — slightly larger padding, gradient accent strip
+   on the left, larger title. Same hover behavior as base card. */
+.cardFeatured {
+  padding: 2.1rem 2rem 1.8rem 2.4rem;
+}
+
+.cardFeatured::before,
+.cardFeatured::after {
+  /* Featured cards always show their gradient stroke faintly,
+     fully on hover — telegraphs "this is the priority item". */
+}
+
+.cardFeatured > .cardAccent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--brand-gradient);
+  z-index: 2;
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+  opacity: 0.85;
+}
+
+.cardFeatured .cardTitle {
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.cardFeatured .cardBody {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.cardIdx {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--brand-deep);
+  margin-bottom: 0.85rem;
+  display: block;
+}
+
+.sectionDark .cardIdx {
+  color: var(--cyan);
+}
+
+/* ============================================================
+ * UseCases — U-02 healthcare card image well + helicopter overlay
+ * ============================================================
+ * The U-02 card has a wide image area at the top showing the
+ * hospital + PODOS pod scene. A transparent (alpha-channel)
+ * helicopter video is layered on top of that image and plays once
+ * the card scrolls into view — the helicopter "arrives" at the
+ * hospital. The video does NOT scale or move with scroll; it just
+ * starts playing when in view and pauses when out of view.
+ */
+
+.cardImage {
+  position: relative;
+  width: calc(100% + 4.4rem);
+  margin: -2.1rem -2rem 1.4rem -2.4rem;
+  /* 16:9 footprint — matches both the hospital photo and the
+     helicopter video so neither is letterboxed. */
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0b1628 0%, #1a2740 100%);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+.cardImageImg {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Helicopter overlay — fixed-position layer that the scroll handler
+   resizes + repositions every frame. Starts as a viewport-filling
+   layer (BIG) and shrinks to the U-02 image rect (SMALL). */
+.helicopterWrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 30;
+  will-change: transform, width, height;
+  transform-origin: top left;
+}
+
+.helicopterVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Alpha-channel video — leave the wrap transparent so whatever's
+     behind shows through everywhere except the helicopter pixels. */
+  background: transparent;
+  pointer-events: none;
+}
+
+@media (max-width: 880px) {
+  .cardImage {
+    /* Card padding shrinks at narrow widths — recalculate the negative
+       margins to match the mobile cardFeatured padding. */
+    width: calc(100% + 3rem);
+    margin: -1.6rem -1.5rem 1.2rem -1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .helicopterWrap {
+    display: none !important;
+  }
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.015em;
+  color: var(--ink-strong);
+  margin: 0 0 0.55rem;
+  line-height: 1.2;
+}
+
+.sectionDark .cardTitle {
+  color: var(--bone);
+}
+
+.cardBody {
+  font-family: var(--font-body);
+  font-size: 0.93rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+.sectionDark .cardBody {
+  color: var(--bone-dim);
+}
+
+/* ================ Timeline (DEPLOYMENT) ================ */
+.timelineWrap {
+  position: relative;
+  margin-top: 1.5rem;
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+.timelineRow {
+  position: relative;
+  padding: 1.4rem 1.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  transition:
+    border-color 280ms ease,
+    background 280ms ease,
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 280ms ease;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.timelineRow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--brand-gradient);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 280ms ease;
+  pointer-events: none;
+}
+
+.timelineRow > * { position: relative; z-index: 1; }
+
+.timelineRow:hover {
+  transform: translateY(-3px);
+  background: rgba(34, 211, 238, 0.06);
+  border-color: transparent;
+  box-shadow: 0 14px 38px -20px var(--cyan-glow);
+}
+
+.timelineRow:hover::before { opacity: 1; }
+
+.timelineStep {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--cyan-bright);
+  margin-bottom: 0.85rem;
+}
+
+.timelineNum {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.4rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.65rem;
+}
+
+.timelineTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--bone);
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.timelineBody {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--bone-dim);
+  margin: 0;
+}
+
+/* ================ Manufacturing — split layout ================ */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1.8fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (max-width: 880px) {
+  .split { grid-template-columns: 1fr; gap: 2rem; }
+}
+
+.bulletList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+.bullet {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+
+.bulletDot {
+  flex-shrink: 0;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+  background: var(--brand-gradient);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+}
+
+.bulletStrong {
+  color: var(--ink-strong);
+  font-weight: 600;
+}
+
+.framePanel {
+  position: relative;
+  border: 1px solid var(--edge-bright);
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.06), rgba(34, 211, 238, 0.04)),
+    var(--panel);
+  border-radius: 18px;
+  padding: 2.2rem;
+  overflow: hidden;
+}
+
+.framePanel::before,
+.framePanel::after {
+  content: "";
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--brand);
+  opacity: 0.85;
+}
+.framePanel::before { top: 12px; left: 12px; border-right: none; border-bottom: none; }
+.framePanel::after  { bottom: 12px; right: 12px; border-left: none; border-top: none; }
+
+.frameStat {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--brand-deep);
+  margin-bottom: 0.5rem;
+}
+
+.frameNum {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.6rem, 5vw, 3.8rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.8rem;
+}
+
+.frameLabel {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--ink-dim);
+  margin-bottom: 1.4rem;
+}
+
+.frameDivider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--edge-bright), transparent);
+  margin: 1.2rem 0;
+}
+
+.frameStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.10em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+
+.frameStrip span b {
+  color: var(--ink-strong);
+  font-weight: 700;
+}
+
+/* ============================================================
+   Manufacturing v2 — build-model card with infographic + steps + tags.
+   These classes extend the existing .split / .bulletList / .framePanel
+   system above; they don't replace it.
+   ============================================================ */
+
+/* Brand-gradient accent span used inline inside .headline. Pairs with
+   solid ink-strong text so part of the headline reads as the
+   gradient payoff word (mirrors the pattern used by .frameNum,
+   .timelineNum, .footerBrand). */
+.headlineAccent {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   .buildModelPanel — variant of .framePanel that hosts a single
+   pre-composed build-model image (factory · pod · site).
+   The image already carries its own corner brackets, title, subtitle,
+   diagram, steps, and tags, so we strip the panel's padding and the
+   ::before/::after CSS brackets to avoid duplicating chrome.
+   ───────────────────────────────────────────────────────────────── */
+.buildModelPanel {
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+}
+
+.buildModelPanel::before,
+.buildModelPanel::after {
+  display: none;
+}
+
+.buildModelImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 18px;
+}
+
+/* Left column wrapper — keeps eyebrow/headline/lede/bullets pinned to
+   the top of the grid row instead of vertical-centering against the
+   taller card on the right. */
+.mfgLeft {
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+}
+
+.mfgLeft .eyebrow { margin-bottom: 1.4rem; }
+.mfgLeft .headline { margin-bottom: 1.1rem; }
+.mfgLeft .lede { margin-bottom: 2rem; }
+
+/* Override .split alignment when a .mfgLeft is present so the card
+   doesn't get vertically centered. */
+.split:has(.mfgLeft) { align-items: start; }
+
+/* Bullet upgrades — icon container, two-line title/desc, dividers.
+   Padding kept tight so the dividers sit close to the content; the
+   icon + 2-line title/desc give each row enough natural height. */
+.bullet {
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--edge-faint);
+}
+
+.bullet:last-child { border-bottom: 0; }
+
+.bulletIcon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(219, 234, 254, 0.85) 90%);
+  border: 1px solid var(--edge-bright);
+  color: var(--brand-deep);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 8px 22px -10px var(--brand-glow);
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 280ms ease;
+}
+
+.bullet:hover .bulletIcon {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 12px 28px -10px var(--brand-glow);
+}
+
+.bulletBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.bulletList .bulletStrong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.bulletDesc {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+
+/* ───── BUILD MODEL card content ───── */
+
+.frameDot {
+  color: var(--brand);
+  opacity: 0.55;
+  margin: 0 0.08em;
+}
+
+/* Scope the BUILD-MODEL card's title for one-line fit at desktop. */
+.framePanel:has(.buildSubtitle) .frameNum {
+  font-size: clamp(2.2rem, 3.8vw, 3.2rem);
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.buildSubtitle {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 1.4rem;
+}
+
+/* Override the original .frameLabel margin since we replaced it with
+   .buildSubtitle in the new markup. (no-op if .frameLabel still exists.) */
+
+/* Diagram: 3 scenes left→center→right, with arrows between.
+   Center column gets 1.6fr so the pod image has enough width to read
+   as the focal point; sides stay at 0.9fr for the blueprint scenes. */
+.diagram {
+  display: grid;
+  grid-template-columns: 0.9fr auto 1.6fr auto 0.9fr;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.sceneCenter {
+  filter: drop-shadow(0 18px 28px rgba(37, 99, 235, 0.20));
+}
+
+.sceneSvg {
+  width: 100%;
+  height: auto;
+  color: var(--brand-deep);
+  opacity: 0.85;
+}
+
+.podSvg {
+  width: 100%;
+  height: auto;
+  max-width: 280px;
+}
+
+/* Real pod render — replaces the inline PodHero SVG. The wrapping
+   .sceneCenter already drops a soft brand-blue glow, so don't
+   double up here. object-fit:contain prevents Next/Image from
+   cropping the pod's blue LED edge accents. */
+.podImage {
+  width: 100%;
+  height: auto;
+  max-width: 320px;
+  object-fit: contain;
+  display: block;
+}
+
+.flowArrow {
+  width: 36px;
+  height: 12px;
+  color: var(--brand);
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+/* Steps row: 01/02/03 numbered chips with labels and descriptions */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 1.4rem 0 0.5rem;
+  border-top: 1px dashed var(--edge);
+}
+
+.step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+}
+
+.stepNum {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+  border: 1px solid var(--edge-bright);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--brand-deep);
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 20px -10px var(--brand-glow);
+  position: relative;
+  z-index: 1;
+}
+
+.stepConnector {
+  position: absolute;
+  top: 1.05rem;
+  left: calc(50% + 1.4rem);
+  width: calc(100% - 2.8rem);
+  height: 1px;
+  background: linear-gradient(90deg, var(--brand), transparent 90%);
+  opacity: 0.4;
+  z-index: 0;
+}
+
+.stepLabel {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--brand-deep);
+  margin-top: 0.15rem;
+}
+
+.stepDesc {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  max-width: 18ch;
+}
+
+/* Tag pills row */
+.tags {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  background: var(--glass-bg-strong);
+  color: var(--ink-strong);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    border-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.tag:hover {
+  border-color: var(--edge-bright);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px -10px var(--brand-glow);
+}
+
+.tagIcon {
+  display: inline-flex;
+  color: var(--brand-deep);
+  flex-shrink: 0;
+}
+
+/* Responsive — collapse diagram + steps + tags */
+@media (max-width: 880px) {
+  .diagram {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .flowArrow {
+    transform: rotate(90deg);
+    margin: 0 auto;
+  }
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  .stepConnector { display: none; }
+  .tags {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ============================================================
+   ENGINEERING SECTION (#design) — pod-hero + pillar grid + creds.
+   Pod render carries the dimensional callouts + faint circuit
+   traces baked into the image, so the layout's job is just to
+   pin six pillar cards to the right of the pod and slap a
+   four-column credentials strip below.
+   ============================================================ */
+
+.engGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 2rem;
+  align-items: stretch;
+  margin-top: 1rem;
+}
+
+@media (max-width: 1080px) {
+  .engGrid { grid-template-columns: 1fr; gap: 1.5rem; }
+}
+
+.engPodHero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.engPodImg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---- Pillar cards: 3 cols × 2 rows ---- */
+.engPillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 0.85rem;
+}
+
+@media (max-width: 700px) {
+  .engPillars { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 460px) {
+  .engPillars { grid-template-columns: 1fr; }
+}
+
+.engCard {
+  position: relative;
+  padding: 1rem 1rem 1.6rem;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 280ms ease;
+}
+
+.engCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.42);
+  box-shadow: 0 12px 28px -14px rgba(37, 99, 235, 0.35);
+}
+
+.engCardIdx {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  color: var(--brand-deep);
+  font-weight: 600;
+}
+
+.engCardIcon {
+  color: var(--brand-deep);
+  width: 28px;
+  height: 28px;
+  margin-top: 0.25rem;
+}
+
+.engCardTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.015em;
+  color: var(--ink-strong);
+  margin: 0.15rem 0 0;
+  line-height: 1.25;
+}
+
+.engCardBody {
+  font-family: var(--font-body);
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+/* Decorative "+" registration mark, bottom-right of every card.
+   Same glyph used on the section corners — ties chrome together. */
+.engCardCorner {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  width: 12px;
+  height: 12px;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.42), rgba(37, 99, 235, 0.42)),
+    linear-gradient(rgba(37, 99, 235, 0.42), rgba(37, 99, 235, 0.42));
+  background-size: 1px 100%, 100% 1px;
+  background-position: center, center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* ---- Bottom credentials strip ---- */
+.engCreds {
+  margin-top: 2.25rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 14px;
+  padding: 0.5rem;
+}
+
+@media (max-width: 880px) {
+  .engCreds { grid-template-columns: repeat(2, 1fr); }
+}
+
+.engCred {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 1.1rem;
+  border-right: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.engCred:last-child { border-right: 0; }
+
+@media (max-width: 880px) {
+  .engCred:nth-child(2n) { border-right: 0; }
+  .engCred:nth-child(-n+2) { border-bottom: 1px solid rgba(37, 99, 235, 0.12); }
+}
+
+.engCredIcon {
+  color: var(--brand-deep);
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.engCredText { display: flex; flex-direction: column; min-width: 0; }
+
+.engCredLabel {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--brand-deep);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.engCredSub {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+  line-height: 1.3;
+}
+
+/* ================ Footer (premium · liquid glass · document end) ================
+   Four-column footer rendered as a translucent navy "liquid glass" panel
+   that sits at the END of the document (only visible when scrolled to the
+   bottom). Behaviour:
+     • position: relative + z-index 30   — footer sits in its natural slot
+       at the document end. z-index lifts it above the sticky hero (z=1)
+       and the page main (z=10) so it always paints on top of whatever
+       is behind at the document tail.
+     • backdrop-filter: blur+saturate — when the footer's slot is in view,
+       you see blurred hero / section content through the glass.
+     • background uses higher alpha (≈0.78) so the panel is legible against
+       a light blueprint section AND against the dark hero. Pure light
+       glass would disappear over the white paper sections.
+     • Cyan-tinted top edge + white inner highlight = polished glass bezel
+       (same chrome language as `.sectionLightShow .card`).
+   ============================================================ */
+.footer {
+  position: relative;
+  z-index: 30;
+  color: var(--bone-dim);
+  padding: 4rem clamp(1.25rem, 4vw, 3.5rem) 2rem;
+  overflow: hidden;
+  isolation: isolate;
+  /* CSS variable defeats Lightning-CSS prefix dedup of backdrop-filter */
+  --liquid-glass: blur(40px) saturate(1.6);
+  -webkit-backdrop-filter: var(--liquid-glass);
+  backdrop-filter: var(--liquid-glass);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.78) 0%,
+      rgba(17, 24, 39, 0.66) 45%,
+      rgba(15, 23, 42, 0.78) 100%
+    );
+  border-top: 1px solid rgba(34, 211, 238, 0.22);
+  box-shadow:
+    /* Bright top-edge highlight — polished glass bezel */
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
+    /* Soft inner shadow at bottom for thickness */
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.04),
+    /* Outer glow lifts panel off whatever shows above it */
+    0 -22px 60px -22px rgba(34, 211, 238, 0.30),
+    0 -8px 26px -10px rgba(0, 0, 0, 0.45);
+}
+
+/* Faint cyan grid texture inside the glass — ties to the blueprint
+   visual language without competing with the section content showing
+   through the backdrop blur. */
+.footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.05) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px;
+  mask-image: radial-gradient(ellipse at 50% 0%, black 35%, transparent 80%);
+}
+
+.footerInner {
+  position: relative;
+  max-width: 78rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1.3fr;
+  gap: 3rem;
+}
+
+@media (max-width: 960px) {
+  .footerInner { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+}
+@media (max-width: 520px) {
+  .footerInner { grid-template-columns: 1fr; gap: 2rem; }
+}
+
+/* --- Brand block (column 1) --- */
+.footerBrandBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.footerLockup {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  /* Crop the lockup PNG's whitespace by clipping the rendered box. The
+     source image has ~25% padding on each side; max-height + width auto
+     scales the image down to a sensible inline size for the footer. */
+  max-width: 220px;
+}
+
+.footerLockupImg {
+  width: 100%;
+  height: auto;
+  display: block;
+  /* Drop the white wordmark + cyan mark cleanly onto the dark glass.
+     Without this, dark dust around the PNG edges can read as banding. */
+  filter: drop-shadow(0 4px 18px rgba(34, 211, 238, 0.25));
+}
+
+.footerTagline {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--bone-dim);
+  max-width: 26rem;
+}
+
+/* Social icon row — small square buttons with hairline borders.
+   Border lights up cyan on hover; icon color shifts from dim to bright. */
+.footerSocials {
+  display: flex;
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+}
+
+.footerSocial {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: var(--bone-dim);
+  background: rgba(255, 255, 255, 0.02);
+  transition: color 200ms ease, border-color 200ms ease, transform 200ms ease, background 200ms ease;
+}
+
+.footerSocial:hover {
+  color: var(--cyan-bright);
+  border-color: rgba(34, 211, 238, 0.42);
+  background: rgba(34, 211, 238, 0.06);
+  transform: translateY(-2px);
+}
+
+.footerSocial svg { width: 16px; height: 16px; }
+
+/* --- Link columns (columns 2 & 3) --- */
+.footerColTitle {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cyan-bright);
+  margin-bottom: 1.1rem;
+}
+
+.footerLinks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.footerLink {
+  font-family: var(--font-body);
+  font-size: 0.94rem;
+  color: var(--bone-dim);
+  text-decoration: none;
+  transition: color 200ms ease, transform 200ms ease;
+  display: inline-block;
+}
+
+.footerLink:hover {
+  color: var(--cyan-bright);
+  transform: translateX(2px);
+}
+
+/* --- Newsletter column (column 4) --- */
+.footerNewsletter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.footerNewsletterCopy {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--bone-dim);
+}
+
+.footerForm {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+  margin-top: 0.2rem;
+}
+
+.footerInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem 0.95rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  color: var(--bone);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: border-color 200ms ease, background 200ms ease;
+}
+
+.footerInput::placeholder { color: rgba(243, 246, 250, 0.42); }
+
+.footerInput:focus {
+  outline: none;
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(34, 211, 238, 0.04);
+}
+
+.footerSubmit {
+  padding: 0.7rem 1rem;
+  background: var(--brand-gradient);
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.22) inset,
+    0 8px 22px -10px rgba(34, 211, 238, 0.55);
+  transition: filter 200ms ease, transform 200ms ease;
+  white-space: nowrap;
+}
+
+.footerSubmit:hover { filter: brightness(1.07) saturate(1.05); transform: translateY(-1px); }
+.footerSubmit:active { transform: translateY(0); }
+
+/* Legal anchors live below the newsletter so they don't crowd the form. */
+.footerLegal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-top: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.footerLegal a {
+  color: var(--bone-faint);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.footerLegal a:hover { color: var(--bone-dim); }
+
+/* --- Bottom strip --- */
+.footerBase {
+  position: relative;
+  max-width: 78rem;
+  margin: 3rem auto 0;
+  padding-top: 1.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: var(--bone-faint);
+  text-transform: uppercase;
+}
+
+.footerStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--bone-dim);
+}
+
+/* ================ Meet The Team ================ */
+.teamHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2.4rem;
+  max-width: 64rem;
+}
+
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(20px, 2.4vw, 40px);
+}
+
+@media (max-width: 1280px) { .teamGrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 760px)  { .teamGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 460px)  { .teamGrid { grid-template-columns: 1fr; } }
+
+.teamCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem 1.65rem;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 16px;
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 280ms ease;
+}
+
+.teamCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(37, 99, 235, 0.42);
+  box-shadow: 0 14px 32px -16px rgba(37, 99, 235, 0.35);
+}
+
+/* Portrait — gradient avatar with monogram. Looks intentional and
+   on-brand on a blueprint surface; swap for <Image src="/team/x.jpg"/>
+   when real headshots arrive. */
+.teamPortrait {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 50%, var(--cyan) 100%);
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.teamPortrait::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 16px 16px;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.teamMonogram {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.96);
+  text-shadow: 0 2px 14px rgba(15, 23, 42, 0.25);
+  z-index: 1;
+}
+
+.teamCardIdx {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: var(--brand-deep);
+  font-weight: 600;
+}
+
+.teamName {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.015em;
+  color: var(--ink-strong);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.teamRole {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--brand-deep);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.teamBio {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+/* "+" registration mark, same chrome as the engineering pillar cards. */
+.teamCardCorner {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  width: 12px;
+  height: 12px;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.42), rgba(37, 99, 235, 0.42)),
+    linear-gradient(rgba(37, 99, 235, 0.42), rgba(37, 99, 235, 0.42));
+  background-size: 1px 100%, 100% 1px;
+  background-position: center, center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}

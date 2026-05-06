@@ -161,7 +161,11 @@ html {
   /* "cv11" single-story a + "ss03" open 4 in Inter Tight; "tnum" tabular nums
      for inline numbers that need alignment. "kern" + "liga" always on. */
   font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "cv11" 1, "ss03" 1;
-  overflow-x: hidden;
+  /* No overflow rules on <html> — needed for position: sticky
+     descendants to engage relative to the viewport. Any
+     overflow-* rule on the root creates a scroll container that
+     prevents sticky from working. Horizontal overflow protection
+     handled at body level instead. */
   /* Smooth-scroll for in-page anchor nav. Was `auto` before the sticky
      NavHeader landed — the pill-rail sends users to #problem / #podos / etc.
      via real <a href>, so we need CSS-level smooth scrolling (no JS handler
@@ -179,7 +183,10 @@ html {
 
 body {
   background: var(--paper);
-  overflow-x: hidden;
+  /* No overflow on body either — sticky on body's children needs
+     the body to NOT be a scroll container. Horizontal overflow
+     protection handled by individual sections that need it
+     (e.g., section components with overflow: hidden internally). */
   min-height: 100vh;
   font-family: var(--font-body);
   font-weight: 400;
@@ -329,6 +336,50 @@ body {
 .section-pad {
   padding-top: clamp(5rem, 10vh, 9rem);
   padding-bottom: clamp(5rem, 10vh, 9rem);
+}
+
+/* ============================================================
+   PAGE OVERLAY — Apple-style section layering.
+
+   The hero (HeroVideoNarrative) is position: sticky; top: 0;
+   z-index: 1, so it stays pinned to the viewport top while
+   subsequent content scrolls over it. <main> below the hero
+   carries this .pageOverlay class — its z-index: 10 places it
+   ABOVE the hero in stacking order, and the rounded top corners
+   + soft top-edge shadow make it feel like a card lifting off
+   the dark hero as it slides up into view.
+
+   No transforms, no margin tricks, no JS-driven slide-up — the
+   layered effect emerges entirely from sticky + z-index +
+   natural document flow. The 40px corner radius and the
+   negative-Y shadow are what sell the "premium card" feel.
+   ============================================================ */
+/* v2: removed transform + will-change + isolation to fix sticky positioning inside main */
+.pageOverlay {
+  position: relative;
+  z-index: 10;
+  background: #F7F9FB;
+  border-radius: 40px 40px 0 0;
+  box-shadow:
+    0 -30px 80px rgba(0, 0, 0, 0.45),
+    0 -2px 0 0 rgba(255, 255, 255, 0.04);
+  /* CRITICAL: margin-top: 100vh creates a viewport-height gap
+     between the sticky hero and main. Without this gap, main
+     would start entering the viewport immediately as the user
+     scrolls — covering the hero before they've had a chance
+     to enjoy the video reveal. With this gap, the user gets:
+       0   → 100vh of scroll: pure hero (video scrubs, text appears)
+       100 → 200vh of scroll: main slides UP over hero naturally
+       200vh+: main covers hero, normal scrolling
+     The 100vh empty zone is invisible (body bg shows through —
+     since hero is sticky at top, the user just sees hero). */
+  margin-top: 100vh;
+}
+
+@media (max-width: 640px) {
+  .pageOverlay {
+    border-radius: 28px 28px 0 0;
+  }
 }
 
 /* ============== SURFACES ============== */

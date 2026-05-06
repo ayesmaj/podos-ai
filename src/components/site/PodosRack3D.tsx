@@ -46,15 +46,13 @@ useGLTF.preload("/models/podos-rack.glb");
 /* -------------------------------------------------------------------- */
 /* Choreography keyframes — tuned to pair with the schematic next to it  */
 /* -------------------------------------------------------------------- */
-// At scroll 0: hero "presentation" angle — rack faces the viewer at a
-// gentle 3/4 from the right, no tilt. Reads as "product photo".
-const HERO_ROT_Y = -0.42;
-const HERO_ROT_X = 0.05;
-// At scroll 1: marketing-isometric "lock" angle — slight upward tilt
-// and rotated further right, so the rack reads as a 3D render
-// COMPLEMENTING the front-elevation schematic, not duplicating it.
-const LOCK_ROT_Y = 0.55;
-const LOCK_ROT_X = 0.18;
+// Centered, straight-on view — no rotation. Both hero and lock keep
+// the rack head-on so it reads as a centered product photo at every
+// scroll position.
+const HERO_ROT_Y = 0;
+const HERO_ROT_X = 0;
+const LOCK_ROT_Y = 0;
+const LOCK_ROT_X = 0;
 
 /* -------------------------------------------------------------------- */
 /* The model itself — handles centering, shadows, rotation logic         */
@@ -110,17 +108,10 @@ function RackModel({
       const targetY = THREE.MathUtils.lerp(HERO_ROT_Y, LOCK_ROT_Y, p);
       const targetX = THREE.MathUtils.lerp(HERO_ROT_X, LOCK_ROT_X, p);
 
-      // Subtle sin-wave drift on Y — adds ~2.3° of breathing motion so
-      // the rack never feels frozen between scroll events. Phase off
-      // state.clock so it's deterministic across renders.
-      const drift = Math.sin(state.clock.elapsedTime * 0.6) * 0.04;
-
-      // Lerp toward target with a frame-rate-independent factor.
-      // delta * 5 means we close ~99% of the gap over ~0.9s — quick
-      // enough to feel responsive, smooth enough to hide jitter.
+      // No drift — keep the rack perfectly still, head-on.
       groupRef.current.rotation.y = THREE.MathUtils.lerp(
         groupRef.current.rotation.y,
-        targetY + drift,
+        targetY,
         delta * 5,
       );
       groupRef.current.rotation.x = THREE.MathUtils.lerp(
@@ -129,14 +120,18 @@ function RackModel({
         delta * 5,
       );
     } else if (!paused) {
-      // ── Idle auto-rotate mode ───────────────────────────────────
-      // Used when the rack is rendered standalone (no scroll prop).
-      // 0.18 rad/sec ≈ one full revolution every ~35s.
-      groupRef.current.rotation.y += delta * 0.18;
+      // ── Idle mode ───────────────────────────────────────────────
+      // No auto-rotate — keep the rack centered head-on. User can
+      // still drag via OrbitControls if they want to inspect.
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(
+        groupRef.current.rotation.y,
+        0,
+        delta * 5,
+      );
     }
   });
 
-  return <primitive ref={groupRef} object={scene} scale={2.2} />;
+  return <primitive ref={groupRef} object={scene} scale={2.0} />;
 }
 
 /* -------------------------------------------------------------------- */
@@ -162,7 +157,7 @@ export default function PodosRack3D({
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       shadows
       dpr={[1, 2]}
-      camera={{ position: [3.2, 1.8, 4.5], fov: 35 }}
+      camera={{ position: [0, 0.4, 6.5], fov: 35 }}
       // cursor affordance — `grab` on hover, `grabbing` while dragging.
       // OrbitControls itself doesn't manage the canvas cursor, so we
       // toggle it via the same isDragging state used to pause auto-rotate.

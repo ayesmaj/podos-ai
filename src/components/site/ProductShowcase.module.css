@@ -1,0 +1,425 @@
+/* ====================================================================
+ * ProductShowcase — premium 2-card "Product Ladder" section.
+ *
+ * Visual reference: Apple Mac Studio + Mac Pro spec page (two
+ * product cards, same architecture, different scale). NVIDIA DGX
+ * product brochure. The SAME blueprint-grid backdrop as
+ * EngineeringAdvantages so both sections feel like chapters of one
+ * polished document.
+ * ==================================================================== */
+
+.section {
+  position: relative;
+  padding: clamp(4rem, 9vh, 8rem) 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(243, 247, 252, 1) 0%,
+      rgba(248, 251, 255, 1) 60%,
+      rgba(243, 247, 252, 1) 100%
+    );
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Blueprint grid texture — matches EngineeringAdvantages so the two
+   premium sections share visual DNA. */
+.gridBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(15, 23, 42, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 95% 80% at 50% 50%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 95% 80% at 50% 50%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  /* Modest widening — break PAST the parent .container-site
+     (1280-1440px) but stay within the section's own bounds so
+     overflow: hidden clipping doesn't crop the cards. Centered. */
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 3.5vw, 2.5rem);
+}
+
+/* ==================== Section header — HERO TEXT STYLE ====================
+   Centered pill eyebrow + huge bold display headline + subhead.
+   Mirrors the EngineeringAdvantages hero style so the two sections
+   read as the same family of premium chapters. */
+.head {
+  text-align: center;
+  margin-bottom: clamp(2.5rem, 5vh, 4.5rem);
+  max-width: 760px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Pill eyebrow — used by the section hero header. */
+.label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--brand-deep);
+  margin-bottom: 1.4rem;
+  padding: 0.4rem 0.95rem;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  border-radius: 999px;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  color: var(--ink-strong);
+  margin: 0 0 1.4rem;
+  text-wrap: balance;
+}
+
+.headlineAccent {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subhead {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  line-height: 1.6;
+  color: var(--ink-dim);
+  margin: 0 auto;
+  max-width: 56ch;
+}
+
+/* ==================== Cards grid ==================== */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 2.5vw, 2.25rem);
+}
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* ==================== Bare image (no card chrome) ====================
+   Replaces the .card / .imageFrame stack. Just a 16:10 box with the
+   product render filling it — no border, no background, no padding,
+   no shadow. The image sits on the section's page background. */
+.imageOnly {
+  position: relative;
+  width: 100%;
+  /* Taller aspect = more vertical real estate at the same column
+     width. Bumped from 16/10 → 5/4 so the product renders read
+     as the hero of this section at the same horizontal width.
+     ~50% taller image (596×478 → ~596×600) without breaking out
+     of the container and triggering main's horizontal clip. */
+  aspect-ratio: 5 / 4.2;
+}
+
+/* Wrapper that stacks the per-image hero label above the bare image. */
+.imageBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Small mono eyebrow above each product image — NOT pill-styled
+   (the section header already owns the pill). Reads as a metadata
+   line: "PROD-01 · PODOS POD · 1 MW · UNIT". */
+.imageLabel {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--brand-deep);
+}
+
+/* ==================== Card ==================== */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 28px;
+  /* Hero-text + image card — comfortable padding around the title
+     block, then a full-bleed image frame below. */
+  padding: clamp(1.5rem, 2.2vw, 2.1rem);
+  /* Three-shadow stack matching EngineeringAdvantages: hairline
+     outline + soft mid + brand-tinted floor. */
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.02),
+    0 8px 20px -10px rgba(15, 23, 42, 0.06),
+    0 30px 60px -28px rgba(37, 99, 235, 0.10);
+  transition:
+    transform 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 380ms ease;
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(37, 99, 235, 0.18);
+  box-shadow:
+    0 0 0 1px rgba(37, 99, 235, 0.08),
+    0 14px 32px -14px rgba(37, 99, 235, 0.20),
+    0 44px 84px -32px rgba(37, 99, 235, 0.26);
+}
+
+/* Distinctive top accent stripe — POD blue-deep, SILO cyan,
+   subtly differentiates the two products at a glance. */
+.cardPod::before,
+.cardSilo::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: clamp(1.5rem, 2.2vw, 2.1rem);
+  right: clamp(1.5rem, 2.2vw, 2.1rem);
+  height: 2px;
+  background: var(--brand-gradient);
+  opacity: 0.85;
+  border-radius: 0 0 2px 2px;
+}
+
+/* ==================== 1. Status row ==================== */
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.codePill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--ink-dim);
+  padding: 0.35rem 0.75rem;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* "PILOT · VALIDATED" — green, signals validated reality */
+.statusSigned {
+  color: #15803d;
+  background: rgba(34, 197, 94, 0.10);
+  border: 1px solid rgba(34, 197, 94, 0.30);
+}
+.statusSigned .statusDot {
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+}
+
+/* "Q4 2026 · TAKING LOIs" — brand blue, signals upcoming */
+.statusValidated {
+  color: var(--brand-deep);
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.24);
+}
+.statusValidated .statusDot {
+  background: var(--brand);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+/* ==================== 2. Title block ==================== */
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.productName {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 2.6vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  color: var(--ink-strong);
+  margin: 0;
+}
+
+.productTag {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--brand-deep);
+}
+
+/* ==================== 3. Image hero ==================== */
+.imageFrame {
+  position: relative;
+  width: 100%;
+  /* 16:10 frame matches the wide blueprint render proportions —
+     enough room for the hero shot AND the metric icons baked into
+     the bottom strip of each image. */
+  aspect-ratio: 16 / 10;
+  border-radius: 18px;
+  overflow: hidden;
+  /* Clean light frame — matches the white card surface so transparent
+     edges of the product renders blend seamlessly. The previous
+     dotted-blueprint placeholder bled through transparent areas of
+     the PNGs and made cards look empty. */
+  background: linear-gradient(
+    180deg,
+    rgba(243, 247, 252, 1) 0%,
+    rgba(248, 251, 255, 1) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(15, 23, 42, 0.06),
+    inset 0 1px 2px rgba(15, 23, 42, 0.03);
+  margin-bottom: 0;
+  color: transparent;
+}
+
+.image {
+  /* contain so the full blueprint shows without crop — the renders
+     have important content at every edge (title at top, metric icons
+     at bottom, dimension callouts on the sides). */
+  object-fit: contain;
+  /* Slight scale on hover — restrained Apple-style polish. */
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.imageOnly:hover .image {
+  transform: scale(1.02);
+}
+
+.card:hover .image {
+  transform: scale(1.02);
+}
+
+/* ==================== 4. Description ==================== */
+.description {
+  font-family: var(--font-body);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  margin: 0 0 1.4rem;
+  max-width: 56ch;
+}
+
+/* ==================== 5. Specs grid (2×2 under divider) ==================== */
+.specsDivider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.02) 0%,
+    rgba(37, 99, 235, 0.18) 50%,
+    rgba(15, 23, 42, 0.02) 100%
+  );
+  margin-bottom: 1.25rem;
+}
+
+.specsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.specCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.specKey {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+.specValue {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.5vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-strong);
+  margin: 0;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+}
+
+/* ==================== Reduced motion ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .image {
+    transition: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+  .card:hover .image {
+    transform: none;
+  }
+}
+
+/* ==================== Mobile tightening ==================== */
+@media (max-width: 540px) {
+  .head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .specsGrid {
+    gap: 0.9rem 1rem;
+  }
+}

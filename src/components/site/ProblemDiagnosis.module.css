@@ -9,15 +9,18 @@
 
 .section {
   position: relative;
-  overflow: hidden;
-  background:
-    /* top hairline — transition from hero */
-    linear-gradient(
-      to bottom,
-      rgba(15, 23, 42, 0.06) 0,
-      transparent 1px
-    ),
-    var(--paper);
+  /* overflow: clip (not hidden) — clips overflow visually without
+     creating a scroll container. Critical: a sticky descendant
+     (like .bgVideoSticky) needs the viewport as its scrollport, not
+     this section. overflow:hidden would make the section a scrollport,
+     so sticky would only stick within the section's own scroll
+     bounds (which don't actually scroll), breaking the effect. */
+  overflow: clip;
+  /* Section background now matches the ribbon video's dark backdrop
+     so there's no white flash above/below where the sticky video
+     hasn't engaged yet. Was paper; switched when the video became
+     full-bleed. */
+  background: #050d1a;
   isolation: isolate;
 }
 
@@ -28,9 +31,86 @@
   pointer-events: none;
 }
 
+/* ============================================================
+   Scroll-driven background ribbon video.
+
+   Sits at the deepest layer of .bg (the ::before-style position),
+   so the existing GridField / AmbientOrbs / Particles all render
+   on top of it.
+
+   Visual intent: the blue ribbons should feel like ambient brand
+   energy washing through the section as the user scrolls — present
+   but not dominant. So we:
+     - Cap opacity at ~0.35 (subtle, not screaming)
+     - Use mix-blend-mode: screen so dark video areas disappear
+       into the light .paper background, only the bright cyan/blue
+       ribbon strands lift off the page
+     - Apply a soft top-and-bottom mask so the video fades into
+       the section's edges instead of sharp-cutting
+   ============================================================ */
+/* ============================================================
+   Sticky video wrapper — keeps the video at viewport aspect
+   ratio while the section scrolls past.
+
+   Two layout tricks combined:
+     - margin-top: -section-pad cancels the section's top padding
+       for THIS element only, pulling the wrapper up so it starts
+       flush with the section's top edge. Without this, the video
+       sticks to the wrapper's natural position which is ~174px
+       below section top, leaving a dark gap when the section
+       first enters the viewport.
+     - margin-bottom: -100vh cancels the wrapper's own 100vh height
+       in flow so it doesn't push the section's actual content
+       down. The wrapper takes 0 net flow space.
+   ============================================================ */
+.bgVideoSticky {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  margin-top: calc(-1 * clamp(5rem, 10vh, 9rem));
+  margin-left: calc(-1 * clamp(1.25rem, 4vw, 3.5rem));
+  margin-right: calc(-1 * clamp(1.25rem, 4vw, 3.5rem));
+  margin-bottom: -100vh;
+  margin-bottom: -100dvh;
+  /* Width has to match the negative margins so the wrapper
+     extends to true edges of the section (not constrained by
+     section-pad's horizontal padding). */
+  width: calc(100% + 2 * clamp(1.25rem, 4vw, 3.5rem));
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bgVideo {
+  width: 100%;
+  height: 100%;
+  /* object-fit: cover fills the ENTIRE viewport edge-to-edge.
+     Aspect-ratio mismatch (16:9 video vs viewport) is resolved
+     by cropping the video to fit — never any empty bars. */
+  object-fit: cover;
+  opacity: 1;
+  display: block;
+  background: #000;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
 .inner {
   position: relative;
   z-index: 2;
+  /* Restore vertical breathing room. The .bgVideoSticky wrapper above
+     uses negative margin-top to break out of section-pad's padding
+     (so the video reaches the section's true top edge). That trick
+     also pulls subsequent siblings UP by the same amount — robbing
+     this content area of its top padding. We add it back here so
+     the header isn't crammed against the section's top edge.
+     Also adding extra breathing room (1.5rem) for visual comfort. */
+  padding-top: calc(clamp(5rem, 10vh, 9rem) + 1.5rem);
+  padding-bottom: clamp(2rem, 5vh, 4rem);
 }
 
 /* ============== HEADER ============== */
@@ -56,14 +136,18 @@
   font-family: var(--font-display);
   line-height: 1.04;
   letter-spacing: -0.04em;
-  color: var(--ink-strong);
+  /* Light text on the dark ribbon-video background. Soft text-shadow
+     gives extra legibility wherever the video happens to be brightest. */
+  color: var(--bone);
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
   max-width: 18ch;
 }
 
 .lede {
   font-size: clamp(1rem, 1.15vw, 1.12rem);
   line-height: 1.55;
-  color: var(--ink-dim);
+  color: var(--bone-dim);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.5);
   max-width: 58ch;
 }
 
@@ -78,35 +162,103 @@
 }
 
 /* ============== CARD ============== */
+/* ============================================================
+   Liquid-glass card — Apple-style frosted pane.
+
+   Layered effect achieved via:
+     1. Subtle white-blue tint as base background (light frost)
+     2. Heavy backdrop-filter blur + saturation boost
+        (the video behind blurs into a soft watercolor)
+     3. Top-edge highlight via inset white shadow
+        (catches "light", reads as a glass bezel)
+     4. Soft outer shadow grounded in brand-blue glow
+     5. Inner gradient overlay (::before) — diagonal sheen
+        that gives liquid-glass refraction feel
+   ============================================================ */
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
   min-height: 340px;
   padding: 1.6rem 1.6rem 1.9rem;
-  background: var(--glass-bg-strong);
-  border: 1px solid var(--glass-edge);
-  border-radius: 14px;
-  backdrop-filter: blur(20px) saturate(1.1);
-  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  /* Subtle white-blue surface tint — defines the card edge. */
+  background:
+    radial-gradient(
+      ellipse 120% 140% at 30% 30%,
+      rgba(140, 190, 255, 0.14) 0%,
+      rgba(80, 140, 230, 0.06) 50%,
+      rgba(50, 90, 180, 0.04) 100%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.10) 0%,
+      rgba(200, 220, 255, 0.06) 100%
+    );
+  border: 1px solid rgba(180, 210, 255, 0.35);
+  border-radius: 22px;
+  /* CSS liquid-glass — backdrop-filter via custom property to
+     defeat Lightning-CSS prefix de-duplication (which was
+     stripping the standard property and leaving only -webkit-). */
+  --liquid-glass: blur(60px) saturate(2.5) brightness(1.4);
+  -webkit-backdrop-filter: var(--liquid-glass);
+  backdrop-filter: var(--liquid-glass);
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 10px 32px -14px rgba(15, 23, 42, 0.08);
+    /* Top-edge bright highlight — reads as polished bezel */
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
+    /* Inner side highlights — subtle depth */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    /* Inner deep shadow for glass thickness */
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
+    /* Outer drop with brand-blue tint — grounds card in scene */
+    0 18px 50px -20px rgba(37, 99, 235, 0.35),
+    0 4px 14px -4px rgba(0, 0, 0, 0.4);
   overflow: hidden;
-  transition: transform 0.4s var(--ease-out-quart, cubic-bezier(0.22, 0.61, 0.36, 1)),
-              box-shadow 0.4s var(--ease-out-quart, cubic-bezier(0.22, 0.61, 0.36, 1)),
-              border-color 0.3s;
-}
-.card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(34, 211, 238, 0.32);
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.05),
-    0 22px 50px -18px rgba(15, 23, 42, 0.14),
-    0 0 0 1px rgba(34, 211, 238, 0.15);
+  isolation: isolate;
+  transition:
+    transform 0.4s var(--ease-out-quart, cubic-bezier(0.22, 0.61, 0.36, 1)),
+    box-shadow 0.4s var(--ease-out-quart, cubic-bezier(0.22, 0.61, 0.36, 1)),
+    border-color 0.3s;
 }
 
-/* Faint top-left index marker — control-panel feel */
+/* Diagonal sheen overlay — a subtle bright-to-transparent gradient
+   that swept across the card surface gives the "liquid glass"
+   refraction feel. Drawn behind content via z-index. */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0) 65%,
+    rgba(120, 180, 255, 0.10) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+  mix-blend-mode: overlay;
+}
+
+/* Make sure the actual card content sits above the sheen overlay */
+.card > * {
+  position: relative;
+  z-index: 2;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
+    0 24px 60px -22px rgba(34, 211, 238, 0.5),
+    0 6px 18px -4px rgba(0, 0, 0, 0.45);
+}
+
+/* Faint top-left index marker — control-panel feel.
+   z-index: 1 places it above the sheen overlay (::after, z:0)
+   but below the card content (z:2). */
 .card::before {
   content: "";
   position: absolute;
@@ -115,7 +267,8 @@
   width: 36px;
   height: 2px;
   background: var(--brand-gradient);
-  opacity: 0.55;
+  opacity: 0.85;
+  z-index: 1;
 }
 
 /* Card head — M-0X code + status chip */
@@ -130,19 +283,19 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.cardCode { color: var(--ink-faint); }
+.cardCode { color: var(--bone-faint); }
 .cardStatus {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--ink-dim);
+  color: var(--bone-dim);
   font-weight: 600;
 }
 .statusDotDegraded {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--ink-dim);
+  background: var(--bone-dim);
   box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.12);
 }
 
@@ -153,7 +306,7 @@
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--bone-faint);
   margin-bottom: 0.4rem;
 }
 
@@ -164,7 +317,7 @@
   gap: 0.55rem;
   margin-bottom: 0.45rem;
   font-family: var(--font-display);
-  color: var(--ink-strong);
+  color: var(--bone);
   font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
 }
 .cardNumber {
@@ -176,14 +329,14 @@
 .cardNumberRange {
   font-size: clamp(1.6rem, 3vw, 2rem);
   font-weight: 500;
-  color: var(--ink-faint);
+  color: var(--bone-faint);
   letter-spacing: -0.03em;
   margin-left: -0.1em;
 }
 .cardCurrency {
   font-size: 0.55em;
   font-weight: 500;
-  color: var(--ink-dim);
+  color: var(--bone-dim);
   margin-right: 0.08em;
   position: relative;
   top: -0.25em;
@@ -194,14 +347,14 @@
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-dim);
+  color: var(--bone-dim);
 }
 
 /* Sub caption */
 .cardSub {
   font-size: 0.85rem;
   line-height: 1.45;
-  color: var(--ink-dim);
+  color: var(--bone-dim);
   max-width: 42ch;
   margin-bottom: auto;
   padding-bottom: 1.4rem;
@@ -240,7 +393,7 @@
   height: 9px;
   border-radius: 50%;
   background: var(--panel);
-  border: 1.5px solid var(--ink-dim);
+  border: 1.5px solid var(--bone-dim);
   transform: translate(-50%, -50%);
 }
 .queueNode:last-child {
@@ -262,7 +415,7 @@
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--bone-faint);
   white-space: nowrap;
 }
 .queueLabel:first-child { transform: translateX(0); }
@@ -311,9 +464,9 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.capexChipLabel { color: var(--ink-faint); }
+.capexChipLabel { color: var(--bone-faint); }
 .capexChipAmt {
-  color: var(--ink-dim);
+  color: var(--bone-dim);
   font-weight: 600;
   font-feature-settings: "tnum" 1;
 }
@@ -339,7 +492,7 @@
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: -0.03em;
-  color: var(--ink-strong);
+  color: var(--bone);
   line-height: 1;
   font-feature-settings: "tnum" 1;
 }
@@ -349,7 +502,7 @@
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--bone-faint);
 }
 
 /* ============== WASTE BAR (card 4) ============== */
@@ -395,7 +548,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--ink-faint);
+  color: var(--bone-faint);
 }
 .legendWaste i,
 .legendUseful i {
@@ -428,7 +581,7 @@
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink-dim);
+  color: var(--bone-dim);
 }
 .bridgeRule {
   flex: 1;

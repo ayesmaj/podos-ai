@@ -143,7 +143,7 @@ export default function HeroAIWall() {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
             <span className="hr-eyeDot" />
-            CALIFORNIA MODULARS · SERIES SEED · APRIL 2026
+            PODOS AI · MODULAR COMPUTE INFRASTRUCTURE
           </motion.span>
 
           <motion.h1
@@ -152,10 +152,10 @@ export default function HeroAIWall() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
-            The AI Economy
+            Modular AI compute
             <br />
-            Needs a New{" "}
-            <span className="hr-headlineGrad">Physical Layer.</span>
+            capacity,{" "}
+            <span className="hr-headlineGrad">built to deploy.</span>
           </motion.h1>
 
           <motion.p
@@ -164,10 +164,9 @@ export default function HeroAIWall() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <b>One company. Two inventions.</b> PODOS ships{" "}
-            <b>1-MW AI supercomputers in 90–120 days</b>. Syntropic makes every
-            GPU inside them do the work of ten. Together they turn GPU
-            deployment from a construction project into a product.
+            PODOS AI delivers <b>factory-built AI compute pods</b> designed
+            for rapid deployment at facilities that need serious compute
+            capacity — without waiting years for hyperscale construction.
           </motion.p>
 
           <motion.div
@@ -176,8 +175,8 @@ export default function HeroAIWall() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
-            <a href="#use-of-funds" className="hr-btn hr-btnPrimary">
-              Request Investor Access
+            <a href="#access" className="hr-btn hr-btnPrimary">
+              Request a Deployment Conversation
               <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
                 <path
                   d="M3.5 8H12.5M12.5 8L8 3.5M12.5 8L8 12.5"
@@ -188,8 +187,8 @@ export default function HeroAIWall() {
                 />
               </svg>
             </a>
-            <a href="#syntropic-console" className="hr-btn hr-btnGhost">
-              See the Delta
+            <a href="#podos" className="hr-btn hr-btnGhost">
+              Explore the Pod
             </a>
           </motion.div>
 
@@ -199,13 +198,13 @@ export default function HeroAIWall() {
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.7 }}
           >
-            <span><b>$3.4T</b> AI Infra Buildout</span>
-            <span className="hr-trustSep">·</span>
-            <span><b>76+</b> USPTO Patents</span>
+            <span><b>1-MW</b> Modular Pods</span>
             <span className="hr-trustSep">·</span>
             <span><b>90–120 day</b> Deploy</span>
             <span className="hr-trustSep">·</span>
-            <span><b>85×</b> Useful Tp/W</span>
+            <span><b>Factory-Built</b> Infrastructure</span>
+            <span className="hr-trustSep">·</span>
+            <span><b>Site-Ready</b> Commissioning</span>
           </motion.div>
         </div>
 
@@ -298,7 +297,7 @@ export default function HeroAIWall() {
 
           <div className="hr-cardFoot">
             <span className="hr-cardFootLeft">
-              SYNTROPIC SCHEDULER · <b>ACTIVE</b>
+              PODOS PLATFORM · <b>ACTIVE</b>
             </span>
             <span className="hr-cardFootRight">UPTIME {uptime}</span>
           </div>

@@ -46,3 +46,8 @@ next-env.d.ts
 .tmp-screens/
 WhatsApp Image*.png
 WhatsApp Image*.jpeg
+
+# Render frame sequences and other heavy intermediate work product
+sequanse helicopter/
+*.aep
+*.psd

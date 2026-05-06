@@ -6,13 +6,15 @@ import dynamic from "next/dynamic";
 import styles from "./PodosPod.module.css";
 import {
   GridField,
-  CircuitTraces,
   AmbientOrbs,
   VignetteLight,
 } from "./BackgroundLayers";
 import LineIcon from "./LineIcon";
 import VideoBackground from "./VideoBackground";
 import OptimusInteractive from "../optimus/OptimusInteractive";
+import EngineeringAdvantages from "./EngineeringAdvantages";
+import ProductShowcase from "./ProductShowcase";
+import DeployTimelineScrub from "./DeployTimelineScrub";
 
 /**
  * 3D rack viewer — code-split out of the initial bundle.
@@ -67,7 +69,7 @@ const specs = [
   { label: "HEAT RECOVERY", value: "ORC", unit: "engine", note: "60–110 kW reclaimed per pod" },
   { label: "DEPLOY",   value: "90–120", unit: "days",  note: "door to dashboard" },
   { label: "MFG",      value: "California", unit: "", note: "shipped · not sited" },
-  { label: "PATENTS",  value: "76+",    unit: "USPTO", note: "granted + pending" },
+  { label: "RELOCATION", value: "Yes", unit: "",      note: "redeployable foundation option" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -83,106 +85,26 @@ const timeline = [
 /* ------------------------------------------------------------------ */
 /* PRODUCT LADDER — POD (1 MW) → SILO (20 MW)                          */
 /* ------------------------------------------------------------------ */
-/**
- * Two-tier product offering. The POD is the unit economics atom. The
- * SILO is a multi-pod cluster that ships at hyperscaler scale with the
- * same factory-built discipline. The visual ladder sells the story:
- * "same DNA, scales to $20M sites."
- *
- * Each tile mirrors the same shape so the asymmetric numbers (1 → 20,
- * 128 → 2,560) do the rhetorical work without copy gymnastics.
- */
-const PRODUCT_LADDER = [
-  {
-    code: "PROD-01",
-    icon: "pod" as const,
-    name: "PODOS POD",
-    tag: "1 MW · UNIT",
-    subtitle:
-      "Containerized factory-built AI supercomputer. 720 sq ft, fully relocatable, off-grid capable.",
-    specs: [
-      { k: "POWER",     v: "1 MW" },
-      { k: "COMPUTE",   v: "128 GPUs" },
-      { k: "FOOTPRINT", v: "720 sq ft" },
-      { k: "DEPLOY",    v: "90–120 days" },
-    ],
-    badge: "PILOT · VALIDATED",
-    badgeTone: "signed" as const,
-  },
-  {
-    code: "PROD-02",
-    icon: "silo" as const,
-    name: "MEGA SILO",
-    tag: "20 MW · CLUSTER",
-    subtitle:
-      "Hyperbaric N₂ compound at 3–5+ atm. 24 pods in 20,000 sq ft — replaces 100,000 sq ft of traditional data center (83% smaller).",
-    specs: [
-      { k: "POWER",     v: "20 MW" },
-      { k: "COMPUTE",   v: "2,560 GPUs" },
-      { k: "DENSITY",   v: "3–5+ atm N₂" },
-      { k: "FOOTPRINT", v: "−83% vs DC" },
-    ],
-    badge: "Q4 2026 · TAKING LOIs",
-    badgeTone: "validated" as const,
-  },
-];
+// PRODUCT_LADDER data array removed — content lives in
+// ProductShowcase.tsx (its own PRODUCTS array) so the premium
+// component is a self-contained unit.
 
-/* ------------------------------------------------------------------ */
-/* ENGINEERING PRINCIPLES — four pillars that make the box different   */
-/* ------------------------------------------------------------------ */
-/**
- * Deck Slide 5 "The PODOS Pod" lists four defensible engineering
- * decisions that collectively make the modular approach work. These
- * aren't "features" — they're the reason the capex and deploy-time
- * numbers in the spec sheet are achievable at all. Rendered as
- * four cards AFTER the product ladder so the user reads:
- *
- *   1. Here's the product (POD + SILO)
- *   2. Here's WHY the product economics are real
- *
- * Not HERE's how you use them — HERE's what makes them possible.
- */
-const ENGINEERING_PRINCIPLES = [
-  {
-    code: "E-01",
-    title: "Thermos enclosure",
-    detail:
-      "Multi-layer foam core + reflective vapor barrier on all six surfaces. Thermal delta held steady regardless of climate — Arctic field to Phoenix tarmac, same PUE.",
-    metric: "6 surfaces",
-    metricLabel: "INSULATED",
-  },
-  {
-    code: "E-02",
-    title: "ORC heat engine",
-    detail:
-      "Organic Rankine Cycle on the waste-heat loop recaptures 60–110 kW as grid-synchronous electricity. Adds ~$57K/yr of revenue per pod without any additional footprint.",
-    metric: "$57K",
-    metricLabel: "/yr/pod reclaimed",
-  },
-  {
-    code: "E-03",
-    title: "Off-grid ready",
-    detail:
-      "Solar roof + battery bank + backup generator integrated. Can deploy to remote edge sites without fiber or utility interconnect — same 90-day timeline, anywhere on the map.",
-    metric: "0",
-    metricLabel: "GRID DEPENDENCY",
-  },
-  {
-    code: "E-04",
-    title: "Zero water · zero concrete",
-    detail:
-      "Closed-loop direct-to-chip liquid means no cooling towers, no water-rights negotiation, no slab permits. The pod lands on gravel or asphalt and starts serving inference.",
-    metric: "0 gal",
-    metricLabel: "WATER · CONCRETE",
-  },
-];
+// ENGINEERING_PRINCIPLES data array removed — content lives in
+// EngineeringAdvantages.tsx (its own ADVANTAGES array) so the
+// premium component is a self-contained unit.
 
 /* ================================================================== */
 /* SECTION                                                             */
 /* ================================================================== */
 export default function PodosPod() {
   const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.2 });
+  // The section is ~5400px tall (taller than the viewport), so an
+  // `amount: 0.2` threshold here can never be satisfied — the trigger
+  // never fires and the header stays at opacity: 0 forever. We anchor
+  // the visibility check to the header itself, which is short enough
+  // to fully clear any threshold.
+  const headerRef = useRef<HTMLElement>(null);
+  const inView = useInView(headerRef, { once: true, amount: 0.2 });
 
   /* ================================================================
    * SCROLL CHOREOGRAPHY — drives the 3D rack rotation
@@ -218,10 +140,13 @@ export default function PodosPod() {
       <div className={styles.bg} aria-hidden>
         {/* Base: modular-infra footage (shipping containers, factory
             yards). Tinted cyan by the VideoBackground overlay stack so
-            warehouse beige becomes brand-coherent. */}
+            warehouse beige becomes brand-coherent.
+
+            Removed CircuitTraces (the diagonal dashed lines) per
+            design feedback — the section reads cleaner without the
+            crisscross overlay. GridField + orbs + vignette stay. */}
         <VideoBackground variant="modular-infra" />
         <GridField variant="dense" />
-        <CircuitTraces accent="electric" />
         <AmbientOrbs config="electric" />
         <VignetteLight />
       </div>
@@ -229,6 +154,7 @@ export default function PodosPod() {
       <div className={`container-site ${styles.inner}`}>
         {/* HEADER */}
         <motion.header
+          ref={headerRef}
           className={styles.header}
           initial={{ opacity: 0, y: 16 }}
           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
@@ -253,23 +179,21 @@ export default function PodosPod() {
           </p>
         </motion.header>
 
-        {/* ============ STUDIO — 3D rack only, full-width, scroll-locked ============
-            The rack now occupies the full content width centered above
-            the engineering schematic. This restores horizontal room
-            (no more right-edge clipping) and gives the lock-in scroll
-            choreography a more dramatic stage. The schematic + spec
-            nameplate live in the original side-by-side grid directly
-            below this block, exactly where they used to be.
-
-            Sticky behaviour: 140vh outer wrapper, 100vh sticky inner
-            stage. Below 1020px both relax to normal block flow (CSS). */}
+        {/* ============ STUDIO — 3D rack viewer ============
+            Scroll-driven 3D rack. See PodosRack3D for camera,
+            lighting, and rotation animation. */}
         <div ref={studioRef} className={styles.studio}>
           <div className={styles.studioStage}>
             <div className={styles.studioGrid}>
               <motion.div
                 className={styles.studioRack}
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                /* Always visible. The previous useInView gate was
+                   unreliable in this layout (Lenis + sticky ancestors
+                   confuse the IntersectionObserver), and the rack
+                   canvas was being hidden by a stuck opacity: 0 even
+                   though WebGL was rendering correctly underneath. */
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
                   duration: 0.9,
                   delay: 0.15,
@@ -283,17 +207,7 @@ export default function PodosPod() {
                   </span>
                   <span>3D · LIVE GEOMETRY · DRAG OR SCROLL</span>
                 </div>
-
-                {/* Pass scroll progress as a MotionValue. Inside the
-                    Canvas, useFrame reads .get() each animation frame
-                    and rotates the group toward target — no React
-                    re-renders fire when the value updates. */}
                 <PodosRack3D scrollProgress={scrollYProgress} />
-
-                {/* Affordance for the rotation interaction. Hidden on
-                    touch devices (CSS hover:none rule) since the
-                    scroll-rotate metaphor is already self-evident on
-                    mobile. */}
                 <div className={styles.studioScrollHint} aria-hidden>
                   <svg viewBox="0 0 12 12">
                     <path
@@ -328,8 +242,22 @@ export default function PodosPod() {
             this swap is fully reversible if needed. */}
         <OptimusInteractive />
 
-        {/* DEPLOY TIMELINE */}
-        <div className={styles.timelineWrap}>
+        {/* ============ DEPLOY TIMELINE — SCROLL-SCRUBBED VIDEO ============
+            Replaces the static D+0 / D+30 / D+60 / D+90 timeline graphic
+            with a cinematic full-bleed video. The video is pinned to the
+            viewport (sticky 100vh) inside an outer scroll runway. As the
+            user scrolls through the runway, the video's currentTime is
+            mapped to scroll progress — so scrolling effectively "plays"
+            the video forward, and reverse-scrolling rewinds it. Once the
+            user scrolls past the runway, normal scroll resumes.
+
+            Same pattern (and Lenis-aware listener stack) used by
+            ProblemDiagnosis for its background scrub video. */}
+        <DeployTimelineScrub />
+
+        {/* legacy timeline below — kept temporarily for reference, hidden
+            via display:none. Remove once the scrub video is approved. */}
+        <div className={styles.timelineWrap} hidden>
           <div className={styles.timelineHead}>
             <span className="t-eyebrow">DEPLOY · 90–120 DAYS · FACTORY TO FIRST MW</span>
           </div>
@@ -371,109 +299,21 @@ export default function PodosPod() {
             scale. Positioned AFTER the timeline so the reader has
             absorbed "90–120 days to 1 MW" before being asked to picture
             the 20-MW cluster. */}
-        <ProductLadder inView={inView} />
+        <ProductShowcase />
 
-        {/* ============ ENGINEERING PRINCIPLES ============
-            Four pillars that make the capex + deploy-time numbers
-            above possible at all. Thermos, ORC, off-grid, zero-water.
-            Reads as "here's why the numbers are real", not "here are
-            some features". */}
-        <EngineeringPrinciples inView={inView} />
+        {/* ============ ENGINEERING ADVANTAGES ============
+            Premium 4-card feature grid with real product imagery.
+            Replaces the older EngineeringPrinciples text-only tiles.
+            Apple-keynote × NVIDIA-infrastructure visual language. */}
+        <EngineeringAdvantages />
       </div>
     </section>
   );
 }
 
-/* ================================================================== */
-/* PRODUCT LADDER — POD (1 MW) → MEGA SILO (20 MW)                     */
-/* ================================================================== */
-/**
- * A two-tile product strip that introduces the MEGA SILO (20 MW
- * cluster) as the scaled-up sibling of the POD. Tiles share layout
- * so the asymmetric numbers (1 → 20, 128 → 2,560) carry the argument
- * without needing marketing copy.
- *
- * Tile anatomy (identical across both tiers):
- *   - Icon (LineIcon primitive — pod / silo)
- *   - Code pill + badge (availability status)
- *   - Product name + tier tag
- *   - One-line subtitle
- *   - 4-row spec grid (POWER / COMPUTE / DEPLOY / PUE)
- *
- * The only visual differentiation between tiles is which spec
- * numbers change. This is intentional — the product design rhymes
- * across tiers, so the user reads "same system, bigger scale."
- */
-function ProductLadder({ inView }: { inView: boolean }) {
-  return (
-    <motion.div
-      className={styles.ladder}
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.9, delay: 1.7, ease: [0.22, 0.61, 0.36, 1] }}
-    >
-      <div className={styles.ladderHead}>
-        <span className="t-eyebrow">PRODUCT LADDER · SAME DNA, TWO SCALES</span>
-        <span className={styles.ladderHeadNote}>
-          Unit economics prove at 1 MW · cluster economics unlock at 20 MW
-        </span>
-      </div>
-
-      <div className={styles.ladderGrid}>
-        {PRODUCT_LADDER.map((p, i) => (
-          <motion.article
-            key={p.code}
-            className={`${styles.ladderTile} ${
-              i === 0 ? styles.ladderTilePod : styles.ladderTileSilo
-            }`}
-            initial={{ opacity: 0, y: 16 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{
-              duration: 0.8,
-              delay: 1.85 + i * 0.12,
-              ease: [0.22, 0.61, 0.36, 1],
-            }}
-          >
-            <header className={styles.ladderTileHead}>
-              <span className={styles.ladderCode}>{p.code}</span>
-              <span
-                className={`${styles.ladderBadge} ${
-                  p.badgeTone === "signed"
-                    ? styles.ladderBadgeSigned
-                    : styles.ladderBadgeValidated
-                }`}
-              >
-                <span className={styles.ladderBadgeDot} aria-hidden />
-                {p.badge}
-              </span>
-            </header>
-
-            <div className={styles.ladderTileBody}>
-              <div className={styles.ladderIconWrap}>
-                <LineIcon name={p.icon} size={32} strokeWidth={1.4} />
-              </div>
-              <div className={styles.ladderTileTitle}>
-                <div className={styles.ladderName}>{p.name}</div>
-                <div className={styles.ladderTag}>{p.tag}</div>
-              </div>
-            </div>
-
-            <p className={styles.ladderSubtitle}>{p.subtitle}</p>
-
-            <dl className={styles.ladderSpecs}>
-              {p.specs.map((s) => (
-                <div key={s.k} className={styles.ladderSpec}>
-                  <dt className={styles.ladderSpecKey}>{s.k}</dt>
-                  <dd className={styles.ladderSpecVal}>{s.v}</dd>
-                </div>
-              ))}
-            </dl>
-          </motion.article>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
+// ProductLadder sub-component removed — replaced by the dedicated
+// <ProductShowcase /> premium card section imported at the top of
+// this file.
 
 /* ================================================================== */
 /* ENGINEERING PRINCIPLES — four-card panel                            */
@@ -485,54 +325,9 @@ function ProductLadder({ inView }: { inView: boolean }) {
  * reads as one continuous spec document — pod + silo + principles —
  * rather than three disconnected panels.
  */
-function EngineeringPrinciples({ inView }: { inView: boolean }) {
-  return (
-    <motion.div
-      className={styles.principles}
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.9, delay: 2.1, ease: [0.22, 0.61, 0.36, 1] }}
-    >
-      <div className={styles.principlesHead}>
-        <span className="t-eyebrow">
-          ENGINEERING PRINCIPLES · WHY THE ECONOMICS WORK
-        </span>
-        <span className={styles.principlesHeadNote}>
-          Four decisions that collapse three years of traditional DC
-          construction into a 90-day factory cycle.
-        </span>
-      </div>
-
-      <div className={styles.principlesGrid}>
-        {ENGINEERING_PRINCIPLES.map((p, i) => (
-          <motion.article
-            key={p.code}
-            className={styles.principleTile}
-            initial={{ opacity: 0, y: 14 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{
-              duration: 0.7,
-              delay: 2.25 + i * 0.1,
-              ease: [0.22, 0.61, 0.36, 1],
-            }}
-          >
-            <header className={styles.principleHead}>
-              <span className={styles.principleCode}>{p.code}</span>
-              <div className={styles.principleMetric}>
-                <span className={styles.principleMetricValue}>{p.metric}</span>
-                <span className={styles.principleMetricLabel}>
-                  {p.metricLabel}
-                </span>
-              </div>
-            </header>
-            <h3 className={styles.principleTitle}>{p.title}</h3>
-            <p className={styles.principleDetail}>{p.detail}</p>
-          </motion.article>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
+// EngineeringPrinciples sub-component removed — replaced by the
+// dedicated <EngineeringAdvantages /> premium card section imported
+// at the top of this file.
 
 /* ================================================================== */
 /* POD BLUEPRINT SVG                                                   */

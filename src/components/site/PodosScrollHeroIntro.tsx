@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import "@/app/intro/intro.css";
+import "./PodosScrollHeroIntro.css";
 
 /**
  * PodosScrollHeroIntro — scroll-controlled, page-pinned intro.
@@ -65,9 +65,9 @@ const STEPS: Step[] = [
   },
   {
     range: [0.60, 0.80],
-    headline: "SYNTROPIC makes every GPU do the work of ten.",
+    headline: "Modular AI compute capacity, built to deploy.",
     subline:
-      "Compression transforms the memory bottleneck into usable compute.",
+      "Factory-built pods designed for rapid commissioning at facilities that need serious compute, fast.",
   },
   {
     range: [0.80, 1.00],
@@ -415,7 +415,7 @@ export default function PodosScrollHeroIntro() {
                   <p className="intro-tagline">
                     The New Physical Layer for AI.
                   </p>
-                  <p className="intro-poweredBy">Powered by Syntropic</p>
+                  <p className="intro-poweredBy">Modular AI Compute</p>
                 </>
               ) : (
                 <>

@@ -1,0 +1,296 @@
+/* =============================================================
+ * HeroVideoNarrative — pinned scroll-driven hero video.
+ * Video fills the viewport. Text overlays fade in/out at chapter
+ * marks. ScrollTrigger pins the section while the timeline plays.
+ * After the timeline ends, the pin releases and the rest of the
+ * page scrolls normally.
+ * ============================================================= */
+
+.hero {
+  /* position: sticky keeps the hero pinned to the top of the viewport
+     while the next section (main.pageOverlay) flows up underneath it
+     in document order. Combined with z-index: 1 (and main.pageOverlay
+     at z-index: 10), the layered card-over-hero effect emerges from
+     pure CSS — no GSAP pin, no margin tricks, no displacement. */
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh; /* dynamic viewport for mobile chrome */
+  background: #000;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.hero[data-scroll-locked="true"] {
+  /* While the GSAP timeline is active, this section is pinned via
+     ScrollTrigger. No special styling needed — pinSpacer handles it. */
+}
+
+/* ============== VIDEO LAYER ============== */
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Slight darken on the video so text overlays read against it.
+     The video itself already has a dark backdrop, so this is light. */
+  filter: brightness(0.92);
+}
+
+/* Vignette + bottom darken so headline at bottom and eyebrow at top
+   both have contrast against any video frame. */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.18) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.32) 100%);
+}
+
+/* ============== TEXT OVERLAYS ============== */
+.overlays {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: clamp(5.5rem, 12vh, 9rem);
+  padding-left: clamp(1.25rem, 4vw, 3rem);
+  padding-right: clamp(1.25rem, 4vw, 3rem);
+  pointer-events: none;
+}
+
+.chapter {
+  position: absolute;
+  top: clamp(5.5rem, 12vh, 9rem);
+  left: 0;
+  right: 0;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  /* Will be controlled by GSAP — initial state is hidden. */
+  pointer-events: none;
+}
+
+/* Premium pill eyebrow — same vocabulary as the DeploymentTimeline
+   and PodosPod sections so the hero reads as part of one design
+   system. Glass surface + cyan brightening + subtle drop shadow. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--cyan-bright);
+  padding: 0.5rem 1.05rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  margin-bottom: 1.6rem;
+  text-shadow: 0 0 14px rgba(103, 232, 249, 0.35);
+  position: relative;
+}
+
+/* Live cyan dot prefix — heartbeat indicator, same one used in the
+   HUD corners. Telegraphs "this is a live system" rather than
+   "this is a static marketing page". */
+.eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan-bright);
+  box-shadow: 0 0 8px rgba(103, 232, 249, 0.85);
+  animation: heroPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes heroPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(103, 232, 249, 0.85); }
+  50%      { opacity: 0.55; box-shadow: 0 0 14px rgba(103, 232, 249, 1); }
+}
+
+/* Subtle vertical accent line below eyebrow — divider rule that
+   echoes the DeploymentTimeline header. */
+.eyebrow::after {
+  content: "";
+  position: absolute;
+  bottom: -1.05rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 16px;
+  background: linear-gradient(180deg, var(--cyan-bright), transparent);
+  opacity: 0.55;
+}
+
+/* Display headline — heavier weight + tighter tracking matches the
+   PodosPod / DeploymentTimeline display headlines exactly. */
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.4rem, 5.8vw, 5rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+  max-width: 22ch;
+  margin: 0 auto 1.6rem;
+  text-shadow:
+    0 2px 28px rgba(0, 0, 0, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Brand-gradient sweep on the active phrase ("AI compute platform")
+   — same `t-sweep-brand` treatment used in the rest of the site so
+   one keyword in the hero pops in cyan/blue without competing with
+   the rest of the white headline. Apply by wrapping the phrase in
+   <span class="t-sweep-brand"> in the JSX. The class is global. */
+
+.sub {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.45vw, 1.2rem);
+  font-weight: 400;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 58ch;
+  margin: 0 auto 1.6rem;
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.55);
+}
+
+/* Tagline — pill-style premium chip beneath the sub, same chrome
+   family as the eyebrow pill but with brand-blue accents instead
+   of cyan, signaling "outcome / promise" rather than "section
+   index". Sits as the visual punctuation of the chapter. */
+.tagline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.15vw, 1.08rem);
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: #ffffff;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid rgba(147, 197, 253, 0.30);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.22) 0%, rgba(34, 211, 238, 0.18) 100%);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  margin: 0.4rem auto 0;
+  text-shadow: 0 1px 10px rgba(37, 99, 235, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 6px 18px -8px rgba(37, 99, 235, 0.4);
+}
+
+/* Tagline arrow accent — small chevron after the text indicating
+   "this leads forward". Decorative; built via border tricks, no SVG. */
+.tagline::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  opacity: 0.85;
+  margin-left: 0.1rem;
+}
+
+/* ============== SKIP / SCROLL HINT ============== */
+.skip {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 200ms ease, transform 200ms ease;
+  pointer-events: auto;
+}
+.skip:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.scrollHint {
+  position: absolute;
+  bottom: clamp(1.5rem, 3vw, 2.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  z-index: 5;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  animation: scrollPulse 2.4s infinite ease-in-out;
+}
+
+.scrollHintArrow {
+  width: 10px;
+  height: 10px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(45deg);
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+/* ============== PROGRESS RAIL (top edge) ============== */
+.progressRail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand), var(--cyan));
+  z-index: 8;
+  width: 0%;
+  transition: width 60ms linear;
+}
+
+/* ============== MOBILE — disable scroll-jack ============== */
+/* On narrow screens we don't pin/scrub. Video auto-plays end-to-end,
+   text overlays appear on a timer synced to video.currentTime. The
+   user just scrolls past the section normally. */
+@media (max-width: 768px) {
+  .scrollHint { display: none; }
+  /* Slightly tighter top padding so text doesn't fight the 3D pod
+     image in the lower portion of the video on small screens. */
+  .chapter {
+    top: clamp(4.5rem, 10vh, 7rem);
+    padding: 0 1.25rem;
+  }
+}

@@ -1,0 +1,466 @@
+/* ============================================================
+ * DeploymentTimeline — sticky-video scroll-driven section.
+ *
+ * Layout (matches ChatGPT reference):
+ *   .section is taller than the viewport (650vh) so the user has
+ *     scroll room across all 4 phases.
+ *   .sticky is a 100vh sticky child that pins to the viewport top.
+ *   No card chrome — the step title block floats directly over the
+ *     video with text-shadow for legibility.
+ *   Bottom horizontal stepper, HUD corners (coordinates BL, system
+ *     status BR), right-side vertical dot rail, top-right percent.
+ * ============================================================ */
+
+.section {
+  position: relative;
+  height: 650vh;
+  background: #050d1a;
+  overflow-x: clip;
+  isolation: isolate;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: #050d1a;
+}
+
+/* ---------------- Video ---------------- */
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #050d1a;
+}
+
+/* Soft vignette — top + bottom dim for text contrast against any
+   video frame. Slightly stronger at the bottom now since the
+   horizontal stepper + HUD corners need the dark band. */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5, 13, 26, 0.55) 0%,
+      transparent 22%,
+      transparent 50%,
+      rgba(5, 13, 26, 0.55) 80%,
+      rgba(5, 13, 26, 0.85) 100%
+    );
+}
+
+/* ---------------- Top progress rail ---------------- */
+.progressRail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand), var(--cyan));
+  z-index: 8;
+  width: 0%;
+  transition: width 80ms linear;
+}
+
+/* ---------------- Top-right progress badge ---------------- */
+.progressBadge {
+  position: absolute;
+  top: clamp(5.5rem, 9vh, 7rem);
+  right: clamp(1.25rem, 3vw, 2.5rem);
+  z-index: 5;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+  color: var(--cyan-bright, #67e8f9);
+  padding: 0.4rem 0.7rem;
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  border-radius: 999px;
+  background: rgba(5, 13, 26, 0.45);
+  backdrop-filter: blur(8px);
+  text-shadow: 0 0 12px rgba(103, 232, 249, 0.4);
+  pointer-events: none;
+}
+
+/* ---------------- Header (top of viewport) ---------------- */
+.header {
+  position: absolute;
+  top: clamp(5.5rem, 10vh, 8rem);
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 3;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
+  pointer-events: none;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.78rem;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--cyan-bright, #67e8f9);
+  padding: 0.45rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  margin-bottom: 1.2rem;
+}
+
+.eyebrowIdx {
+  font-weight: 800;
+  color: var(--cyan-bright, #67e8f9);
+}
+
+.eyebrowSep {
+  opacity: 0.4;
+  margin: 0 0.15rem;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5.4vw, 4.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: #ffffff;
+  max-width: 18ch;
+  margin: 0 auto;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.55);
+}
+
+/* ---------------- Floating step titles (no card chrome) ---------------- */
+.titlesWrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.title {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(720px, calc(100% - 2.5rem));
+  text-align: center;
+  --title-y: 22px;
+  transform: translateX(-50%) translateY(var(--title-y, 0));
+  opacity: 0;
+  filter: blur(6px);
+  transition:
+    opacity 80ms linear,
+    transform 80ms linear,
+    filter 80ms linear;
+}
+
+/* "STEP" small eyebrow */
+.stepBadge {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.78rem;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--cyan-bright, #67e8f9);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 12px rgba(103, 232, 249, 0.45);
+}
+
+/* Big floating number */
+.stepNumber {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(4rem, 9vw, 7.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  background: linear-gradient(180deg, #93c5fd 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 40px rgba(59, 130, 246, 0.35);
+  filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.35));
+}
+
+.stepTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin: 0 0 0.7rem;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7), 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+.stepBody {
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 1.15vw, 1.08rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0 auto;
+  max-width: 56ch;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.7), 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+ * Bottom horizontal stepper — 4 phases connected by a line
+ * ============================================================ */
+.stepper {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(5rem, 9vh, 7rem);
+  transform: translateX(-50%);
+  width: min(900px, calc(100% - 3rem));
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Connecting track behind the dots */
+.stepperTrack {
+  position: absolute;
+  top: 7px; /* dot center: 14px / 2 = 7px */
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+
+/* Cyan fill that grows with progress */
+.stepperFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--brand, #3b82f6), var(--cyan, #22d3ee));
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
+  transition: width 120ms linear;
+}
+
+.stepperRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  align-items: start;
+}
+
+.stepperItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+/* Default dot — empty ring */
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #050d1a;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+/* Past steps — dim filled */
+.dotPast {
+  background: var(--cyan, #22d3ee);
+  border-color: var(--cyan, #22d3ee);
+  opacity: 0.65;
+}
+
+/* Active step — bright cyan with glow + slight scale */
+.dotActive {
+  background: var(--cyan, #22d3ee);
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 4px rgba(34, 211, 238, 0.18),
+    0 0 14px rgba(34, 211, 238, 0.7);
+  transform: scale(1.15);
+}
+
+.stepperLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.stepperLabelN {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+
+.stepperLabelPhase {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+
+/* ============================================================
+ * HUD corners — coordinates (bottom-left), system status (bottom-right)
+ * ============================================================ */
+.hudBl,
+.hudBr {
+  position: absolute;
+  bottom: clamp(1rem, 2.5vh, 1.75rem);
+  z-index: 4;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+
+.hudBl {
+  left: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+.hudBr {
+  right: clamp(1.25rem, 3vw, 2.5rem);
+  text-align: right;
+}
+
+.hudBlLine {
+  margin-bottom: 0.18rem;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+
+.hudBrLabel {
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.2rem;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+
+.hudBrValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+
+.hudBrDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan, #22d3ee);
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+  animation: hudPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes hudPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(34, 211, 238, 0.8); }
+  50% { opacity: 0.55; box-shadow: 0 0 14px rgba(34, 211, 238, 1); }
+}
+
+/* ============================================================
+ * Right-side vertical dot rail — 4 dots, one per phase
+ * ============================================================ */
+.sideRail {
+  position: absolute;
+  right: clamp(1rem, 2.5vw, 2rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.sideDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+
+.sideDotActive {
+  background: var(--cyan, #22d3ee);
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 3px rgba(34, 211, 238, 0.18),
+    0 0 10px rgba(34, 211, 238, 0.7);
+  transform: scale(1.25);
+}
+
+/* ============================================================
+ * Mobile — collapse the HUD corners and side rail; stack stepper
+ * labels tighter so the phrases still fit at narrow widths.
+ * ============================================================ */
+@media (max-width: 760px) {
+  .progressBadge {
+    top: clamp(4.5rem, 8vh, 5.5rem);
+    font-size: 0.7rem;
+    padding: 0.3rem 0.55rem;
+  }
+  .titlesWrap {
+    top: 46%;
+  }
+  .stepNumber {
+    font-size: clamp(3.4rem, 14vw, 5rem);
+  }
+  .stepTitle {
+    font-size: clamp(1.2rem, 4.5vw, 1.6rem);
+  }
+  .stepBody {
+    font-size: 0.92rem;
+  }
+  .stepper {
+    bottom: clamp(4rem, 7vh, 5.5rem);
+    width: calc(100% - 1.5rem);
+  }
+  .stepperLabelPhase {
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+  }
+  /* HUD + side rail are space-greedy on phones — hide them so the
+     core narrative (titles + stepper) reads cleanly. */
+  .hudBl,
+  .hudBr,
+  .sideRail {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title {
+    transition: none;
+  }
+  .hudBrDot {
+    animation: none;
+  }
+}

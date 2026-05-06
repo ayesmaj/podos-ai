@@ -697,3 +697,201 @@
     animation: none;
   }
 }
+
+/* ============================================================
+   "Let's Work Together" — contact info card.
+   Sits below the factbar at the bottom of the section. Single
+   rounded panel with a small eyebrow + headline + lede on the
+   left and three icon-tagged contact rows + a social row on the
+   right. Mirrors the `engCreds` strip used on the engineering
+   section so the chrome reads as a coherent system.
+   ============================================================ */
+.contactCard {
+  margin-top: 2.5rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 2.5rem;
+  padding: 2rem 2.2rem;
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 14px 38px -22px rgba(15, 23, 42, 0.12);
+}
+
+@media (max-width: 880px) {
+  .contactCard { grid-template-columns: 1fr; gap: 1.75rem; padding: 1.5rem; }
+}
+
+/* Decorative "+" registration mark to match the rest of the site's chrome. */
+.contactCard::before,
+.contactCard::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.42), rgba(37, 99, 235, 0.42)),
+    linear-gradient(rgba(37, 99, 235, 0.42), rgba(37, 99, 235, 0.42));
+  background-size: 1px 100%, 100% 1px;
+  background-position: center, center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.contactCard::before { top: 12px; left: 12px; }
+.contactCard::after  { bottom: 12px; right: 12px; }
+
+/* --- Left side of the card: pitch copy --- */
+.contactPitch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-self: center;
+}
+
+.contactKicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--brand-deep);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.contactTitle {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  color: var(--ink-strong);
+  margin: 0;
+}
+
+.contactCopy {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  margin: 0;
+  max-width: 36ch;
+}
+
+/* --- Right side: contact rows + social row --- */
+.contactRows {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+}
+
+@media (max-width: 700px) {
+  .contactRows { grid-template-columns: 1fr; }
+}
+
+.contactRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  transition: border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+}
+
+.contactRow:hover {
+  border-color: rgba(37, 99, 235, 0.32);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -14px rgba(37, 99, 235, 0.30);
+}
+
+.contactIcon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(34, 211, 238, 0.10));
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 10px;
+  color: var(--brand-deep);
+}
+
+.contactIcon svg { width: 16px; height: 16px; }
+
+.contactRowText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.contactRowLabel {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--brand-deep);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.contactRowValue {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--ink-strong);
+  font-weight: 500;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.contactRowValueLink {
+  color: var(--ink-strong);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.contactRowValueLink:hover { color: var(--brand-deep); }
+
+.contactSocials {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(37, 99, 235, 0.18);
+}
+
+.contactSocialLabel {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--ink-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-right: 0.5rem;
+}
+
+.contactSocial {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink-dim);
+  transition: color 200ms ease, border-color 200ms ease, transform 200ms ease, background 200ms ease;
+}
+
+.contactSocial:hover {
+  color: var(--brand-deep);
+  border-color: rgba(37, 99, 235, 0.45);
+  background: rgba(37, 99, 235, 0.06);
+  transform: translateY(-2px);
+}
+
+.contactSocial svg { width: 16px; height: 16px; }

@@ -30,15 +30,15 @@ type RailItem = {
 };
 
 const RAIL_ITEMS: RailItem[] = [
-  { id: "rail-hero", label: "The new physical layer of AI", short: "HERO" },
-  { id: "rail-problem", label: "Diagnosis of the bottleneck", short: "PROBLEM" },
-  { id: "rail-podos", label: "Optimus pod — the hardware", short: "OPTIMUS" },
-  { id: "rail-syntropic", label: "Syntropic compression", short: "SYNTROPIC" },
-  { id: "rail-fusion", label: "85× capital efficiency", short: "FUSION" },
-  { id: "rail-blueprint", label: "The $3.4T Nvidia blueprint", short: "BLUEPRINT" },
-  { id: "rail-competition", label: "Category position", short: "COMPETITION" },
-  { id: "rail-traction", label: "Traction + the team", short: "TRACTION" },
-  { id: "rail-cta", label: "Request investor access", short: "CTA" },
+  { id: "rail-hero", label: "Modular AI compute, built to deploy", short: "HERO" },
+  { id: "rail-problem", label: "AI infrastructure is moving too slowly", short: "PROBLEM" },
+  { id: "rail-solution", label: "Factory-built AI compute pods", short: "SOLUTION" },
+  { id: "rail-podos", label: "The PODOS compute pod", short: "PRODUCT" },
+  { id: "rail-deployment", label: "From factory to facility", short: "DEPLOY" },
+  { id: "rail-usecases", label: "Built for controlled AI infrastructure", short: "USE CASES" },
+  { id: "rail-manufacturing", label: "Modular manufacturing discipline", short: "MFG" },
+  { id: "rail-design", label: "Engineered for deployment, density, control", short: "DESIGN" },
+  { id: "rail-cta", label: "Request a conversation", short: "CONTACT" },
 ];
 
 export default function ScrollProgressRail() {

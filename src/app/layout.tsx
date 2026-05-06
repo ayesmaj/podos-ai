@@ -46,12 +46,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PODOS · Syntropic — The New Physical Layer for AI",
+  title: "PODOS AI — The New Physical Layer for AI",
   description:
-    "PODOS builds deployable AI infrastructure. Syntropic multiplies the output of every GPU inside it. 1-MW modular supercomputers shipped in 90 days. 85× useful throughput per watt.",
-  metadataBase: new URL("https://synthtropic-al.com"),
+    "PODOS AI builds factory-built modular AI compute pods. 1-MW deployable infrastructure shipped in 90 days, ready to commission at your facility.",
+  metadataBase: new URL("https://podos.ai"),
   openGraph: {
-    title: "PODOS · Syntropic",
+    title: "PODOS AI",
     description: "The AI economy needs a new physical layer.",
     type: "website",
   },

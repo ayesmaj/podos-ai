@@ -37,7 +37,15 @@ import styles from "./GlobalEnergyLayer.module.css";
 export default function GlobalEnergyLayer() {
   return (
     <div className={styles.root} aria-hidden>
-      <div className={styles.beam} />
+      {/*
+        Scan beam removed 2026-04-25 per user feedback — the
+        top→bottom sweeping cyan band was visually distracting and
+        competed with the section-level scan effects (e.g. the intro
+        video's own light pass). The .beam CSS rule and
+        @keyframes globalBeamSweep are kept in
+        GlobalEnergyLayer.module.css as dormant rules; re-mount the
+        <div className={styles.beam} /> here to bring it back.
+      */}
       <div className={styles.pulseGrid} />
       <span className={`${styles.spark} ${styles.spark1}`} />
       <span className={`${styles.spark} ${styles.spark2}`} />

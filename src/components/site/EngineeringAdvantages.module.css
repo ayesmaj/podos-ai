@@ -1,0 +1,308 @@
+/* ====================================================================
+ * EngineeringAdvantages — premium 4-card feature section.
+ *
+ * Visual references: Apple keynote slides, NVIDIA infrastructure pages,
+ * high-end enterprise brochure. Cool gray + white palette, generous
+ * whitespace, real product photography over generic icons, restrained
+ * accent color (brand blue) reserved for metric values + on-hover glow.
+ * ==================================================================== */
+
+.section {
+  position: relative;
+  padding: clamp(4rem, 9vh, 8rem) 0 clamp(4rem, 9vh, 8rem);
+  background:
+    /* Soft cool blue → white wash from top */
+    linear-gradient(
+      180deg,
+      rgba(243, 247, 252, 1) 0%,
+      rgba(248, 251, 255, 1) 60%,
+      rgba(243, 247, 252, 1) 100%
+    );
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Blueprint grid texture — 80px × 80px grid with hairline strokes.
+   Uses linear-gradient stripes layered to form a square grid. The
+   alpha is intentionally tiny (0.025) — it should READ as texture,
+   not pattern. */
+.gridBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(15, 23, 42, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  /* Soft fade at edges so the grid doesn't fight against adjacent
+     section seams. */
+  -webkit-mask-image: radial-gradient(
+    ellipse 90% 75% at 50% 50%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 90% 75% at 50% 50%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
+}
+
+/* ==================== Section intro ==================== */
+.head {
+  text-align: center;
+  margin-bottom: clamp(2.5rem, 5vh, 4.5rem);
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+.label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--brand-deep);
+  margin-bottom: 1.4rem;
+  padding: 0.4rem 0.95rem;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  border-radius: 999px;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  color: var(--ink-strong);
+  margin: 0 0 1.4rem;
+  text-wrap: balance;
+}
+
+.headlineAccent {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subhead {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  line-height: 1.6;
+  color: var(--ink-dim);
+  margin: 0 auto;
+  max-width: 56ch;
+}
+
+/* ==================== Card grid ==================== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(1rem, 1.6vw, 1.75rem);
+}
+
+@media (max-width: 1100px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* ==================== Card ==================== */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 26px;
+  padding: 1.5rem 1.5rem 1.75rem;
+  /* Three-shadow stack: hairline outline, soft mid, generous floor.
+     Together they read as a precision-machined panel resting on a
+     studio surface — not a flat rectangle with a drop shadow. */
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.02),
+    0 6px 16px -8px rgba(15, 23, 42, 0.06),
+    0 24px 50px -22px rgba(37, 99, 235, 0.08);
+  transition:
+    transform 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 380ms ease;
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(37, 99, 235, 0.18);
+  box-shadow:
+    0 0 0 1px rgba(37, 99, 235, 0.08),
+    0 10px 24px -10px rgba(37, 99, 235, 0.18),
+    0 36px 70px -28px rgba(37, 99, 235, 0.22);
+}
+
+/* ==================== Card top: code + metric ==================== */
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.codePill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--brand-deep);
+  padding: 0.35rem 0.75rem;
+  background: rgba(37, 99, 235, 0.07);
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.metricBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  /* Limit width so long values stay on the right edge */
+  max-width: 60%;
+}
+
+.metricValue {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 1.7vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.metricLabel {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-top: 0.25rem;
+}
+
+/* ==================== Image frame ==================== */
+.imageFrame {
+  position: relative;
+  width: 100%;
+  /* Aspect-ratio locked so all 4 cards have identical image
+     proportions regardless of source image dimensions. 4:3 is the
+     sweet spot for product render shots — landscape enough to show
+     context, square-enough to feel solid. */
+  aspect-ratio: 4 / 3;
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    /* Deep blueprint frame — replaces the previous light dotted
+       placeholder which bled through transparent edges of the
+       product renders, making cards look empty. */
+    radial-gradient(
+      ellipse at 50% 30%,
+      rgba(37, 99, 235, 0.18) 0%,
+      rgba(15, 23, 42, 0.92) 70%,
+      rgba(15, 23, 42, 0.98) 100%
+    );
+  /* Inner edge — brand-tinted hairline ring */
+  box-shadow:
+    inset 0 0 0 1px rgba(37, 99, 235, 0.18),
+    inset 0 1px 2px rgba(15, 23, 42, 0.10);
+  margin-bottom: 1.4rem;
+  /* Hide the broken-image icon if the file is missing — Next/Image's
+     <img> shows alt text fallback by default, which appears as a
+     broken-image glyph. Hide that visually. */
+  color: transparent;
+}
+
+.image {
+  object-fit: cover;
+  /* Image loads as bright, crisp product art. Slight scale on hover
+     makes it feel alive without flashy zoom. */
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card:hover .image {
+  transform: scale(1.02);
+}
+
+/* Soft bottom fade — gradient overlay that blends image edge into
+   the card surface for a less "stuck-on" feel. Only visible at the
+   bottom 18% of the image. */
+.imageFade {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 22%;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.55) 100%
+  );
+}
+
+/* ==================== Card body: title + copy ==================== */
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  flex: 1;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.4vw, 1.3rem);
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  color: var(--ink-strong);
+  margin: 0;
+}
+
+.cardCopy {
+  font-family: var(--font-body);
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+/* ==================== Reduced motion ==================== */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .image {
+    transition: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+  .card:hover .image {
+    transform: none;
+  }
+}

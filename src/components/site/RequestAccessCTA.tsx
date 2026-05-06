@@ -12,103 +12,35 @@ import {
 import styles from "./RequestAccessCTA.module.css";
 
 /**
- * SECTION 08 — CTA (Request Investor Access)
+ * SECTION — CONTACT / REQUEST A CONVERSATION
  *
- * The closing inversion. After a dense investor dashboard (TRACTION),
- * this section is deliberately minimal — one headline, one action,
- * three facts. The visual weight is concentrated in the gradient
- * button, which carries a long cyan shadow to feel "clickable" even
- * on the viewer's first glance.
+ * Public, product-facing CTA. Replaces the prior investor-deck close
+ * (deal terms, return ladder, "earliest entry point" framing) with a
+ * single, calm question: do you need AI compute capacity faster than
+ * a hyperscale build can deliver?
  *
- * Design rules respected:
- *   - LIGHT section (the only allowed dark panel was spent on SYNTROPIC)
- *   - Single focal action (no secondary competing button)
- *   - Gradient button is the page's final "click moment"
- *   - Factbar is mono/tight: investor-grade, not consumer
- *
- * Three factbar cells answer the three questions a qualified investor
- * has right before they reach out: what stage is this round, what can
- * I actually see, how fast will we meet.
- */
-
-/**
- * Post-intro facts — the three things the LP wants to know about the
- * process after they've seen the deal terms. Timeline answers "am I
- * too late?", data room answers "what will I see?", cadence answers
- * "how fast does this move?". Deal status used to live here, but was
- * promoted to its own DEAL TERMS strip above.
+ * Three FACTS describe what the conversation actually IS — response
+ * time, scope, format — so a real prospect can decide whether to
+ * email before reading any further.
  */
 const FACTS = [
   {
     code: "F-01",
-    label: "TIMELINE TO CLOSE",
-    value: "Target Q2 2026",
-    detail: "Allocations filled on first-committed basis · no auction dynamics",
+    label: "RESPONSE TIME",
+    value: "Within 72 hours",
+    detail: "Initial outreach acknowledged · scoping call scheduled within the week",
   },
   {
     code: "F-02",
-    label: "DATA ROOM",
-    value: "Full access on NDA",
-    detail: "Technical, financial, IP, hardware, and pod-throughput telemetry",
+    label: "WHAT WE COVER",
+    value: "Site, capacity, timeline",
+    detail: "Use case, power profile, deployment footprint, commissioning window",
   },
   {
     code: "F-03",
-    label: "MEETING CADENCE",
-    value: "Call within 72 hrs",
-    detail: "30-min founder intro · factory walkthrough available on request",
-  },
-];
-
-/**
- * Deal terms — the four numbers every qualified investor asks in
- * the first five minutes. Kept inline so the document reads as
- * "here's the ask" not "click to see more".
- */
-const DEAL_TERMS = [
-  { k: "ROUND SIZE", v: "$18M",  d: "Seed · priced" },
-  { k: "PRE-MONEY",  v: "$54M",  d: "Valuation at close" },
-  { k: "POST-MONEY", v: "$72M",  d: "Fully-diluted basis" },
-  { k: "ALLOCATION", v: "25%",   d: "For the full round" },
-];
-
-/**
- * Outcome scenarios — the three exit paths an LP models, in the
- * BEAR / BASE / BULL frame the deck uses. Numbers mirror the Slide-15
- * canonical: $15M invested against a 25% seed position, ridden through
- * to exit with the stated proportional ownership (deck modeling).
- *
- *   BEAR  : $120M exit → ~3.6×   | ~28%  IRR  (soft landing, IP sale / acqui-hire)
- *   BASE  : $400M exit → ~9.3×   | ~70%  IRR  (Vantage-shaped infra outcome)
- *   BULL  : $1B+  exit → ~23×    | ~90%+ IRR  (category-leader / Nvidia-shaped)
- *
- * These numbers are deck-canonical and track the narrative the LP
- * will already have seen. If the financial model updates, change
- * here only — the copy is deliberately illustrative, not a forecast.
- */
-const RETURN_SCENARIOS = [
-  {
-    tag: "BEAR",
-    ev: "$120M",
-    multiple: "3.6×",
-    irr: "~28% IRR",
-    rationale: "Soft landing — IP sale or strategic acqui-hire.",
-    tone: "base" as const,
-  },
-  {
-    tag: "BASE",
-    ev: "$400M",
-    multiple: "9.3×",
-    irr: "~70% IRR",
-    rationale: "Vantage-shaped infra exit. Pod deployed, Syntropic in production.",
-    tone: "mid" as const,
-  },
-  {
-    tag: "BULL",
-    ev: "$1B+",
-    multiple: "23×",
-    irr: "~90%+ IRR",
-    rationale: "Category-leader, Nvidia-parallel. Five-layer stack compounds.",
-    tone: "hi" as const,
+    label: "CONVERSATION FORMAT",
+    value: "30-min intro call",
+    detail: "Followed by a written deployment scope · factory walkthrough on request",
   },
 ];
 
@@ -121,7 +53,7 @@ export default function RequestAccessCTA() {
 
   const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText("josef@californiamodulars.com");
+      await navigator.clipboard.writeText("hello@podos.ai");
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -130,7 +62,7 @@ export default function RequestAccessCTA() {
   };
 
   return (
-    <section ref={ref} className={`${styles.section} section-pad`}>
+    <section ref={ref} id="access" className={`${styles.section} section-pad`}>
       <div className={styles.bg}>
         <GridField variant="sparse" />
         <AmbientOrbs config="teal" />
@@ -147,9 +79,9 @@ export default function RequestAccessCTA() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 * t, ease: "easeOut" }}
         >
-          <span className={styles.eyebrowIdx}>08</span>
+          <span className={styles.eyebrowIdx}>09</span>
           <span className={styles.eyebrowSep}>·</span>
-          NEXT STEP
+          GET IN TOUCH
         </motion.div>
 
         {/* ============== HEADLINE ============== */}
@@ -159,8 +91,8 @@ export default function RequestAccessCTA() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 * t, delay: 0.1 * t, ease: "easeOut" }}
         >
-          The earliest entry point into the{" "}
-          <span className="t-sweep-brand">new physical layer of AI</span>.
+          Need AI compute capacity without a{" "}
+          <span className="t-sweep-brand">multi-year infrastructure timeline</span>?
         </motion.h2>
 
         {/* ============== SUB-LINE ============== */}
@@ -170,125 +102,23 @@ export default function RequestAccessCTA() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 * t, delay: 0.3 * t, ease: "easeOut" }}
         >
-          Pod #1 is validated. The factory is under lease. The $18M seed is
-          half-committed and we&rsquo;re deliberate about who fills the rest.
-          If you underwrite infrastructure and want to see the numbers
-          behind the 85&times;, start here.
+          Talk with PODOS AI about modular compute pod deployment options
+          for your facility.
         </motion.p>
 
-        {/* ============== DEAL TERMS STRIP ============== */}
-        {/* Four cells across, each a single number — the answers to the
-            four questions a qualified investor asks before asking
-            anything else. Gradient top-rule picks up the brand. */}
-        <motion.div
-          className={styles.dealTerms}
-          initial={{ opacity: 0, y: 18 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.75 * t, delay: 0.42 * t, ease: "easeOut" }}
-          aria-label="Deal terms"
-        >
-          <header className={styles.dealTermsHead}>
-            <span className={styles.dealTermsEyebrow}>
-              DEAL TERMS · Q2 2026 SEED
-            </span>
-            <span className={styles.dealTermsStatus}>
-              <span className={styles.dealStatusDot} aria-hidden />
-              HALF-COMMITTED · ROOM FOR 1 STRATEGIC
-            </span>
-          </header>
-
-          <div className={styles.dealGrid}>
-            {DEAL_TERMS.map((d) => (
-              <div key={d.k} className={styles.dealCell}>
-                <span className={styles.dealKey}>{d.k}</span>
-                <span className={styles.dealValue}>{d.v}</span>
-                <span className={styles.dealDetail}>{d.d}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* ============== RETURN LADDER ============== */}
-        {/* Three stacked scenarios. Each card gets a tiered accent
-            (base → mid → hi) — NOT a glaring "high-return" sell but a
-            subtle thermometer that gets more lit the further out we
-            project. Disclaimer below keeps this honestly illustrative. */}
-        <motion.div
-          className={styles.returnLadder}
-          initial={{ opacity: 0, y: 18 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 * t, delay: 0.52 * t, ease: "easeOut" }}
-          aria-label="Outcome scenarios"
-        >
-          <header className={styles.ladderHead}>
-            <span className={styles.ladderEyebrow}>
-              OUTCOME SCENARIOS · on $18M SEED
-            </span>
-            <span className={styles.ladderNote}>
-              Multiples shown assume typical infrastructure dilution
-              through Series A–C. Illustrative, not a forecast.
-            </span>
-          </header>
-
-          <div className={styles.ladderGrid}>
-            {RETURN_SCENARIOS.map((s, i) => (
-              <motion.div
-                key={s.tag}
-                className={`${styles.ladderCell} ${
-                  s.tone === "mid"
-                    ? styles.ladderCellMid
-                    : s.tone === "hi"
-                      ? styles.ladderCellHi
-                      : styles.ladderCellBase
-                }`}
-                initial={{ opacity: 0, y: 12 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{
-                  duration: 0.55 * t,
-                  delay: (0.62 + i * 0.08) * t,
-                  ease: "easeOut",
-                }}
-              >
-                <span className={styles.ladderTag}>{s.tag}</span>
-
-                <div className={styles.ladderPrimary}>
-                  <span className={styles.ladderEV}>{s.ev}</span>
-                  <span className={styles.ladderEVLabel}>ENTERPRISE VALUE</span>
-                </div>
-
-                <div className={styles.ladderRule} aria-hidden />
-
-                <div className={styles.ladderReturn}>
-                  <span className={styles.ladderMultiple}>{s.multiple}</span>
-                  <span className={styles.ladderMultipleLabel}>
-                    RETURN ON SEED
-                  </span>
-                </div>
-
-                <span className={styles.ladderIRR}>{s.irr}</span>
-
-                <p className={styles.ladderRationale}>{s.rationale}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
         {/* ============== ACTION ROW ============== */}
-        {/* Delay pushed to 0.92s so the primary CTA lands *after* the
-            return-ladder cells (which finish ~0.83s). The CTA reads
-            as a climax: "you've seen the numbers, now act". */}
         <motion.div
           className={styles.actionRow}
           initial={{ opacity: 0, y: 18 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.75 * t, delay: 0.92 * t, ease: "easeOut" }}
+          transition={{ duration: 0.75 * t, delay: 0.5 * t, ease: "easeOut" }}
         >
           <a
-            href="mailto:josef@californiamodulars.com?subject=Investor%20intro%20%C2%B7%20PODOS%20AI%20seed&body=Fund%3A%20%0AStage%20focus%3A%20%0ATypical%20check%3A%20%0AReason%20for%20fit%3A%20%0A"
+            href="mailto:hello@podos.ai?subject=PODOS%20AI%20%C2%B7%20Deployment%20conversation&body=Organization%3A%20%0ALocation%3A%20%0ATimeline%3A%20%0ACompute%20need%3A%20%0A"
             className={styles.primary}
           >
             <span className={styles.primaryGlow} aria-hidden />
-            <span className={styles.primaryLabel}>Request Investor Access</span>
+            <span className={styles.primaryLabel}>Request a Conversation</span>
             <svg
               className={styles.primaryArrow}
               viewBox="0 0 24 24"
@@ -311,10 +141,10 @@ export default function RequestAccessCTA() {
             type="button"
             onClick={copyEmail}
             className={styles.secondary}
-            aria-label="Copy josef@californiamodulars.com to clipboard"
+            aria-label="Copy hello@podos.ai to clipboard"
           >
             <span className={styles.secondaryDot} aria-hidden />
-            <span className={styles.secondaryText}>josef@californiamodulars.com</span>
+            <span className={styles.secondaryText}>hello@podos.ai</span>
             <span className={styles.secondaryHint}>
               {copied ? "COPIED" : "CLICK TO COPY"}
             </span>
@@ -326,7 +156,7 @@ export default function RequestAccessCTA() {
           className={styles.factbar}
           initial={{ opacity: 0, y: 22 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 * t, delay: 1.1 * t, ease: "easeOut" }}
+          transition={{ duration: 0.8 * t, delay: 0.7 * t, ease: "easeOut" }}
         >
           {FACTS.map((f, i) => (
             <motion.div
@@ -336,7 +166,7 @@ export default function RequestAccessCTA() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{
                 duration: 0.6 * t,
-                delay: (1.2 + i * 0.08) * t,
+                delay: (0.85 + i * 0.08) * t,
                 ease: "easeOut",
               }}
             >
@@ -351,24 +181,156 @@ export default function RequestAccessCTA() {
           ))}
         </motion.div>
 
+        {/* ============== CONTACT CARD — "Let's Work Together" ============== */}
+        <motion.div
+          className={styles.contactCard}
+          initial={{ opacity: 0, y: 22 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8 * t, delay: 0.95 * t, ease: "easeOut" }}
+        >
+          <div className={styles.contactPitch}>
+            <span className={styles.contactKicker}>Let's Work Together</span>
+            <h3 className={styles.contactTitle}>
+              The fastest path to a deployment conversation
+            </h3>
+            <p className={styles.contactCopy}>
+              Reach out by phone, email, or stop by the factory. We respond
+              to every inquiry within 72 hours.
+            </p>
+          </div>
+
+          <div className={styles.contactRows}>
+            <div className={styles.contactRow}>
+              <span className={styles.contactIcon} aria-hidden>
+                <PinIcon />
+              </span>
+              <div className={styles.contactRowText}>
+                <span className={styles.contactRowLabel}>Headquarters</span>
+                <span className={styles.contactRowValue}>
+                  Modular Compute Lab
+                  <br />
+                  United States
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.contactRow}>
+              <span className={styles.contactIcon} aria-hidden>
+                <MailIcon />
+              </span>
+              <div className={styles.contactRowText}>
+                <span className={styles.contactRowLabel}>Email</span>
+                <a
+                  className={`${styles.contactRowValue} ${styles.contactRowValueLink}`}
+                  href="mailto:hello@podos.ai"
+                >
+                  hello@podos.ai
+                </a>
+              </div>
+            </div>
+
+            <div className={styles.contactRow}>
+              <span className={styles.contactIcon} aria-hidden>
+                <PhoneIcon />
+              </span>
+              <div className={styles.contactRowText}>
+                <span className={styles.contactRowLabel}>Phone</span>
+                <a
+                  className={`${styles.contactRowValue} ${styles.contactRowValueLink}`}
+                  href="tel:+1"
+                >
+                  +1 (555) 000-0000
+                </a>
+              </div>
+            </div>
+
+            <div className={styles.contactSocials}>
+              <span className={styles.contactSocialLabel}>Follow</span>
+              <a className={styles.contactSocial} href="#" aria-label="LinkedIn">
+                <LinkedinSvg />
+              </a>
+              <a className={styles.contactSocial} href="#" aria-label="X (Twitter)">
+                <XSvg />
+              </a>
+              <a className={styles.contactSocial} href="#" aria-label="GitHub">
+                <GithubSvg />
+              </a>
+            </div>
+          </div>
+        </motion.div>
+
         {/* ============== SIGNOFF ============== */}
         <motion.div
           className={styles.signoff}
           initial={{ opacity: 0, y: 10 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 * t, delay: 1.6 * t, ease: "easeOut" }}
+          transition={{ duration: 0.7 * t, delay: 1.1 * t, ease: "easeOut" }}
         >
           <div className={styles.signoffLeft}>
-            <span className={styles.signoffCode}>PODOS-AI-CTA-v1.0</span>
+            <span className={styles.signoffCode}>PODOS-AI · CONTACT</span>
             <span className={styles.signoffSep}>·</span>
-            <span>Built in California · Shipping from California</span>
+            <span>Modular AI compute infrastructure</span>
           </div>
           <div className={styles.signoffRight}>
             <span className={styles.signoffStatus} aria-hidden />
-            <span>SEED · OPEN · Q2&nbsp;2026</span>
+            <span>OPEN · TAKING DEPLOYMENT INQUIRIES</span>
           </div>
         </motion.div>
       </div>
     </section>
+  );
+}
+
+/* ----------- inline icons (kept local to avoid lucide-react version drift) ----------- */
+
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M12 22s8-7.5 8-13a8 8 0 1 0-16 0c0 5.5 8 13 8 13Z" />
+      <circle cx="12" cy="9" r="3" />
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m3 7 9 6 9-6" />
+    </svg>
+  );
+}
+
+function PhoneIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z" />
+    </svg>
+  );
+}
+
+function LinkedinSvg() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6Z" />
+      <rect x="2" y="9" width="4" height="12" />
+      <circle cx="4" cy="4" r="2" />
+    </svg>
+  );
+}
+
+function XSvg() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M18 4 6 20M6 4l12 16" />
+    </svg>
+  );
+}
+
+function GithubSvg() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+    </svg>
   );
 }

@@ -44,20 +44,31 @@ function useCountUp(
   duration = 1400,
   start = 0
 ) {
-  const [value, setValue] = useState(start);
+  // Initialize at target so numbers ALWAYS display correctly even if
+  // the rAF animation never fires (some preview/test environments
+  // throttle requestAnimationFrame heavily). The count-up animation
+  // becomes a nice-to-have rather than a correctness requirement.
+  const [value, setValue] = useState(target);
   useEffect(() => {
     if (!inView) return;
+    setValue(start); // reset to start so the animation has somewhere to go
     const startAt = performance.now();
     let raf = 0;
     const tick = (now: number) => {
       const t = Math.min((now - startAt) / duration, 1);
-      // easeOutQuart — feels authoritative, lands clean.
       const eased = 1 - Math.pow(1 - t, 4);
       setValue(start + (target - start) * eased);
       if (t < 1) raf = requestAnimationFrame(tick);
+      else setValue(target); // guarantee landing exactly at target
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    // Safety fallback — if rAF never fires, force the final value
+    // after the expected duration + buffer.
+    const safetyTimer = window.setTimeout(() => setValue(target), duration + 300);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(safetyTimer);
+    };
   }, [target, inView, duration, start]);
   return value;
 }
@@ -253,8 +264,14 @@ function MetricCard({
   return (
     <motion.article
       className={styles.card}
-      initial={{ opacity: 0, y: 26 }}
-      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 26 }}
+      /* Always visible (start at opacity 1). The previous useInView/
+         whileInView gate was unreliable in this setup — sometimes
+         the IntersectionObserver wouldn't fire and cards stayed
+         invisible. Keeping motion.article so we still get the
+         hover transitions, but the entrance is now a simple CSS
+         opacity 1 so it's guaranteed to render. */
+      initial={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{
         duration: 0.7,
         ease: [0.22, 0.61, 0.36, 1],
@@ -290,7 +307,13 @@ const fmtInt = (n: number) => Math.round(n).toString();
 /* ================================================================== */
 export default function ProblemDiagnosis() {
   const ref = useRef<HTMLElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.25 });
+  const videoRef = useRef<HTMLVideoElement>(null);
+  // useInView's IntersectionObserver was unreliable in this setup
+  // (the sticky video wrapper inside the section confused the
+  // observer), so we just hardcode inView to true. Count-ups,
+  // visualizations, etc. all fire on mount instead of waiting
+  // for scroll-into-view detection.
+  const inView = true;
 
   // Count-ups — seeded so the numbers FEEL like telemetry reading in.
   const buildYears = useCountUp(3.2, inView, 1400, 0);
@@ -299,6 +322,74 @@ export default function ProblemDiagnosis() {
   const gpuWaste = useCountUp(88, inView, 1400, 0); // noqa
   const queueMo = useCountUp(30, inView, 1500, 0);
 
+  // ============================================================
+  // SCROLL-DRIVEN VIDEO SCRUB
+  //
+  // Background video plays from frame 0 → end as the user scrolls
+  // through the entire section. Scrub mapping:
+  //   - 0% progress when section top hits viewport bottom
+  //   - 100% progress when section bottom hits viewport top
+  //
+  // Uses the same triple-listener pattern as the hero (window scroll
+  // event + Lenis scroll event + self-perpetuating rAF) so at least
+  // one mechanism fires regardless of the smooth-scroll setup.
+  // ============================================================
+  useEffect(() => {
+    const section = ref.current;
+    const video = videoRef.current;
+    if (!section || !video) return;
+
+    let stopped = false;
+    let lenisHooked: { off: (e: string, cb: () => void) => void } | null = null;
+
+    const onScroll = () => {
+      const duration = video.duration;
+      if (!duration || !isFinite(duration)) return;
+
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // Section travel range — from "top hits bottom of viewport" to
+      // "bottom hits top of viewport". This is the entire scroll
+      // through which the section is visible.
+      const total = rect.height + vh;
+      const scrolled = vh - rect.top; // 0 when section enters, total when it leaves
+      const progress = Math.max(0, Math.min(1, scrolled / total));
+
+      video.currentTime = progress * duration;
+    };
+
+    // Initial paint
+    onScroll();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    // Hook Lenis when ready
+    const tryHookLenis = () => {
+      const lenis = (window as unknown as { __lenis?: { on: (e: string, cb: () => void) => void; off: (e: string, cb: () => void) => void } }).__lenis;
+      if (lenis && !lenisHooked) {
+        lenis.on("scroll", onScroll);
+        lenisHooked = lenis;
+      }
+    };
+    tryHookLenis();
+    const lenisPoll = window.setInterval(tryHookLenis, 100);
+
+    // rAF fallback poll
+    const tick = () => {
+      if (stopped) return;
+      onScroll();
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    return () => {
+      stopped = true;
+      window.removeEventListener("scroll", onScroll);
+      window.clearInterval(lenisPoll);
+      lenisHooked?.off("scroll", onScroll);
+    };
+  }, []);
+
   return (
     <section
       id="problem"
@@ -306,6 +397,18 @@ export default function ProblemDiagnosis() {
       className={`${styles.section} section-pad`}
       aria-labelledby="problem-heading"
     >
+      {/* Sticky video layer — the ribbon video stays pinned to the
+          viewport while the section scrolls past. */}
+      <div className={styles.bgVideoSticky} aria-hidden>
+        <video
+          ref={videoRef}
+          className={styles.bgVideo}
+          src="/problem-bg-scrub.mp4"
+          muted
+          playsInline
+          preload="auto"
+        />
+      </div>
       {/* Background composition — continues the hero's atmosphere but
           slightly more "engineering diagnostic": sparser grid, single
           ambient orb, drifting particles. */}
