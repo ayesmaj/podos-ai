@@ -49,11 +49,18 @@ export const metadata: Metadata = {
   title: "PODOS AI — The New Physical Layer for AI",
   description:
     "PODOS AI builds factory-built modular AI compute pods. 1-MW deployable infrastructure shipped in 90 days, ready to commission at your facility.",
-  metadataBase: new URL("https://podos.ai"),
+  metadataBase: new URL("https://podosai.com"),
   openGraph: {
     title: "PODOS AI",
     description: "The AI economy needs a new physical layer.",
     type: "website",
+    url: "https://podosai.com",
+    siteName: "PODOS AI",
+  },
+  twitter: {
+    card: "summary",
+    title: "PODOS AI",
+    description: "The AI economy needs a new physical layer.",
   },
 };
 
