@@ -22,10 +22,20 @@ if (typeof window !== "undefined") {
  * page proper begins. No further video plays after this chapter.
  *
  * EDITING NOTES:
- *   - Video (intro-scrub.mp4) is 7.07 seconds long. pauseAt = 6.9
+ *   - Video (intro-scrub.mp4) is 7.04 seconds long. pauseAt = 6.9
  *     lands on the final pod beauty shot per design intent.
  *   - The "Compression software" line contradicts the PODOS-only
  *     public-website cleanup we did earlier. Verify intent.
+ *   - To swap the intro: drop a new MP4 in public/, then re-encode
+ *     into intro-scrub.mp4 with every frame as a keyframe:
+ *       ffmpeg -y -i source.mp4 -c:v libx264 -preset slow \
+ *         -x264opts keyint=1:min-keyint=1:no-scenecut \
+ *         -pix_fmt yuv420p -movflags +faststart -an \
+ *         public/intro-scrub.mp4
+ *     And regenerate the poster from a late frame:
+ *       ffmpeg -y -ss 6.5 -i source.mp4 -frames:v 1 \
+ *         public/intro-poster.jpg
+ *     This way the JSX <video src="/intro-scrub.mp4"> never changes.
  */
 const CHAPTERS = [
   {
@@ -294,11 +304,12 @@ export default function HeroVideoNarrative() {
         className={styles.hero}
         aria-label="PODOS AI hero introduction"
       >
-        {/* Two video sources — intro-scrub.mp4 has every frame as a
-            keyframe (much faster seeking, 18MB) and is used by the
-            scroll-driven scrubbing. The full-quality intro.mp4
-            (50MB, 1440p) is kept in /public/ as a fallback or for
-            non-scrub uses. */}
+        {/* intro-scrub.mp4 — 720p, ~5.7 MB, every-frame-keyframe
+            encode of the source intro. Same file feeds desktop
+            scroll-scrub and mobile autoplay (mobile branch above).
+            The original full-quality intro.mp4 stays in /public/ as
+            an unreferenced backup for re-encodes. See the EDITING
+            NOTES at the top of this file for the swap recipe. */}
         <video
           ref={videoRef}
           className={styles.video}
