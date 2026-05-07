@@ -115,13 +115,13 @@ export default function OptimusInteractive() {
     >
       {/* Section header — mirrors the reference's top strip. */}
       <header className={styles.header}>
-        <p className={styles.eyebrow}>POD-0042 · REV·E · CONFIDENTIAL — SEED · 2026</p>
+        <p className={styles.eyebrow}>POD-0042 · REV·F · CONFIDENTIAL — SEED · 2026</p>
         <h3 id="optimus-section-title" className={styles.title}>
-          8× DENSITY. LIQUID COOLED. BUILT TO SCALE.
+          SOLAR POWERED. ROAD RATED. BUILT TO DEPLOY.
         </h3>
         <p className={styles.subtitle}>
-          High-density GPU infrastructure in a modular, liquid-cooled pod.
-          Click any callout to explore the spec.
+          A self-contained AI compute pod with on-board solar harvest and
+          road-rated mobility. Click any callout to explore the spec.
         </p>
       </header>
 

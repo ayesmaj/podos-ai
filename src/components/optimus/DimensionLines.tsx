@@ -89,7 +89,7 @@ export default function DimensionLines({ visible }: Props) {
         animate={{ opacity: visible ? 1 : 0 }}
         transition={{ duration: 0.4, delay: visible ? 0.55 : 0 }}
       >
-        2 591 mm
+        1 731 mm
       </motion.text>
 
       {/*

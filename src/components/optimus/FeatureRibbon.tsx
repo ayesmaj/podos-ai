@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  Server,
+  Sun,
   Droplet,
-  Activity,
+  Truck,
   Globe,
   ShieldCheck,
 } from "lucide-react";
@@ -17,32 +17,39 @@ import styles from "./FeatureRibbon.module.css";
  * The five columns are intentionally hardcoded here (not data-driven)
  * because they're the section's brand promises, not pod components.
  * Editing them is a copywriting decision, not an ops decision.
+ *
+ * Rebrand 2026-05-07: shifted from the prior Optimus-rack identity
+ * ("8× DENSITY", "GPU MODULES", "POWER DELIVERY") to the Solar Freight
+ * pod identity (on-board solar, road-rated mobility, multi-path
+ * uplink). The section's pod render and 9 callouts changed in the same
+ * pass; these 5 brand promises summarize the same story for the
+ * scanner who doesn't click any callouts.
  */
 
 const FEATURES = [
   {
-    Icon: Server,
-    title: "8× HIGH-DENSITY",
-    sub: "GPU MODULES",
+    Icon: Sun,
+    title: "ON-BOARD SOLAR",
+    sub: "12 KW HARVEST",
   },
   {
     Icon: Droplet,
     title: "CLOSED-LOOP",
-    sub: "LIQUID COOLING",
+    sub: "LIQUID COOLED",
   },
   {
-    Icon: Activity,
-    title: "HIGH CAPACITY",
-    sub: "POWER DELIVERY",
+    Icon: Truck,
+    title: "ROAD-RATED",
+    sub: "FREIGHT MOBILITY",
   },
   {
     Icon: Globe,
-    title: "HIGH-SPEED",
-    sub: "NETWORK FABRIC",
+    title: "MULTI-PATH",
+    sub: "NETWORK UPLINK",
   },
   {
     Icon: ShieldCheck,
-    title: "RUGGED. SECURE.",
+    title: "SELF-CONTAINED.",
     sub: "BUILT TO DEPLOY.",
   },
 ] as const;

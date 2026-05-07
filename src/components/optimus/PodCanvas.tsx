@@ -83,11 +83,12 @@ export default function PodCanvas({ activeId, filterCategory, onActivate }: Prop
       <div className={styles.imageWrap}>
         <Image
           src="/optimus/optimus-pod-front.png"
-          alt="Optimus pod — front elevation"
+          alt="Solar Freight pod — front elevation"
           fill
           priority
           // `unoptimized` short-circuits Next.js's image optimizer.
-          // The pod render is 1822×863 — small enough that optimization
+          // The pod render is 1448×411 (was 1822×863 for the prior
+          // Optimus rack render) — small enough that optimization
           // isn't winning much, and the dev-mode optimizer was failing
           // to deliver a 3840w upscale variant (image stayed in
           // currentSrc="" perpetually). Serving the raw PNG fixes it.

@@ -10,14 +10,15 @@
   position: relative;
   width: 100%;
   /* Aspect math:
-       image native 1822×863 → aspect 2.111:1
+       image native 1448×411 → aspect 3.523:1 (Solar Freight pod)
        imageWrap should match exactly (so object-fit: contain doesn't
        letterbox). With top:8% bottom:14% (sum 22%), imageWrap height
        is 78% of canvas height. Required canvas paddingBottom:
-       1 / (image_aspect × 0.78) = 1 / (2.111 × 0.78) = 60.7%
+       1 / (image_aspect × 0.78) = 1 / (3.523 × 0.78) = 36.4%
+     Was 60.7% for the prior 2.111-aspect Optimus rack render.
      Tune both this and the top/bottom margins below if the render
      is replaced with a different aspect. */
-  padding-bottom: 60.7%;
+  padding-bottom: 36.4%;
   margin: 0 auto;
   max-width: 1280px;
 }

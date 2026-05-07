@@ -9,6 +9,7 @@ import {
   Network,
   Fan,
   Shield,
+  Sun,
   type LucideIcon,
 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -45,6 +46,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Network,
   Fan,
   Shield,
+  Sun,
 };
 
 type Props = {
