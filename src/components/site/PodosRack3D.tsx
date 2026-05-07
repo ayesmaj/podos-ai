@@ -131,7 +131,15 @@ function RackModel({
     }
   });
 
-  return <primitive ref={groupRef} object={scene} scale={2.0} />;
+  // scale=3.0 is tuned to the Solar Freight pod's bounds (1.9 × 0.44 ×
+  // 0.49 m). At this scale the model fills ~87% of the canvas width and
+  // ~32% of the height with the camera at [0, 0.4, 6.5] and fov=35.
+  // The freight pod is much flatter than the prior Optimus rack, so the
+  // vertical breathing room is intentional — it's a long-vehicle silhouette,
+  // not a chunky box. If a future model swap is more cuboidal, you'll
+  // probably want to drop this back to ~2.0–2.2 to avoid clipping the
+  // top/bottom edges of the frame.
+  return <primitive ref={groupRef} object={scene} scale={3.0} />;
 }
 
 /* -------------------------------------------------------------------- */
