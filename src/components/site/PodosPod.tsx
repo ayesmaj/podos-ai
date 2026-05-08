@@ -200,6 +200,23 @@ export default function PodosPod() {
                   ease: [0.22, 0.61, 0.36, 1],
                 }}
               >
+                {/* Looping background video behind the WebGL canvas.
+                    R3F's <Canvas> uses gl={{ alpha: true }}, so the
+                    canvas pixels are transparent everywhere the pod
+                    model isn't opaque — the video shows through.
+                    `aria-hidden` because it's pure decoration; the
+                    pod is the content. `pointer-events: none` (in
+                    CSS) keeps drag input flowing to the canvas. */}
+                <video
+                  className={styles.studioBackgroundVideo}
+                  src="/background-3d.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  aria-hidden
+                />
                 <div className={styles.studioRackHead}>
                   <span>
                     <span className={styles.studioRackHeadDot} aria-hidden />

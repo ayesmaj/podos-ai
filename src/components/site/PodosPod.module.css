@@ -169,6 +169,31 @@
   }
 }
 
+/* Looping decorative background video sitting behind the WebGL canvas.
+   PodosRack3D's <Canvas> uses gl={{ alpha: true }}, so canvas pixels
+   are transparent everywhere the pod model isn't opaque — the video
+   shows through. `z-index: 0` plus DOM order (this video element
+   is the FIRST child of .studioRack) puts it under the static-flow
+   canvas. `pointer-events: none` keeps drag input flowing through to
+   OrbitControls. `inset: 0` + `object-fit: cover` is the standard
+   full-bleed pattern. */
+.studioBackgroundVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+  /* Soft, faded look so the video reads as ambient context behind
+     the pod, not as competing content. Tune opacity if you want it
+     more or less prominent. */
+  opacity: 0.85;
+  /* Crop softly at the corners so the video doesn't bleed past the
+     studioRack's visual frame. */
+  border-radius: clamp(0.5rem, 1vw, 1rem);
+}
+
 /* Header labels overlaid on the 3D scene — now NO background gradient
    (the previous white-fade strip read as card chrome). The labels sit
    as plain floating typography against the section's grid background.
