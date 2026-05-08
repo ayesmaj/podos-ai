@@ -128,8 +128,20 @@ export default function HeroVideoNarrative() {
       const textFadeStart = totalScroll * 0.85;
       const textFadeEnd = totalScroll;
 
+      // Dedup guard: onScroll is wired to native scroll + Lenis 'scroll' +
+      // self-perpetuating rAF (three sources for race-safety against Lenis's
+      // smoothWheel suppressing native events). Without dedup, all three
+      // fire on every actual scroll change → up to ~180 currentTime sets
+      // per second. Each set kicks off a fresh decode that the next one
+      // cancels before completion → visible stutter even with all-keyframe
+      // encoding. Tracking lastY here lets us coalesce the fan-in: skip
+      // any onScroll call where scrollY hasn't moved since last apply.
+      let lastY = -1;
+
       const onScroll = () => {
         const y = window.scrollY;
+        if (y === lastY) return; // skip redundant currentTime sets
+        lastY = y;
         const progress = Math.max(0, Math.min(1, y / totalScroll));
 
         // Video scrub — direct currentTime mapping. Cheap and exact.
@@ -304,16 +316,25 @@ export default function HeroVideoNarrative() {
         className={styles.hero}
         aria-label="PODOS AI hero introduction"
       >
-        {/* intro-scrub.mp4 — 720p, ~5.7 MB, every-frame-keyframe
-            encode of the source intro. Same file feeds desktop
-            scroll-scrub and mobile autoplay (mobile branch above).
-            The original full-quality intro.mp4 stays in /public/ as
-            an unreferenced backup for re-encodes. See the EDITING
-            NOTES at the top of this file for the swap recipe. */}
+        {/* Hero intro video — different files per breakpoint:
+              • Desktop (>768px): /intro-scrub.mp4 — 720p/60fps,
+                ~10 MB, every-frame-keyframe. The 60fps interpolation
+                (motion-compensated, mci) gives 2.5× more frames over
+                the 7s timeline than the original 24fps source, so
+                scroll-scrub feels smooth instead of frame-stepping.
+              • Mobile (≤768px): /intro-mobile.mp4 — 720p/30fps,
+                ~1 MB, normal H.264. Mobile autoplays the video (no
+                scrub), so all-keyframe encoding is wasted bandwidth.
+            `key` forces React to remount on breakpoint change so
+            currentSrc actually swaps. Same pattern DeploymentTimeline
+            uses for its factory-scrub.mp4 / factory-mobile.mp4 split.
+            See the EDITING NOTES at the top of this file for the
+            re-encode recipe. */}
         <video
           ref={videoRef}
           className={styles.video}
-          src="/intro-scrub.mp4"
+          key={isMobile ? "mobile" : "desktop"}
+          src={isMobile ? "/intro-mobile.mp4" : "/intro-scrub.mp4"}
           muted
           playsInline
           preload="auto"
