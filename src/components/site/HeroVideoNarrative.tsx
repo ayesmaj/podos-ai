@@ -128,38 +128,86 @@ export default function HeroVideoNarrative() {
       const textFadeStart = totalScroll * 0.85;
       const textFadeEnd = totalScroll;
 
-      // Dedup guard: onScroll is wired to native scroll + Lenis 'scroll' +
-      // self-perpetuating rAF (three sources for race-safety against Lenis's
-      // smoothWheel suppressing native events). Without dedup, all three
-      // fire on every actual scroll change → up to ~180 currentTime sets
-      // per second. Each set kicks off a fresh decode that the next one
-      // cancels before completion → visible stutter even with all-keyframe
-      // encoding. Tracking lastY here lets us coalesce the fan-in: skip
-      // any onScroll call where scrollY hasn't moved since last apply.
+      // ── Decoder-paced video scrub ──────────────────────────────────
+      // The naive approach — `video.currentTime = X` on every scroll
+      // event — looks chunky during fast scroll because the decoder
+      // can't keep up: each currentTime set kicks off a decode that
+      // the NEXT set 16ms later cancels before completing. Frames get
+      // thrown away mid-decode and the user sees stutter.
+      //
+      // Fix: pace currentTime sets to the decoder's natural rate via
+      // `requestVideoFrameCallback` (rVFC). rVFC fires after a frame
+      // has actually been rendered to the screen — not when decode
+      // started, not when bytes arrived. Gating the next currentTime
+      // set on the previous frame's rVFC means at most one decode in
+      // flight at any time, and zero thrown-away work.
+      //
+      // `lastY` dedup still applies — multiple onScroll calls for the
+      // same scrollY (from native + Lenis + rAF fan-in) coalesce.
+      // `pendingTarget` holds the most recent target the user has
+      // scrolled toward; rVFC dequeues it when the decoder is free.
+      //
+      // `fastSeek` is preferred over `currentTime` for the seek
+      // itself — it's designed for scrubbing and is 2-3× faster.
+      // With all-keyframe encoding (every frame is independently
+      // decodable) the "less precise" trade-off is moot.
+      // ────────────────────────────────────────────────────────────────
       let lastY = -1;
+      let pendingTarget: number | null = null;
+      let decoderBusy = false;
+
+      type FrameCb = (cb: () => void) => number;
+      const rvfc = (video as unknown as { requestVideoFrameCallback?: FrameCb })
+        .requestVideoFrameCallback;
+      type FastSeek = (t: number) => void;
+      const fastSeek = (video as unknown as { fastSeek?: FastSeek }).fastSeek;
+
+      const flushVideoTarget = () => {
+        if (decoderBusy || pendingTarget === null) return;
+        const target = pendingTarget;
+        pendingTarget = null;
+        decoderBusy = true;
+        if (typeof fastSeek === "function") {
+          fastSeek.call(video, target);
+        } else {
+          video.currentTime = target;
+        }
+        if (typeof rvfc === "function") {
+          rvfc.call(video, () => {
+            decoderBusy = false;
+            flushVideoTarget();
+          });
+        } else {
+          // Older Firefox: estimate at ~60fps. rVFC was Firefox 132+
+          // (Oct 2025); older builds get a slightly less smooth fallback.
+          window.setTimeout(() => {
+            decoderBusy = false;
+            flushVideoTarget();
+          }, 16);
+        }
+      };
 
       const onScroll = () => {
         const y = window.scrollY;
-        if (y === lastY) return; // skip redundant currentTime sets
+        if (y === lastY) return;
         lastY = y;
         const progress = Math.max(0, Math.min(1, y / totalScroll));
 
-        // Video scrub — direct currentTime mapping. Cheap and exact.
-        video.currentTime = progress * targetTime;
+        // Queue the video target — flushed at decoder pace, not scroll pace
+        pendingTarget = progress * targetTime;
+        flushVideoTarget();
 
-        // Progress rail (top-edge gradient bar)
+        // Progress rail + text fade are pure DOM updates — CPU-cheap
+        // and not gated by any decoder. Apply every onScroll call so
+        // the rail and text track scroll exactly even while video is
+        // mid-decode.
         if (progressRef.current) {
           progressRef.current.style.width = `${progress * 100}%`;
         }
-
-        // Chapter text fade-in — interpolate opacity/transform/filter
-        // over the last 15% of the dwell zone. Manual interpolation
-        // avoids the GSAP/Lenis sync issues we hit with ScrollTrigger.
         const textProgress = Math.max(
           0,
           Math.min(1, (y - textFadeStart) / (textFadeEnd - textFadeStart)),
         );
-        // Ease-out cubic for a smooth land
         const eased = 1 - Math.pow(1 - textProgress, 3);
         chapterRefs.current.forEach((ref) => {
           if (!ref) return;
