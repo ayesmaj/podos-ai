@@ -46,12 +46,19 @@ useGLTF.preload("/models/podos-rack.glb");
 /* -------------------------------------------------------------------- */
 /* Choreography keyframes — tuned to pair with the schematic next to it  */
 /* -------------------------------------------------------------------- */
-// Centered, straight-on view — no rotation. Both hero and lock keep
-// the rack head-on so it reads as a centered product photo at every
-// scroll position.
-const HERO_ROT_Y = 0;
+// Side-elevation view: rotate 90° around Y so the camera sees the long
+// side of the freight pod (5.7m wide × 1.32m tall world-space) rather
+// than the short front face. Reads as a long product profile — solar
+// array along the top, mounting feet along the bottom, PODOS wordmark
+// on the side. Both hero and lock keep this angle so the side view is
+// the canonical resting orientation across all scroll positions.
+//
+// If +π/2 reveals the wrong side of the pod (e.g. you wanted to see
+// the wordmark and it's hidden), flip to -Math.PI / 2.
+const SIDE_ROT_Y = Math.PI / 2;
+const HERO_ROT_Y = SIDE_ROT_Y;
 const HERO_ROT_X = 0;
-const LOCK_ROT_Y = 0;
+const LOCK_ROT_Y = SIDE_ROT_Y;
 const LOCK_ROT_X = 0;
 
 /* -------------------------------------------------------------------- */
@@ -121,11 +128,13 @@ function RackModel({
       );
     } else if (!paused) {
       // ── Idle mode ───────────────────────────────────────────────
-      // No auto-rotate — keep the rack centered head-on. User can
-      // still drag via OrbitControls if they want to inspect.
+      // No auto-rotate — lerp the rack back to the canonical side
+      // view when the user releases a drag. They can still orbit via
+      // OrbitControls during drag; release returns to this resting
+      // angle so the model reads as a stable product profile.
       groupRef.current.rotation.y = THREE.MathUtils.lerp(
         groupRef.current.rotation.y,
-        0,
+        SIDE_ROT_Y,
         delta * 5,
       );
     }
