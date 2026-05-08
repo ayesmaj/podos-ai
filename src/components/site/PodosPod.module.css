@@ -36,27 +36,36 @@
 
 /* ──────────────────────────────────────────────────────────────────
  * .podCable — the crane's lifting cable, rendered as a section-wide
- * decorative line BEHIND the pod. Spans the full height of the #podos
- * section so it visually extends from the section top all the way down
- * past the pod. The pod's z-index (10) covers the cable at the pod's
- * position, so the cable appears to "end" at the pod from the user's
- * point of view.
+ * decorative line.
+ *
+ * `height: 100%` made it extend ALL the way past the pod into the
+ * podium area below — wrong. The cable should END where the pod is.
+ * `max-height: 900px` caps it at roughly the pod's vertical position
+ * (header ~200px + studio top ~50px + canvas-top-area ~650px ≈ 900px
+ * from section top). Below that, no cable visible.
  *
  * The gradient runs from semi-transparent at the top (atmospheric
- * distance — like the cable disappears into the sky) to nearly opaque
- * at the bottom (where it meets the pod, fully visible).
+ * "fading into the sky" effect) to fully opaque at the bottom (where
+ * the cable meets the pod's hook and reads as a tactile rope).
  * ────────────────────────────────────────────────────────────────── */
 .podCable {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  height: 100%;
+  /* `--pod-cable-h` is set by JS in PodosPod.tsx — equals the
+     pixel distance from section top to canvas top, so the cable
+     always ENDS exactly where the 3D pod's hook is visible. The
+     fallback 800px applies before the JS effect runs (e.g.,
+     during SSR/hydration or before R3F mounts the canvas). */
+  height: var(--pod-cable-h, 800px);
   width: 2px;
   background: linear-gradient(
     to bottom,
-    rgba(20, 30, 45, 0.55),
-    rgba(20, 30, 45, 0.95)
+    rgba(20, 30, 45, 0.0) 0%,
+    rgba(20, 30, 45, 0.4) 25%,
+    rgba(20, 30, 45, 0.85) 75%,
+    rgba(20, 30, 45, 0.95) 100%
   );
   z-index: 5;
   pointer-events: none;
