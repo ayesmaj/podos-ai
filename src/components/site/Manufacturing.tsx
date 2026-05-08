@@ -136,7 +136,7 @@ export default function Manufacturing() {
             transition={{ ...transition, delay: 0.2 }}
           >
             <Image
-              src="/engineering/build-model.png"
+              src="/engineering/build-model.v2.png"
               alt="Build model diagram: Factory, Pod, Site. Three-stage modular pipeline — factory production with robotic assembly, the PODOS AI compute pod, and site deployment by crane. Steps: 01 Factory — engineered and assembled in a controlled environment; 02 Pod — fully tested, integrated, and quality-validated; 03 Site — delivered and deployed for rapid site integration. Tags: Controlled QA, Repeatable Spec, Parallelized Schedule, Factory Build."
               width={1400}
               height={900}
