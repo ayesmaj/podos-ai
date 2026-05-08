@@ -70,7 +70,7 @@ const INTRO_FRAME_COUNT = 209;
 export default function HeroVideoNarrative() {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const chapterRefs = useRef<(HTMLDivElement | null)[]>([]);
   const progressRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -108,18 +108,82 @@ export default function HeroVideoNarrative() {
   useEffect(() => {
     if (isMobile || skipped) return;
     const section = sectionRef.current;
-    const img = imgRef.current;
-    if (!section || !img) return;
+    const canvas = canvasRef.current;
+    if (!section || !canvas) return;
 
-    // Preload every frame so subsequent src-swaps are cache-hit
-    // instant. We don't keep refs — the browser's HTTP cache holds
-    // the decoded JPEG data across all 209 URLs. Use `window.Image`
-    // explicitly because the file imports `Image` from `next/image`
-    // at the top (which is a React component, not the HTMLImageElement
-    // constructor — `new Image()` would resolve to that and fail).
-    for (let i = 1; i <= INTRO_FRAME_COUNT; i++) {
-      const preload = new window.Image();
-      preload.src = `/intro-frames/${String(i).padStart(3, "0")}.jpg`;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Build the frame array. Use `window.Image` explicitly because
+    // the file imports `Image` from `next/image` at the top — `new
+    // Image()` would resolve to that React component and fail.
+    const frames: HTMLImageElement[] = new Array(INTRO_FRAME_COUNT);
+
+    // Schedule frame loads: frame 0 immediately (so the canvas can
+    // draw something on first scroll), the rest progressively during
+    // browser idle time so we don't lock up the network/decoder
+    // firing 209 requests at once. Frames load in scroll order
+    // (1..209), so by the time the user scrolls past frame N, frame
+    // N+1 is already in cache.
+    const loadFrame = (i: number) => {
+      const img = new window.Image();
+      img.src = `/intro-frames/${String(i + 1).padStart(3, "0")}.jpg`;
+      frames[i] = img;
+      return img;
+    };
+    // Eager load: frame 0 (visible immediately) + first few for
+    // initial scroll responsiveness without saturating the network.
+    const eagerCount = 12;
+    for (let i = 0; i < eagerCount; i++) loadFrame(i);
+
+    // Lazy load: rest of the frames during idle time. requestIdleCallback
+    // is supported in Chrome/Edge/Firefox; Safari falls back to a
+    // setTimeout chain. Either way, frames trickle in without
+    // blocking the main thread or saturating the connection budget.
+    type IdleSchedule = (cb: () => void) => number;
+    const ric = (window as unknown as { requestIdleCallback?: IdleSchedule })
+      .requestIdleCallback;
+    let lazyIdx = eagerCount;
+    const scheduleLazy = () => {
+      if (lazyIdx >= INTRO_FRAME_COUNT) return;
+      const next = () => {
+        if (lazyIdx >= INTRO_FRAME_COUNT) return;
+        loadFrame(lazyIdx);
+        lazyIdx += 1;
+        scheduleLazy();
+      };
+      if (typeof ric === "function") ric(next);
+      else window.setTimeout(next, 16);
+    };
+    scheduleLazy();
+
+    // Draw a frame to canvas if it's loaded. If the frame hasn't
+    // loaded yet, skip — canvas retains the previous frame, so the
+    // user sees the last known good frame instead of flicker.
+    const drawFrame = (idx: number) => {
+      const frame = frames[idx];
+      if (!frame || !frame.complete || frame.naturalWidth === 0) return;
+      // Lazy-resize canvas backing store to match source image
+      // resolution. Canvas displays at CSS size (100% × 100%) with
+      // `object-fit: cover` from styles.video; the backing store
+      // holds the actual pixel data at native resolution for crisp
+      // output on retina screens.
+      if (
+        canvas.width !== frame.naturalWidth ||
+        canvas.height !== frame.naturalHeight
+      ) {
+        canvas.width = frame.naturalWidth;
+        canvas.height = frame.naturalHeight;
+      }
+      ctx.drawImage(frame, 0, 0);
+    };
+
+    // Draw frame 0 as soon as it's available (or immediately if
+    // already cached from a prior visit).
+    if (frames[0].complete) {
+      drawFrame(0);
+    } else {
+      frames[0].onload = () => drawFrame(0);
     }
 
     // The hero is position: sticky (CSS). Sticky handles the pin;
@@ -154,10 +218,13 @@ export default function HeroVideoNarrative() {
       );
       if (idx !== lastIdx) {
         lastIdx = idx;
-        // Cache hit: the URL was preloaded above into the browser's
-        // HTTP cache, so this src-swap is a memcpy + paint, not a
-        // network request. Typical cost: ~3-5ms per swap.
-        img.src = `/intro-frames/${String(idx + 1).padStart(3, "0")}.jpg`;
+        // Atomic canvas draw — drawImage is a memcpy from the
+        // already-decoded HTMLImageElement to the canvas backing
+        // store, then a single paint. No transitional state, no
+        // flicker. If the frame isn't loaded yet (lazy-load still
+        // catching up), drawFrame is a no-op and the canvas keeps
+        // showing the previous frame — graceful degradation.
+        drawFrame(idx);
       }
 
       if (progressRef.current) {
@@ -312,12 +379,20 @@ export default function HeroVideoNarrative() {
             poster="/intro-poster.jpg"
           />
         ) : (
-          <img
-            ref={imgRef}
+          <canvas
+            ref={canvasRef}
             className={styles.video}
-            src="/intro-frames/001.jpg"
-            alt=""
-            decoding="async"
+            // CSS background fallback: until frame 0 is loaded and
+            // drawn to the canvas backing store, the canvas is
+            // transparent. Showing /intro-frames/001.jpg as a CSS
+            // background means the user sees the opening frame
+            // immediately on hard-reload (cold cache) instead of a
+            // blank canvas. Once we drawImage, opaque canvas pixels
+            // cover the background — no double-paint.
+            style={{
+              background:
+                "url('/intro-frames/001.jpg') center / cover no-repeat",
+            }}
           />
         )}
         <div className={styles.vignette} aria-hidden />
