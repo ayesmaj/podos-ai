@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView, useScroll } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import dynamic from "next/dynamic";
 import styles from "./PodosPod.module.css";
 import {
@@ -128,59 +128,6 @@ export default function PodosPod() {
     offset: ["start start", "end end"],
   });
 
-  /* ================================================================
-   * DYNAMIC CRANE-CABLE HEIGHT
-   * ----------------------------------------------------------------
-   * The .podCable element extends from the section's top edge down
-   * to where the pod's hook is rendered. The pod's vertical position
-   * is variable (depends on scroll because .studioStage is sticky):
-   * before sticky, pod scrolls with content; during sticky, pod stays
-   * pinned to the viewport's top while the section scrolls past.
-   *
-   * To make the cable always END at the canvas top edge (where the
-   * 3D model's hook sits visually), we compute `canvasTop -
-   * sectionTop` on every scroll and write it to a CSS custom
-   * property on the section element. The .podCable rule consumes
-   * `var(--pod-cable-h)` for its height.
-   *
-   * rAF-throttled so we don't spam getBoundingClientRect on every
-   * scroll event. Also runs on resize since layout dimensions change.
-   * ================================================================ */
-  useEffect(() => {
-    const sectionEl = ref.current;
-    if (!sectionEl) return;
-    let raf: number | null = null;
-    const update = () => {
-      raf = null;
-      const canvasEl = sectionEl.querySelector(
-        'canvas[data-engine^="three.js"]',
-      ) as HTMLCanvasElement | null;
-      const sectionRect = sectionEl.getBoundingClientRect();
-      const canvasRect = canvasEl?.getBoundingClientRect();
-      // If the canvas isn't mounted yet (R3F is dynamic-imported), use
-      // a sensible default height instead of leaving the cable at 0.
-      const h = canvasRect
-        ? Math.max(0, canvasRect.top - sectionRect.top)
-        : 800;
-      sectionEl.style.setProperty("--pod-cable-h", `${h}px`);
-    };
-    const schedule = () => {
-      if (raf !== null) return;
-      raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    // Also run periodically in case canvas mounts after first paint.
-    const interval = window.setInterval(update, 500);
-    return () => {
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-      window.clearInterval(interval);
-      if (raf !== null) cancelAnimationFrame(raf);
-    };
-  }, []);
-
   return (
     <section
       id="podos"
@@ -204,19 +151,6 @@ export default function PodosPod() {
         <VignetteLight />
       </div>
 
-      {/* Crane cable — visual element that spans the FULL height of
-          the #podos section. Positioned absolutely so it sits behind
-          the pod (z:5 < pod z:10), creating the illusion that the
-          cable runs from above the page down to the pod. The pod's
-          z-index covers the cable at the pod's position; below the
-          pod the cable continues into the section content (where
-          existing text/cards have their own backgrounds or sit at
-          higher z-indexes).
-
-          See `.podCable` in PodosPod.module.css for the gradient
-          spec — fades from light at the top (atmospheric distance
-          effect) to opaque near the bottom (close-up at the pod). */}
-      <div className={styles.podCable} aria-hidden />
 
       <div className={`container-site ${styles.inner}`}>
         {/* HEADER */}
