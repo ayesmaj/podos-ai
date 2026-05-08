@@ -95,13 +95,13 @@ function RackModel({
   // sub(center) would just undo whatever translation was applied.
   // The offset has to live at the same level as sub(center) to
   // survive.
-  // At scale 2.8 the cable-top world-y reaches `offset + 2.8 × 2.97` =
-  // `offset + 8.316`. Camera frustum top is ~7.3, so cable cropping
-  // requires offset > -1.02. -0.5 leaves ~0.5 units of safety margin
-  // and drops the pod ~1.1 world units lower than the previous tuning
-  // (offset 0.6 at scale 2.3) — combined with the bigger scale, the
-  // pod sits noticeably larger and lower in the frame.
-  const POD_Y_OFFSET = -0.5;
+  // 0.6 puts the pod hovering ABOVE the studio podium with a visible
+  // air gap (instead of landed on it). At scale 2.3 the cable-top
+  // world-y reaches `0.6 + 2.3 × 2.97 = 7.43`, just above the camera
+  // frustum top (~7.3) so the cable stays cropped beyond canvas — it
+  // continues extending out into the section above as visible page
+  // chrome rather than terminating mid-canvas.
+  const POD_Y_OFFSET = 0.6;
   useEffect(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const center = box.getCenter(new THREE.Vector3());
@@ -202,7 +202,7 @@ function RackModel({
     <primitive
       ref={groupRef}
       object={scene}
-      scale={2.8}
+      scale={2.3}
       rotation-y={HERO_ROT_Y}
       rotation-x={HERO_ROT_X}
     />
