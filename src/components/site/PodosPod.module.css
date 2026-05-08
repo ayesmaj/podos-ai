@@ -138,17 +138,16 @@
   z-index: 5;
   pointer-events: none;
   overflow: visible !important;
-  /* Clip the top 90vh of the layer so the cable doesn't render through
-     the SolutionCards section above. The canvas extends 100vh upward
-     in DOM (so the WebGL render target stays large enough to render
-     the model at full pixel size — R3F sizes the canvas to its
-     parent, so shrinking the layer would shrink the model). The
-     clip-path masks the top of that extension visually.
-     inset(90vh 0 0 0) leaves visible the bottom 10vh + studio_height
-     of the layer → cable extends ~10vh (≈10% of viewport height)
-     above the studio top before being cleanly cropped, ending well
-     below the SolutionCards section above. */
-  clip-path: inset(90vh 0 0 0);
+  /* Clip the top 100vh of the layer so the cable rendering is confined
+     ENTIRELY within the studio area. Above the studio top the canvas
+     is masked, so the rope visible above the hook gets cleanly cut
+     off — visually it reads like the crane is lifting from off-stage
+     above the section, with only the hook+straps+pod inside the
+     studio's visible frame.
+     The canvas DOM still extends 100vh upward so R3F can render the
+     full model at full pixel resolution; the clip-path is a pure
+     visual mask, no WebGL resizing. */
+  clip-path: inset(100vh 0 0 0);
 }
 .podVisualLayer > * {
   pointer-events: auto;
@@ -159,9 +158,10 @@
        canvas covering the full screen on small phones. */
     top: -50vh;
     height: calc(100% + 50vh);
-    /* Match the smaller upward extension — clip 40vh of 50vh so
-       cable still extends ~10vh above studio on mobile. */
-    clip-path: inset(40vh 0 0 0);
+    /* Match the upward extension exactly — clip 50vh on a 50vh
+       extension so cable is fully confined to the studio area on
+       mobile too. */
+    clip-path: inset(50vh 0 0 0);
   }
 }
 @media (max-width: 1020px) {
