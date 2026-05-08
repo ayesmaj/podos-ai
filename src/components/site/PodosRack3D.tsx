@@ -78,15 +78,21 @@ const MODEL_SCALE = 3.5;
 const PIVOT_LOCAL_Y = -0.5;
 
 // World-y of the pivot point (= world-y where the rotation happens
-// AND where OrbitControls targets). Tuned so the pod itself sits at
-// the same screen position as the previous "amazing u made it" tuning
-// — pod center ≈ world y 0.12, hovering above the studio podium.
+// AND where OrbitControls targets). With MODEL_SCALE bumped to 3.5,
+// the model is much taller — the pod's pixel-bottom sits well below
+// the pod center, so we have to drop PIVOT_WORLD_Y substantially to
+// bring the pod's bottom edge near the studio podium image.
 //
-// Math: pod_center_world = PIVOT_WORLD_Y + MODEL_SCALE × (pod_local - PIVOT_LOCAL_Y)
-//   For pod_local ≈ -0.21 and PIVOT_LOCAL_Y = -0.5:
-//   pod_center_world = PIVOT_WORLD_Y + 3.5 × 0.29 = PIVOT_WORLD_Y + 1.015
-//   Solve for pod_center_world = 0.12 → PIVOT_WORLD_Y = -0.9
-const PIVOT_WORLD_Y = -0.9;
+// -2.2 places the rotation pivot ~1.3 world units below the previous
+// tuning at scale 2.3, which translates to ~190 canvas pixels of
+// downward shift — closing most of the gap between the bigger pod
+// and the podium while keeping a clear "hovering above" air-gap.
+//
+// Cable cropping is preserved with margin to spare:
+//   cable_top_world = -2.2 + (-3.5 × -0.5) + 3.5 × 2.97
+//                   = -2.2 + 1.75 + 10.395 = 9.945
+//   frustum_top ≈ 7.3, so cable still crops out the canvas top.
+const PIVOT_WORLD_Y = -2.2;
 
 /* -------------------------------------------------------------------- */
 /* The model itself — handles centering, shadows, rotation logic         */
