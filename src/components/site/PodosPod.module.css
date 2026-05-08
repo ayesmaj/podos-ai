@@ -267,6 +267,31 @@
   object-fit: cover;
   z-index: 0;
   pointer-events: none;
+  /* Fade the backdrop's vertical edges so it blends smoothly into
+     the page background instead of presenting a hard rectangular
+     "card" boundary. Top 18% fades from transparent → opaque;
+     bottom 18% fades opaque → transparent. The middle 64% (where
+     the podium and pod live) stays fully opaque. This is what
+     removes the "trapped in a container" feeling: there's no
+     visible top or bottom seam where the studio scene begins
+     and the page background ends.
+     -webkit-mask-image is for Safari which still needs the
+     prefix (Safari 15.4+ accepts unprefixed but older versions
+     don't). */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 18%,
+    black 82%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 18%,
+    black 82%,
+    transparent 100%
+  );
 }
 
 /* Header labels overlaid on the 3D scene — now NO background gradient
