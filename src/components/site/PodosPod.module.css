@@ -8,11 +8,11 @@
 
 .section {
   position: relative;
-  /* `overflow: visible` (was `hidden`) so the .studioCableTrail
-     pseudo-element can extend ABOVE the section into the
-     SolutionCards section above. The section's bg image breakout
-     pattern doesn't need overflow:hidden — it's already capped by
-     the viewport edges via the 100vw / left:calc(50% - 50vw) math. */
+  /* overflow: visible — wrappers must NOT clip the crane cable
+     visual, which is positioned absolutely from section top
+     (top: 0; height: 100%). The bg image breakout pattern
+     (used elsewhere) doesn't need overflow:hidden either; it's
+     already capped by viewport edges via the 100vw math. */
   overflow: visible;
   background:
     linear-gradient(
@@ -22,6 +22,44 @@
     ),
     linear-gradient(180deg, var(--paper) 0%, var(--canvas) 100%);
   isolation: isolate;
+  /* Min-height ensures the crane composition has room to breathe
+     even if section content is short. Mobile uses content-natural
+     height to avoid forcing a tall empty section when the pod
+     scales down. */
+  min-height: clamp(900px, 100vh, 1100px);
+}
+@media (max-width: 1020px) {
+  .section {
+    min-height: auto;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * .podCable — the crane's lifting cable, rendered as a section-wide
+ * decorative line BEHIND the pod. Spans the full height of the #podos
+ * section so it visually extends from the section top all the way down
+ * past the pod. The pod's z-index (10) covers the cable at the pod's
+ * position, so the cable appears to "end" at the pod from the user's
+ * point of view.
+ *
+ * The gradient runs from semi-transparent at the top (atmospheric
+ * distance — like the cable disappears into the sky) to nearly opaque
+ * at the bottom (where it meets the pod, fully visible).
+ * ────────────────────────────────────────────────────────────────── */
+.podCable {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    rgba(20, 30, 45, 0.55),
+    rgba(20, 30, 45, 0.95)
+  );
+  z-index: 5;
+  pointer-events: none;
 }
 
 .bg {
@@ -162,35 +200,12 @@
    (`<ContactShadows>` in PodosRack3D.tsx) is what actually anchors
    the rack visually so it reads as "in air" not "PNG cutout".
    ================================================================== */
-/* CSS extension of the 3D cable line above the canvas. Three.js
- * renders only inside the canvas pixel rectangle, so the cable
- * visually ends at the canvas top edge. This pseudo-element
- * continues the line upward into the section above (SolutionCards
- * "Factory-built AI compute pods" area), giving the impression
- * that the lifting cable extends through the entire section.
- *
- * Lives inside .studio (position: relative). `top: -120vh` extends
- * 120vh above the studio's top edge; `bottom: 50%` ends roughly
- * at the canvas top. Section's `overflow: visible` allows this. */
-.studioCableTrail {
-  position: absolute;
-  top: -120vh;
-  bottom: 50%;
-  left: 50%;
-  width: 2px;
-  transform: translateX(-50%);
-  background: linear-gradient(
-    to bottom,
-    rgba(20, 30, 50, 0) 0%,
-    rgba(20, 30, 50, 0.4) 60%,
-    rgba(20, 30, 50, 0.65) 100%
-  );
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* studioRack — the WebGL viewer column. Position relative inside
- * studioStage, fills available height. Contains the canvas. */
+/* studioRack — the WebGL viewer column hosting the 3D pod canvas.
+ * `z-index: 10` puts the pod above the section-level .podCable
+ * (z-index: 5), so the cable visually disappears behind the pod —
+ * exactly where it should "land". `overflow: visible` everywhere
+ * up the chain so the canvas and contact shadow can spill if they
+ * need to. */
 .studioRack {
   position: relative;
   height: 100%;
@@ -202,6 +217,7 @@
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   overflow: visible;
+  z-index: 10;
 }
 @media (max-width: 1020px) {
   .studioRack {

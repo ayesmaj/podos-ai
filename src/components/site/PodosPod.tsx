@@ -151,6 +151,20 @@ export default function PodosPod() {
         <VignetteLight />
       </div>
 
+      {/* Crane cable — visual element that spans the FULL height of
+          the #podos section. Positioned absolutely so it sits behind
+          the pod (z:5 < pod z:10), creating the illusion that the
+          cable runs from above the page down to the pod. The pod's
+          z-index covers the cable at the pod's position; below the
+          pod the cable continues into the section content (where
+          existing text/cards have their own backgrounds or sit at
+          higher z-indexes).
+
+          See `.podCable` in PodosPod.module.css for the gradient
+          spec — fades from light at the top (atmospheric distance
+          effect) to opaque near the bottom (close-up at the pod). */}
+      <div className={styles.podCable} aria-hidden />
+
       <div className={`container-site ${styles.inner}`}>
         {/* HEADER */}
         <motion.header
@@ -183,12 +197,6 @@ export default function PodosPod() {
             Scroll-driven 3D rack. See PodosRack3D for camera,
             lighting, and rotation animation. */}
         <div ref={studioRef} className={styles.studio}>
-          {/* CSS overlay extending the visual of the 3D cable above
-              the canvas. The 3D rendering is bounded by the canvas
-              rectangle; this thin line continues the visual into the
-              section above (SolutionCards). See `.studioCableTrail`
-              CSS for math. */}
-          <div className={styles.studioCableTrail} aria-hidden />
           <div className={styles.studioStage}>
             {/* Edge-to-edge static background image for the studio.
                 Lives at the .studioStage level (not inside .studioRack)
