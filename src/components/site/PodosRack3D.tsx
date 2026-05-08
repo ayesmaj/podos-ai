@@ -95,7 +95,13 @@ function RackModel({
   // sub(center) would just undo whatever translation was applied.
   // The offset has to live at the same level as sub(center) to
   // survive.
-  const POD_Y_OFFSET = 1.5;
+  // Bumped 1.5 → 2.7 to compensate for scale 1.7 → 2.3. Keeping the pod
+  // at the same world-y after a scale change requires an offset bump
+  // proportional to the local-y of the focal point:
+  //   world_y_pod = offset + scale × pod_local_y
+  // Holding world_y_pod ≈ -2 with pod_local_y ≈ -2.08:
+  //   offset_new = -2 - 2.3 × (-2.08) = 2.78  → rounded to 2.7
+  const POD_Y_OFFSET = 2.7;
   useEffect(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const center = box.getCenter(new THREE.Vector3());
@@ -196,7 +202,7 @@ function RackModel({
     <primitive
       ref={groupRef}
       object={scene}
-      scale={1.7}
+      scale={2.3}
       rotation-y={HERO_ROT_Y}
       rotation-x={HERO_ROT_X}
     />
