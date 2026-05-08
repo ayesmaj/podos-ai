@@ -138,6 +138,17 @@
   z-index: 5;
   pointer-events: none;
   overflow: visible !important;
+  /* Clip the top 90vh of the layer so the cable doesn't render through
+     the SolutionCards section above. The canvas extends 100vh upward
+     in DOM (so the WebGL render target stays large enough to render
+     the model at full pixel size — R3F sizes the canvas to its
+     parent, so shrinking the layer would shrink the model). The
+     clip-path masks the top of that extension visually.
+     inset(90vh 0 0 0) leaves visible the bottom 10vh + studio_height
+     of the layer → cable extends ~10vh (≈10% of viewport height)
+     above the studio top before being cleanly cropped, ending well
+     below the SolutionCards section above. */
+  clip-path: inset(90vh 0 0 0);
 }
 .podVisualLayer > * {
   pointer-events: auto;
@@ -148,6 +159,9 @@
        canvas covering the full screen on small phones. */
     top: -50vh;
     height: calc(100% + 50vh);
+    /* Match the smaller upward extension — clip 40vh of 50vh so
+       cable still extends ~10vh above studio on mobile. */
+    clip-path: inset(40vh 0 0 0);
   }
 }
 @media (max-width: 1020px) {
