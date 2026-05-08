@@ -95,15 +95,13 @@ function RackModel({
   // sub(center) would just undo whatever translation was applied.
   // The offset has to live at the same level as sub(center) to
   // survive.
-  // 2.7 → 0.6 to drop the pod down to MEET the studio podium image.
-  // The cable's world-y top at scale 2.3 reaches `offset + scale × 2.97`
-  // = `offset + 6.83`. As long as that value exceeds the camera frustum
-  // top (~7.3 at camera_y 1.5 z=14 fov=45), the cable stays cropped
-  // beyond the canvas — which is what makes the cable "extend out the
-  // section above". 0.6 + 6.83 = 7.43 > 7.3 by a small margin (✓).
-  // Going below 0.47 would let the cable terminate visibly inside the
-  // canvas instead of extending out — that's the floor.
-  const POD_Y_OFFSET = 0.6;
+  // At scale 2.8 the cable-top world-y reaches `offset + 2.8 × 2.97` =
+  // `offset + 8.316`. Camera frustum top is ~7.3, so cable cropping
+  // requires offset > -1.02. -0.5 leaves ~0.5 units of safety margin
+  // and drops the pod ~1.1 world units lower than the previous tuning
+  // (offset 0.6 at scale 2.3) — combined with the bigger scale, the
+  // pod sits noticeably larger and lower in the frame.
+  const POD_Y_OFFSET = -0.5;
   useEffect(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const center = box.getCenter(new THREE.Vector3());
@@ -204,7 +202,7 @@ function RackModel({
     <primitive
       ref={groupRef}
       object={scene}
-      scale={2.3}
+      scale={2.8}
       rotation-y={HERO_ROT_Y}
       rotation-x={HERO_ROT_X}
     />
