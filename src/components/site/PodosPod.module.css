@@ -109,8 +109,14 @@
      reasonable on tall and short viewports alike. */
   top: clamp(4rem, 8vh, 6rem);
   height: calc(100vh - clamp(5rem, 10vh, 7rem));
-  display: flex;
-  align-items: center;
+  /* Block layout (was flex with align-items:center). The flex
+     centering was shrinking the studioRack to its content size,
+     leaving the WebGL canvas at ~520px tall when the full stage
+     was ~780px. Block layout + height:100% on the inner studioRack
+     lets the canvas use ALL available vertical space, giving the
+     pod's cable more room to render natively before getting
+     clipped at the canvas top edge. */
+  display: block;
 }
 @media (max-width: 1020px) {
   .studioStage {
