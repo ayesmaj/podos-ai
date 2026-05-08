@@ -274,16 +274,18 @@
   left: calc(50% - 50vw);
   width: 100vw;
   height: 100%;
-  /* No translateY: backdrop sits in its natural position so the
-     podium remains at the bottom of the .studioStage area, with the
-     pod (in the 3D canvas) hovering ABOVE it with visible air-gap.
-     The "pod hovers, doesn't sit" composition reads as "being lowered
-     by crane" — the cable extending out the top of the canvas into
-     the section above sells the narrative.
-     If the gap looks too big or small later, tune via translateY
-     here OR adjust POD_Y_OFFSET in PodosRack3D.tsx (within the cable-
-     cropping constraint: offset must satisfy
-     offset + scale × 2.97 > 7.3, i.e. offset > 0.47 at scale 2.3). */
+  /* translateY shifts the podium image UP so it meets the suspended
+     pod model with a small visible air-gap (pod hovers, doesn't
+     touch). At MODEL_SCALE 3.5 the pod's bottom sits well above
+     where the podium naturally lands at the bottom of .studioStage —
+     -260px lifts the podium up to just below the pod, preserving
+     the "being lowered by crane" composition.
+     Tuning note: this is the simplest knob for the pod-to-podium gap.
+     PIVOT_WORLD_Y in PodosRack3D.tsx does NOT effectively control
+     this gap because OrbitControls.target follows the pivot, so the
+     camera tilts to keep the model at the same canvas pixel position
+     when PIVOT_WORLD_Y changes. Use translateY here instead. */
+  transform: translateY(-260px);
   /* Explicit `max-width: none` overrides Tailwind's default
      `img, video { max-width: 100% }` reset, which would otherwise
      cap the breakout at the parent's content-box width (~830px on
