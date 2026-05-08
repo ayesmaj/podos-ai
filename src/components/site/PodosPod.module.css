@@ -48,6 +48,11 @@
 .header {
   max-width: 900px;
   margin-bottom: clamp(3rem, 5vw, 4.5rem);
+  /* Sit on top of the .podVisualLayer canvas (z:5) so the headline
+     remains readable even though the cable renders BEHIND it through
+     the headline area. */
+  position: relative;
+  z-index: 6;
 }
 .eyebrowIdx {
   font-weight: 600;
@@ -95,74 +100,67 @@
    ================================================================== */
 .studio {
   position: relative;
-  /* The outer wrapper is just taller than the sticky stage; the
-     difference (~25vh) is the scroll runway that drives `useScroll`
-     progress. Tighter than this and the choreography fires within
-     a single wheel notch; longer and the empty trailing space below
-     the rack reads as "broken layout" before .main scrolls in. */
-  height: 115vh;
-  min-height: clamp(900px, 100vh, 1100px);
-  /* Per user spec: every wrapper around the 3D visual must NOT clip
-     anything — the canvas extends UPWARD via its absolute layer
-     (.podVisualLayer) and would be cut off by any clipping ancestor. */
+  /* No longer sticky-driven — the canvas now lives in .podComposition
+     above .studio. .studio just hosts the backdrop image + text
+     labels; its height is set by content (min-height) so the podium
+     image sits at the bottom of the composition. */
+  min-height: 60vh;
   overflow: visible !important;
   clip-path: none !important;
   contain: none !important;
   margin-bottom: clamp(2rem, 3.5vw, 3rem);
+  /* z-index lower than .podVisualLayer (z:5) so the canvas pod
+     renders ON TOP of the backdrop image. */
+  z-index: 1;
 }
 
-/* Pod 3D visual layer — hosts the WebGL canvas in a tall absolute
-   layer that extends ABOVE the studio's sticky viewport-frame, so
-   the GLB's real cable+hook+straps render across the section's
-   vertical space without being clipped by the "card" wrapper.
+/* ==================================================================
+   POD COMPOSITION — wraps .header + .studio so the cable canvas
+   can span the FULL VERTICAL EXTENT of the headline-plus-pod area.
+   ==================================================================
+   The .podVisualLayer (canvas) is positioned absolute inset:0 inside
+   .podComposition, so it covers exactly the area from the eyebrow
+   "02 · THE PHYSICAL LAYER" down to the studio's bottom (where the
+   podium image lives). The crane cable rendered in the canvas thus
+   spans from the section top to the pod's hook with no clipping
+   needed — the canvas's own bounds ARE the boundary the cable should
+   stop at.
+   ================================================================== */
+.podComposition {
+  position: relative;
+  /* Min-height ensures the composition area is tall enough to host
+     the headline + pod + podium with proper vertical breathing room
+     even before the .studio's content sets a height. Matches the
+     previous .studio min-height behavior. */
+  min-height: clamp(900px, 100vh, 1100px);
+  overflow: visible !important;
+  /* New stacking context so .podVisualLayer (z:5) and .header (z:6)
+     z-index relationships are isolated to this subtree. */
+  isolation: isolate;
+}
+@media (max-width: 1020px) {
+  .podComposition {
+    min-height: auto;
+  }
+}
 
-   No CSS fakery. The cable visible above the pod is the actual
-   3D model's geometry, just in a bigger canvas with more vertical
-   room. Camera framing (in PodosRack3D.tsx) is what determines
-   how much of the model's cable is visible.
-
-   `top: -100vh` makes the canvas DOM rectangle extend one viewport
-   height above .studio's top edge — into the section above
-   (SolutionCards). `height: calc(100% + 100vh)` covers that extension
-   plus the full studio scroll runway height.
+/* Pod 3D visual layer — fills the entire .podComposition.
+   The WebGL canvas inside renders the crane + hook + straps + pod;
+   with the layer at inset:0 of .podComposition, the cable's pixel
+   range covers the full headline-to-pod span.
 
    `pointer-events: none` so the layer doesn't intercept text
    clicks; the canvas inside re-enables pointer-events for its
    own drag interactions (OrbitControls). */
 .podVisualLayer {
   position: absolute;
-  top: -100vh;
-  left: 0;
-  right: 0;
-  height: calc(100% + 100vh);
+  inset: 0;
   z-index: 5;
   pointer-events: none;
   overflow: visible !important;
-  /* Clip the top 100vh of the layer so the cable rendering is confined
-     ENTIRELY within the studio area. Above the studio top the canvas
-     is masked, so the rope visible above the hook gets cleanly cut
-     off — visually it reads like the crane is lifting from off-stage
-     above the section, with only the hook+straps+pod inside the
-     studio's visible frame.
-     The canvas DOM still extends 100vh upward so R3F can render the
-     full model at full pixel resolution; the clip-path is a pure
-     visual mask, no WebGL resizing. */
-  clip-path: inset(100vh 0 0 0);
 }
 .podVisualLayer > * {
   pointer-events: auto;
-}
-@media (max-width: 1020px) {
-  .podVisualLayer {
-    /* Mobile: less aggressive vertical extension to avoid the
-       canvas covering the full screen on small phones. */
-    top: -50vh;
-    height: calc(100% + 50vh);
-    /* Match the upward extension exactly — clip 50vh on a 50vh
-       extension so cable is fully confined to the studio area on
-       mobile too. */
-    clip-path: inset(50vh 0 0 0);
-  }
 }
 @media (max-width: 1020px) {
   /* Below 1020px we drop sticky entirely — side-by-side becomes
@@ -175,23 +173,21 @@
 }
 
 .studioStage {
-  position: sticky;
-  /* Sit just below the persistent nav (~5rem). The clamp keeps it
-     reasonable on tall and short viewports alike. */
-  top: clamp(4rem, 8vh, 6rem);
-  height: calc(100vh - clamp(5rem, 10vh, 7rem));
+  /* Sticky removed — the canvas (in .podComposition) and the backdrop
+     image (here) now share the same scroll context. Both move with
+     the page, no relative drift between pod and podium. */
+  position: relative;
+  height: 60vh;
+  min-height: 480px;
   display: block;
-  /* Per user spec: don't clip the 3D canvas. The .podVisualLayer
-     absolute child extends up via negative top — any clipping
-     would crop the model's cable. */
   overflow: visible !important;
   clip-path: none !important;
   contain: none !important;
 }
 @media (max-width: 1020px) {
   .studioStage {
-    position: static;
     height: auto;
+    min-height: 360px;
     display: block;
   }
 }
@@ -295,18 +291,13 @@
   left: calc(50% - 50vw);
   width: 100vw;
   height: 100%;
-  /* translateY shifts the podium image UP so it meets the suspended
-     pod model with a small visible air-gap (pod hovers, doesn't
-     touch). At MODEL_SCALE 3.5 the pod's bottom sits well above
-     where the podium naturally lands at the bottom of .studioStage —
-     -260px lifts the podium up to just below the pod, preserving
-     the "being lowered by crane" composition.
-     Tuning note: this is the simplest knob for the pod-to-podium gap.
-     PIVOT_WORLD_Y in PodosRack3D.tsx does NOT effectively control
-     this gap because OrbitControls.target follows the pivot, so the
-     camera tilts to keep the model at the same canvas pixel position
-     when PIVOT_WORLD_Y changes. Use translateY here instead. */
-  transform: translateY(-260px);
+  /* No transform: with the canvas now spanning the entire
+     .podComposition (header + studio), the studio backdrop sits
+     naturally at its DOM position (lower portion of composition).
+     The pod renders at canvas pixel ~506 (= viewport y composition_top
+     + 506), which falls roughly above the natural backdrop top —
+     creating the "pod hovers above podium" composition without
+     needing a transform. If alignment needs tweaking, dial here. */
   /* Explicit `max-width: none` overrides Tailwind's default
      `img, video { max-width: 100% }` reset, which would otherwise
      cap the breakout at the parent's content-box width (~830px on

@@ -153,75 +153,74 @@ export default function PodosPod() {
 
 
       <div className={`container-site ${styles.inner}`}>
-        {/* HEADER */}
-        <motion.header
-          ref={headerRef}
-          className={styles.header}
-          initial={{ opacity: 0, y: 16 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-          transition={{ duration: 0.8, ease: [0.22, 0.61, 0.36, 1] }}
-        >
-          <span className="t-eyebrow">
-            <span className={styles.eyebrowIdx}>02</span>
-            <span className={styles.eyebrowSep}>·</span>
-            THE PHYSICAL LAYER
-          </span>
-          <h2 id="podos-heading" className={`${styles.headline} t-display`}>
-            Deploy <span className="t-sweep-brand">one megawatt</span> in
-            90–120 days.
-            <br />
-            Not four years.
-          </h2>
-          <p className={styles.lede}>
-            PODOS is a factory-built modular AI supercomputer. Power, cooling,
-            networking, fire, seismic — integrated and pressure-tested before
-            it leaves California. Sites prepare the pad. The pod brings the
-            data center.
-          </p>
-        </motion.header>
+        {/* ============ POD COMPOSITION ============
+            Wraps the .header (eyebrow + headline + lede) AND the
+            .studio (3D pod render area) so the .podVisualLayer can
+            span the FULL VERTICAL EXTENT of the composition with
+            position:absolute, inset:0.
 
-        {/* ============ STUDIO — 3D rack viewer ============
-            Scroll-driven 3D rack. See PodosRack3D for camera,
-            lighting, and rotation animation. */}
-        <div ref={studioRef} className={styles.studio}>
-          <div className={styles.studioStage}>
-            {/* Pod 3D visual layer — the WebGL canvas lives in its own
-                absolute layer that extends ABOVE the studioStage's
-                sticky viewport-frame so the model's REAL cable can
-                render across the section's vertical space without
-                being clipped by any "card" wrapper. No fake CSS cable.
+            Why this structure: the user wants the crane cable visible
+            from the pod's hook all the way up to the section top —
+            i.e., crossing through the headline area. With the canvas
+            scoped only to .studio (its previous parent), the cable
+            could only render below the headline. By scoping the
+            canvas to a wrapper that contains the headline AND the
+            studio, the cable's pixel range covers the full visible
+            composition, naturally extending up to the wrapper's top
+            edge.
 
-                IMPORTANT: this layer MUST live inside .studioStage
-                (which is position: sticky), not as a sibling of it.
-                If it sits outside the sticky container, the sticky
-                stage "freezes" at viewport top during scroll while
-                this absolute layer continues moving with .studio —
-                so the pod drifts up/away from the studio backdrop
-                (the podium image) until the sticky range ends. Inside
-                .studioStage, both layers share the sticky lifecycle:
-                they pin together, they release together, and the pod
-                stays glued to the podium throughout the scroll.
+            Trade-off: removed sticky behavior on .studioStage so the
+            canvas (in this new wrapper) and the studio backdrop
+            (inside .studio inside this wrapper) share the same scroll
+            context — they move together with the page, no relative
+            drift between pod and podium. */}
+        <div className={styles.podComposition}>
+          {/* Pod 3D visual layer — fills the entire composition via
+              inset:0. The cable rendered in this canvas naturally
+              spans from the canvas top (= composition top) down to
+              wherever the pod is rendered, with no clip-path needed. */}
+          <div className={styles.podVisualLayer}>
+            <PodosRack3D scrollProgress={scrollYProgress} />
+          </div>
 
-                pointer-events: none on the wrapper so it doesn't block
-                clicks on text elsewhere; canvas itself stays clickable
-                for OrbitControls drag. */}
-            <div className={styles.podVisualLayer}>
-              <PodosRack3D scrollProgress={scrollYProgress} />
-            </div>
-            {/* Edge-to-edge static background image for the studio.
-                Lives at the .studioStage level (not inside .studioRack)
-                so it can break out of container-site's max-width via
-                the 100vw pattern in CSS. PodosRack3D's <Canvas> uses
-                gl={{ alpha: true }} — canvas pixels are transparent
-                everywhere the pod isn't opaque, so the backdrop shows
-                through behind the pod. `aria-hidden` because it's
-                pure decoration; the pod is the content.
+          {/* HEADER text — eyebrow, headline, lede. z-index above the
+              canvas so text remains readable even though the cable
+              renders behind it. */}
+          <motion.header
+            ref={headerRef}
+            className={styles.header}
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.8, ease: [0.22, 0.61, 0.36, 1] }}
+          >
+            <span className="t-eyebrow">
+              <span className={styles.eyebrowIdx}>02</span>
+              <span className={styles.eyebrowSep}>·</span>
+              THE PHYSICAL LAYER
+            </span>
+            <h2 id="podos-heading" className={`${styles.headline} t-display`}>
+              Deploy <span className="t-sweep-brand">one megawatt</span> in
+              90–120 days.
+              <br />
+              Not four years.
+            </h2>
+            <p className={styles.lede}>
+              PODOS is a factory-built modular AI supercomputer. Power, cooling,
+              networking, fire, seismic — integrated and pressure-tested before
+              it leaves California. Sites prepare the pad. The pod brings the
+              data center.
+            </p>
+          </motion.header>
 
-                Plain <img> rather than next/image to avoid the
-                _next/image optimizer cache layer (we hit cache-stale
-                bugs with that earlier on build-model.png). For a
-                single hero backdrop at a stable URL, plain <img>
-                is more predictable. */}
+          {/* ============ STUDIO — pod backdrop + text labels ============
+              The 3D canvas is no longer here (moved to .podVisualLayer
+              above); .studio now hosts only the studio backdrop image
+              (the podium) and the studio label overlays. Sticky
+              positioning removed because canvas + backdrop now share
+              the same scroll context — they move together as the user
+              scrolls, so no relative drift between pod and podium. */}
+          <div ref={studioRef} className={styles.studio}>
+            <div className={styles.studioStage}>
             <img
               className={styles.studioBackdrop}
               src="/studio-bg.png"
@@ -271,8 +270,10 @@ export default function PodosPod() {
                 </div>
               </motion.div>
             </div>
+            </div>
           </div>
         </div>
+        {/* /podComposition */}
 
         {/* ============ INTERACTIVE OPTIMUS POD SPEC ============
             2026-04-24: Replaced the static side-by-side
