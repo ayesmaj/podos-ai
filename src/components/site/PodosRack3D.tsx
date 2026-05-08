@@ -148,7 +148,24 @@ function RackModel({
   // not a chunky box. If a future model swap is more cuboidal, you'll
   // probably want to drop this back to ~2.0–2.2 to avoid clipping the
   // top/bottom edges of the frame.
-  return <primitive ref={groupRef} object={scene} scale={3.0} />;
+  //
+  // `rotation-y={HERO_ROT_Y}` and `rotation-x={HERO_ROT_X}` set the
+  // initial rotation DECLARATIVELY via R3F's JSX-prop syntax — applied
+  // during reconciliation, before any useFrame tick. Without these,
+  // useFrame might run before the seeding useEffect on the first frame
+  // and briefly render the model at rotation 0 (front view) before
+  // snap-lerping to the side view. The JSX props guarantee the very
+  // first paint shows the side view; subsequent useFrame lerps keep
+  // it there (lerp(π/2, π/2, anything) = π/2).
+  return (
+    <primitive
+      ref={groupRef}
+      object={scene}
+      scale={3.0}
+      rotation-y={HERO_ROT_Y}
+      rotation-x={HERO_ROT_X}
+    />
+  );
 }
 
 /* -------------------------------------------------------------------- */
