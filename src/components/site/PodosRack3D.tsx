@@ -46,16 +46,15 @@ useGLTF.preload("/models/podos-rack.glb");
 /* -------------------------------------------------------------------- */
 /* Choreography keyframes — tuned to pair with the schematic next to it  */
 /* -------------------------------------------------------------------- */
-// Side-elevation view: rotate 90° around Y so the camera sees the long
-// side of the freight pod (5.7m wide × 1.32m tall world-space) rather
-// than the short front face. Reads as a long product profile — solar
-// array along the top, mounting feet along the bottom, PODOS wordmark
-// on the side. Both hero and lock keep this angle so the side view is
-// the canonical resting orientation across all scroll positions.
+// Default rotation: 0 (the GLB's authored front view). The previous
+// Solar Freight pod needed +π/2 to show its long side; the new pod 3d
+// model has bounds 7.70 × 5.94 × 1.52 (more cube-like than ribbon-like)
+// so the natural front face reads as the hero angle without rotation.
 //
-// If +π/2 reveals the wrong side of the pod (e.g. you wanted to see
-// the wordmark and it's hidden), flip to -Math.PI / 2.
-const SIDE_ROT_Y = Math.PI / 2;
+// If you swap models again and the natural orientation looks wrong,
+// try Math.PI / 2 (right side), -Math.PI / 2 (left side), or
+// Math.PI (back) until the right face is camera-facing.
+const SIDE_ROT_Y = 0;
 const HERO_ROT_Y = SIDE_ROT_Y;
 const HERO_ROT_X = 0;
 const LOCK_ROT_Y = SIDE_ROT_Y;
@@ -140,28 +139,32 @@ function RackModel({
     }
   });
 
-  // scale=3.0 is tuned to the Solar Freight pod's bounds (1.9 × 0.44 ×
-  // 0.49 m). At this scale the model fills ~87% of the canvas width and
-  // ~32% of the height with the camera at [0, 0.4, 6.5] and fov=35.
-  // The freight pod is much flatter than the prior Optimus rack, so the
-  // vertical breathing room is intentional — it's a long-vehicle silhouette,
-  // not a chunky box. If a future model swap is more cuboidal, you'll
-  // probably want to drop this back to ~2.0–2.2 to avoid clipping the
-  // top/bottom edges of the frame.
+  // scale=0.65 is tuned to the new pod 3d model's bounds (7.70 × 5.94
+  // × 1.52 m). At this scale the model is ~5.0m × 3.86m × 0.99m world
+  // space, comfortably fitting the camera's ~6.5 × 4.1 unit visible
+  // frame at z=0 (camera position [0, 0.4, 6.5], FOV 35°).
+  //
+  // History: prior Solar Freight pod had bounds 1.9 × 0.44 × 0.49 m
+  // and used scale=3.0. The new model is 4× wider and 13× taller in
+  // local units, so it requires a much smaller scale.
+  //
+  // If a future swap shrinks the model again (e.g., a flatter freight
+  // pod), bump scale back up. Math: target ~5m model width, divide by
+  // local X-bound to get scale.
   //
   // `rotation-y={HERO_ROT_Y}` and `rotation-x={HERO_ROT_X}` set the
   // initial rotation DECLARATIVELY via R3F's JSX-prop syntax — applied
   // during reconciliation, before any useFrame tick. Without these,
   // useFrame might run before the seeding useEffect on the first frame
-  // and briefly render the model at rotation 0 (front view) before
-  // snap-lerping to the side view. The JSX props guarantee the very
-  // first paint shows the side view; subsequent useFrame lerps keep
-  // it there (lerp(π/2, π/2, anything) = π/2).
+  // and briefly render the model at default rotation before snap-
+  // lerping to the target. JSX props guarantee the very first paint
+  // shows the intended angle; subsequent useFrame lerps keep it there
+  // (lerp(target, target, anything) = target).
   return (
     <primitive
       ref={groupRef}
       object={scene}
-      scale={3.0}
+      scale={0.65}
       rotation-y={HERO_ROT_Y}
       rotation-x={HERO_ROT_X}
     />

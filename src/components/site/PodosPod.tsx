@@ -184,23 +184,27 @@ export default function PodosPod() {
             lighting, and rotation animation. */}
         <div ref={studioRef} className={styles.studio}>
           <div className={styles.studioStage}>
-            {/* Edge-to-edge looping background video for the studio.
+            {/* Edge-to-edge static background image for the studio.
                 Lives at the .studioStage level (not inside .studioRack)
                 so it can break out of container-site's max-width via
                 the 100vw pattern in CSS. PodosRack3D's <Canvas> uses
                 gl={{ alpha: true }} — canvas pixels are transparent
-                everywhere the pod isn't opaque, so the video shows
+                everywhere the pod isn't opaque, so the backdrop shows
                 through behind the pod. `aria-hidden` because it's
-                pure decoration. */}
-            <video
-              className={styles.studioBackgroundVideo}
-              src="/studio-bg.mp4"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
+                pure decoration; the pod is the content.
+
+                Plain <img> rather than next/image to avoid the
+                _next/image optimizer cache layer (we hit cache-stale
+                bugs with that earlier on build-model.png). For a
+                single hero backdrop at a stable URL, plain <img>
+                is more predictable. */}
+            <img
+              className={styles.studioBackdrop}
+              src="/studio-bg.png"
+              alt=""
               aria-hidden
+              loading="eager"
+              decoding="async"
             />
             <div className={styles.studioGrid}>
               <motion.div
