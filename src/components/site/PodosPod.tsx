@@ -184,23 +184,30 @@ export default function PodosPod() {
             Scroll-driven 3D rack. See PodosRack3D for camera,
             lighting, and rotation animation. */}
         <div ref={studioRef} className={styles.studio}>
-          {/* Pod 3D visual layer — the WebGL canvas lives in its own
-              absolute layer that extends ABOVE the studioStage's
-              sticky viewport-frame so the model's REAL cable can
-              render across the section's vertical space without
-              being clipped by any "card" wrapper. No fake CSS cable.
-
-              The layer uses position: absolute + negative top so it
-              extends from somewhere up high (above the section) down
-              past the studio area, giving the GLB scene plenty of
-              vertical room to render its full crane rigging.
-              pointer-events: none on the wrapper so it doesn't block
-              clicks on text elsewhere; canvas itself stays clickable
-              for OrbitControls drag. */}
-          <div className={styles.podVisualLayer}>
-            <PodosRack3D scrollProgress={scrollYProgress} />
-          </div>
           <div className={styles.studioStage}>
+            {/* Pod 3D visual layer — the WebGL canvas lives in its own
+                absolute layer that extends ABOVE the studioStage's
+                sticky viewport-frame so the model's REAL cable can
+                render across the section's vertical space without
+                being clipped by any "card" wrapper. No fake CSS cable.
+
+                IMPORTANT: this layer MUST live inside .studioStage
+                (which is position: sticky), not as a sibling of it.
+                If it sits outside the sticky container, the sticky
+                stage "freezes" at viewport top during scroll while
+                this absolute layer continues moving with .studio —
+                so the pod drifts up/away from the studio backdrop
+                (the podium image) until the sticky range ends. Inside
+                .studioStage, both layers share the sticky lifecycle:
+                they pin together, they release together, and the pod
+                stays glued to the podium throughout the scroll.
+
+                pointer-events: none on the wrapper so it doesn't block
+                clicks on text elsewhere; canvas itself stays clickable
+                for OrbitControls drag. */}
+            <div className={styles.podVisualLayer}>
+              <PodosRack3D scrollProgress={scrollYProgress} />
+            </div>
             {/* Edge-to-edge static background image for the studio.
                 Lives at the .studioStage level (not inside .studioRack)
                 so it can break out of container-site's max-width via
