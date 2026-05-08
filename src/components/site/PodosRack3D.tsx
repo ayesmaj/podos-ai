@@ -77,10 +77,30 @@ function RackModel({
   // of the rack — Meshy's exporter often dumps the origin at a corner
   // or far below the model, which makes auto-rotate look like the rack
   // is wobbling on a pivot.
+  //
+  // Then apply POD_Y_OFFSET to shift the model up. The bbox-recenter
+  // puts the geometric centroid at world origin, but for the pod 3d
+  // model that centroid sits in empty space BETWEEN the pod (lower
+  // portion of bounds) and the cable end (upper portion). Without an
+  // additional offset the pod ends up at the bottom of the visible
+  // frame and the cable extends just halfway up. Shifting the whole
+  // scene up by 2.5 puts the pod near canvas vertical center, with
+  // the cable continuing past the visible top edge — exactly the
+  // "pod at center, cable extending out the top" framing requested.
+  //
+  // IMPORTANT: this offset is applied INSIDE the useEffect, AFTER
+  // the bbox recenter. A `position-y` prop on the <primitive> would
+  // be CANCELLED OUT here because Box3.setFromObject computes world-
+  // space bbox (which includes any ancestor/own translation), and
+  // sub(center) would just undo whatever translation was applied.
+  // The offset has to live at the same level as sub(center) to
+  // survive.
+  const POD_Y_OFFSET = 1.5;
   useEffect(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const center = box.getCenter(new THREE.Vector3());
     scene.position.sub(center);
+    scene.position.y += POD_Y_OFFSET;
 
     scene.traverse((node) => {
       const mesh = node as THREE.Mesh;
@@ -139,32 +159,44 @@ function RackModel({
     }
   });
 
-  // scale=0.65 is tuned to the new pod 3d model's bounds (7.70 × 5.94
-  // × 1.52 m). At this scale the model is ~5.0m × 3.86m × 0.99m world
-  // space, comfortably fitting the camera's ~6.5 × 4.1 unit visible
-  // frame at z=0 (camera position [0, 0.4, 6.5], FOV 35°).
+  // scale=1.0 + position-y=2.0 frames the new pod 3d model so the
+  // pod itself sits at canvas vertical center, with the cable
+  // rigging extending above the visible frame top (cropped). The
+  // bbox-recenter useEffect above puts the model's geometric centroid
+  // at world origin, but the centroid lands in empty space BETWEEN
+  // the pod (lower portion of the local Y bounds) and the cable end
+  // (upper portion). Without translation the pod ends up at the
+  // bottom of the visible frame.
   //
-  // History: prior Solar Freight pod had bounds 1.9 × 0.44 × 0.49 m
-  // and used scale=3.0. The new model is 4× wider and 13× taller in
-  // local units, so it requires a much smaller scale.
+  // Math (assuming pod occupies the bottom ~30% of the local Y
+  // bounds, centered around local y ≈ -2.08):
+  //   world_y_of_pod_center = position-y + scale × pod_local_y
+  //                         = 2.0 + 1.0 × (-2.08) = -0.08 ≈ 0 ✓
+  // The cable (upper 70% of bounds, extending to local y +2.97)
+  // ends up at world y = 2.0 + 1.0 × 2.97 = 4.97, well above the
+  // ~y=2.05 visible top edge of the canvas at this camera setup —
+  // cropped out of view, exactly the requested "cable goes up out
+  // of the section" behavior.
   //
-  // If a future swap shrinks the model again (e.g., a flatter freight
-  // pod), bump scale back up. Math: target ~5m model width, divide by
-  // local X-bound to get scale.
+  // History:
+  //   • Prior Solar Freight pod (bounds 1.9 × 0.44 × 0.49 m) used
+  //     scale=3.0, no position offset.
+  //   • New pod 3d model (bounds 7.70 × 5.94 × 1.52 m) is 4× wider
+  //     and 13× taller in local units. Scale=0.65 was the initial
+  //     fit-the-whole-bbox tuning; user requested pod-at-center
+  //     framing with cable cropped, so we bumped to scale=1.0 +
+  //     position-y=2.0.
+  //   • If you swap the model again, recompute pod_local_y from
+  //     ffprobe / inspect-glb.mjs output and adjust position-y.
   //
   // `rotation-y={HERO_ROT_Y}` and `rotation-x={HERO_ROT_X}` set the
-  // initial rotation DECLARATIVELY via R3F's JSX-prop syntax — applied
-  // during reconciliation, before any useFrame tick. Without these,
-  // useFrame might run before the seeding useEffect on the first frame
-  // and briefly render the model at default rotation before snap-
-  // lerping to the target. JSX props guarantee the very first paint
-  // shows the intended angle; subsequent useFrame lerps keep it there
-  // (lerp(target, target, anything) = target).
+  // initial rotation DECLARATIVELY via R3F's JSX-prop syntax —
+  // applied during reconciliation, before any useFrame tick.
   return (
     <primitive
       ref={groupRef}
       object={scene}
-      scale={0.65}
+      scale={1.0}
       rotation-y={HERO_ROT_Y}
       rotation-x={HERO_ROT_X}
     />
