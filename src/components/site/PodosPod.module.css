@@ -274,6 +274,15 @@
   left: calc(50% - 50vw);
   width: 100vw;
   height: 100%;
+  /* translateY shifts the podium image UP so it meets the suspended
+     pod model. We can't drop the pod any lower in the 3D scene without
+     pulling the GLB cable below the camera frustum top (which would
+     make the cable visibly terminate inside the canvas instead of
+     extending out into the section above). The backdrop image, being a
+     2D <img> independent of the 3D scene, can be shifted freely.
+     -260px puts the podium top at the pod's bottom edge so the pod
+     looks like it's landing on the platform, not floating above it. */
+  transform: translateY(-260px);
   /* Explicit `max-width: none` overrides Tailwind's default
      `img, video { max-width: 100% }` reset, which would otherwise
      cap the breakout at the parent's content-box width (~830px on
