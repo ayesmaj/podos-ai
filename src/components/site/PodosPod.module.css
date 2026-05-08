@@ -101,7 +101,41 @@
      a single wheel notch; longer and the empty trailing space below
      the rack reads as "broken layout" before .main scrolls in. */
   height: 115vh;
+  /* Per spec: full-height crane scene (900–1100px desktop) so the
+     suspended pod has room. height:115vh already covers this on
+     desktop; min-height handles tall ultrawides. */
+  min-height: clamp(900px, 100vh, 1100px);
+  /* overflow: visible so the cable + canvas can spill if needed */
+  overflow: visible;
   margin-bottom: clamp(2rem, 3.5vw, 3rem);
+}
+
+/* Crane cable — vertical line behind the pod. Scoped to .studio so
+   it spans only the pod composition area, not the entire #podos
+   section. Position absolute, full-height of parent, narrow gradient
+   line. Pod z-index covers this at pod's position. */
+.podCable {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    rgba(20, 30, 45, 0.55),
+    rgba(20, 30, 45, 0.95)
+  );
+  z-index: 5;
+  pointer-events: none;
+}
+@media (max-width: 1020px) {
+  .podCable {
+    /* On mobile the section collapses to content height; keep the
+       cable at full height of the (smaller) studio. Width stays
+       narrow so no horizontal overflow. */
+    width: 1.5px;
+  }
 }
 @media (max-width: 1020px) {
   /* Below 1020px we drop sticky entirely — side-by-side becomes

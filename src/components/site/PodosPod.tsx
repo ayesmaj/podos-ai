@@ -184,6 +184,12 @@ export default function PodosPod() {
             Scroll-driven 3D rack. See PodosRack3D for camera,
             lighting, and rotation animation. */}
         <div ref={studioRef} className={styles.studio}>
+          {/* Crane cable — vertical line spanning the full height of
+              the studio scene. Behind the pod (z:5 < pod z:10), so
+              it visually disappears at the pod's position. Scoped to
+              .studio so it doesn't bleed through unrelated content
+              elsewhere in the section. See `.podCable` CSS. */}
+          <div className={styles.podCable} aria-hidden />
           <div className={styles.studioStage}>
             {/* Edge-to-edge static background image for the studio.
                 Lives at the .studioStage level (not inside .studioRack)
