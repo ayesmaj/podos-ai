@@ -110,30 +110,32 @@
   margin-bottom: clamp(2rem, 3.5vw, 3rem);
 }
 
-/* Crane cable — vertical line behind the pod. Scoped to .studio so
-   it spans only the pod composition area, not the entire #podos
-   section. Position absolute, full-height of parent, narrow gradient
-   line. Pod z-index covers this at pod's position. */
+/* Crane cable — vertical line that extends from the pod's hook
+   UP through the section above (SolutionCards) and into the page
+   header area. Lives in PodosPod section but uses negative top to
+   render outside the section into the area occupied by sibling
+   sections above. PodosPod section needs `overflow: visible`.
+   Both top and height are set by JS (PodosPod.tsx useEffect)
+   because canvas position is variable due to sticky scroll. */
 .podCable {
   position: absolute;
-  top: 0;
+  top: var(--pod-cable-top, -1500px);
+  height: var(--pod-cable-h, 2000px);
   left: 50%;
   transform: translateX(-50%);
-  height: 100%;
   width: 2px;
   background: linear-gradient(
     to bottom,
-    rgba(20, 30, 45, 0.55),
-    rgba(20, 30, 45, 0.95)
+    rgba(20, 30, 45, 0) 0%,
+    rgba(20, 30, 45, 0.35) 30%,
+    rgba(20, 30, 45, 0.85) 80%,
+    rgba(20, 30, 45, 0.95) 100%
   );
   z-index: 5;
   pointer-events: none;
 }
 @media (max-width: 1020px) {
   .podCable {
-    /* On mobile the section collapses to content height; keep the
-       cable at full height of the (smaller) studio. Width stays
-       narrow so no horizontal overflow. */
     width: 1.5px;
   }
 }
