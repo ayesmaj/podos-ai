@@ -169,19 +169,35 @@
   }
 }
 
-/* Looping decorative background video sitting behind the WebGL canvas.
+/* Edge-to-edge looping decorative background video for the studio.
+   Lives inside .studioStage (sticky, viewport-height) and breaks out
+   of container-site's max-width via the 100vw / left:calc(50% - 50vw)
+   pattern so it spans the full viewport width regardless of how
+   narrow the inner column is.
+
    PodosRack3D's <Canvas> uses gl={{ alpha: true }}, so canvas pixels
    are transparent everywhere the pod model isn't opaque — the video
-   shows through. `z-index: 0` plus DOM order (this video element
-   is the FIRST child of .studioRack) puts it under the static-flow
-   canvas. `pointer-events: none` keeps drag input flowing through to
-   OrbitControls. `inset: 0` + `object-fit: cover` is the standard
-   full-bleed pattern. */
+   shows through. `z-index: 0` plus DOM order (this video element is
+   the FIRST child of .studioStage) puts it under the static-flow
+   .studioGrid that contains the pod canvas. `pointer-events: none`
+   keeps drag input flowing through to OrbitControls.
+
+   The breakout works because .studioStage is centered horizontally at
+   viewport-center (via container-site's auto margins), so 50% of
+   .studioStage = viewport center. `left: calc(50% - 50vw)` then
+   anchors the video's left edge to the viewport's left edge; width
+   100vw spans to the viewport's right edge. */
 .studioBackgroundVideo {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  top: 0;
+  left: calc(50% - 50vw);
+  width: 100vw;
   height: 100%;
+  /* Explicit `max-width: none` overrides Tailwind's default
+     `video { max-width: 100% }` reset, which would otherwise cap
+     the breakout at the parent's content-box width (~830px on the
+     studio column) and defeat the 100vw width. */
+  max-width: none;
   object-fit: cover;
   z-index: 0;
   pointer-events: none;
@@ -189,9 +205,6 @@
      the pod, not as competing content. Tune opacity if you want it
      more or less prominent. */
   opacity: 0.85;
-  /* Crop softly at the corners so the video doesn't bleed past the
-     studioRack's visual frame. */
-  border-radius: clamp(0.5rem, 1vw, 1rem);
 }
 
 /* Header labels overlaid on the 3D scene — now NO background gradient

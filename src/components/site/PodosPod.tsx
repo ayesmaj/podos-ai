@@ -184,6 +184,24 @@ export default function PodosPod() {
             lighting, and rotation animation. */}
         <div ref={studioRef} className={styles.studio}>
           <div className={styles.studioStage}>
+            {/* Edge-to-edge looping background video for the studio.
+                Lives at the .studioStage level (not inside .studioRack)
+                so it can break out of container-site's max-width via
+                the 100vw pattern in CSS. PodosRack3D's <Canvas> uses
+                gl={{ alpha: true }} — canvas pixels are transparent
+                everywhere the pod isn't opaque, so the video shows
+                through behind the pod. `aria-hidden` because it's
+                pure decoration. */}
+            <video
+              className={styles.studioBackgroundVideo}
+              src="/studio-bg.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-hidden
+            />
             <div className={styles.studioGrid}>
               <motion.div
                 className={styles.studioRack}
@@ -200,23 +218,6 @@ export default function PodosPod() {
                   ease: [0.22, 0.61, 0.36, 1],
                 }}
               >
-                {/* Looping background video behind the WebGL canvas.
-                    R3F's <Canvas> uses gl={{ alpha: true }}, so the
-                    canvas pixels are transparent everywhere the pod
-                    model isn't opaque — the video shows through.
-                    `aria-hidden` because it's pure decoration; the
-                    pod is the content. `pointer-events: none` (in
-                    CSS) keeps drag input flowing to the canvas. */}
-                <video
-                  className={styles.studioBackgroundVideo}
-                  src="/background-3d.mp4"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
-                  aria-hidden
-                />
                 <div className={styles.studioRackHead}>
                   <span>
                     <span className={styles.studioRackHeadDot} aria-hidden />
