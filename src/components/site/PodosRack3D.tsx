@@ -95,7 +95,7 @@ function RackModel({
   // sub(center) would just undo whatever translation was applied.
   // The offset has to live at the same level as sub(center) to
   // survive.
-  const POD_Y_OFFSET = 0.7;
+  const POD_Y_OFFSET = 3.0;
   useEffect(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const center = box.getCenter(new THREE.Vector3());
@@ -196,7 +196,7 @@ function RackModel({
     <primitive
       ref={groupRef}
       object={scene}
-      scale={1.5}
+      scale={2.2}
       rotation-y={HERO_ROT_Y}
       rotation-x={HERO_ROT_X}
     />
