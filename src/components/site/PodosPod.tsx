@@ -183,6 +183,13 @@ export default function PodosPod() {
             Scroll-driven 3D rack. See PodosRack3D for camera,
             lighting, and rotation animation. */}
         <div ref={studioRef} className={styles.studio}>
+          {/* Visual extension of the 3D pod's lifting cable above the
+              WebGL canvas. The cable ends at the canvas's top edge
+              because Three.js can't render outside the canvas; this
+              pseudo-cable continues the line upward into the section
+              above (SolutionCards "Factory-built AI compute pods").
+              See `.studioCableTrail` in the CSS module for math. */}
+          <div className={styles.studioCableTrail} aria-hidden />
           <div className={styles.studioStage}>
             {/* Edge-to-edge static background image for the studio.
                 Lives at the .studioStage level (not inside .studioRack)

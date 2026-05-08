@@ -8,7 +8,12 @@
 
 .section {
   position: relative;
-  overflow: hidden;
+  /* `overflow: visible` (was `hidden`) so the .studioCableTrail
+     pseudo-element can extend ABOVE the section into the
+     SolutionCards section above. The section's bg image breakout
+     pattern doesn't need overflow:hidden — it's already capped by
+     the viewport edges via the 100vw / left:calc(50% - 50vw) math. */
+  overflow: visible;
   background:
     linear-gradient(
       to bottom,
@@ -151,6 +156,50 @@
    (`<ContactShadows>` in PodosRack3D.tsx) is what actually anchors
    the rack visually so it reads as "in air" not "PNG cutout".
    ================================================================== */
+/* ──────────────────────────────────────────────────────────────────
+ * .studioCableTrail — a thin vertical line extending UP from the top
+ * of the studio canvas through the section above (SolutionCards's
+ * "Factory-built AI compute pods" area), giving the visual impression
+ * that the 3D pod's lifting cable continues upward beyond the WebGL
+ * canvas's pixel rectangle.
+ *
+ * Three.js can't render outside its canvas — anything outside the
+ * canvas's bounding rect is clipped. So we fake the cable's
+ * continuation with a CSS-only thin vertical line, positioned to
+ * align with where the 3D cable ends visually (canvas top edge,
+ * horizontally at canvas center) and extending upward by ~120vh
+ * to cover the SolutionCards section that sits above PodosPod.
+ *
+ * Lives inside .studio (which is inside the studio's container-site
+ * wrapper, which is centered horizontally at viewport-center via
+ * container-site's auto margins). `left: 50%; transform: translateX
+ * (-50%)` keeps the line at viewport-center, matching the canvas's
+ * cable X position.
+ *
+ * `top: -120vh` extends 120vh above .studio's top edge into the
+ * section above. Section's `overflow: visible` allows this; with
+ * the prior `overflow: hidden` this would be clipped at the section
+ * boundary.
+ *
+ * `pointer-events: none` keeps the line transparent to drag input.
+ * ────────────────────────────────────────────────────────────────── */
+.studioCableTrail {
+  position: absolute;
+  top: -120vh;
+  bottom: 50%;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to bottom,
+    rgba(20, 30, 50, 0) 0%,
+    rgba(20, 30, 50, 0.45) 60%,
+    rgba(20, 30, 50, 0.7) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
 .studioRack {
   position: relative;
   height: 100%;
