@@ -91,7 +91,7 @@ export default function DesignTechEnvironment() {
             transition={{ ...transition, delay: 0.15 }}
           >
             <Image
-              src="/ChatGPT Image May 5, 2026, 06_00_44 PM.png"
+              src="/engineering/pod-hero.png"
               alt="PODOS deployable AI compute unit, shown with dimensional callouts: 6058mm long, 2591mm tall, 2438mm wide. The pod is rendered as a black industrial enclosure with a glowing blue interior visible through a service door, sitting on a faintly illuminated floor with a circuit-style trace pattern fading toward the right edge."
               width={1300}
               height={760}
