@@ -61,6 +61,34 @@ const LOCK_ROT_Y = SIDE_ROT_Y;
 const LOCK_ROT_X = 0;
 
 /* -------------------------------------------------------------------- */
+/* Geometry tuning                                                       */
+/* -------------------------------------------------------------------- */
+// The model's overall scale factor. Bumped 2.3 → 3.5 per user request
+// for a "much bigger" model. At this scale the cable still has plenty
+// of cropping headroom (cable_top world ~11.25, frustum top ~7.3).
+const MODEL_SCALE = 3.5;
+
+// Where the rotation pivot sits in the GLB's bbox-centered local
+// coordinate system. Negative = below the bbox geometric center.
+// User pointed at a red dot near the front-lower part of the pod
+// body; -0.5 puts the pivot in that area so dragging or scroll-
+// choreographed rotation makes the pod swing around its own base
+// rather than wobbling around the geometric centroid (which sits
+// in empty space between the pod body and the cable rigging above).
+const PIVOT_LOCAL_Y = -0.5;
+
+// World-y of the pivot point (= world-y where the rotation happens
+// AND where OrbitControls targets). Tuned so the pod itself sits at
+// the same screen position as the previous "amazing u made it" tuning
+// — pod center ≈ world y 0.12, hovering above the studio podium.
+//
+// Math: pod_center_world = PIVOT_WORLD_Y + MODEL_SCALE × (pod_local - PIVOT_LOCAL_Y)
+//   For pod_local ≈ -0.21 and PIVOT_LOCAL_Y = -0.5:
+//   pod_center_world = PIVOT_WORLD_Y + 3.5 × 0.29 = PIVOT_WORLD_Y + 1.015
+//   Solve for pod_center_world = 0.12 → PIVOT_WORLD_Y = -0.9
+const PIVOT_WORLD_Y = -0.9;
+
+/* -------------------------------------------------------------------- */
 /* The model itself — handles centering, shadows, rotation logic         */
 /* -------------------------------------------------------------------- */
 function RackModel({
@@ -73,40 +101,24 @@ function RackModel({
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF("/models/podos-rack.glb");
 
-  // Re-center on bounding-box midpoint so [0,0,0] is the visual center
-  // of the rack — Meshy's exporter often dumps the origin at a corner
-  // or far below the model, which makes auto-rotate look like the rack
-  // is wobbling on a pivot.
+  // Re-center on bounding-box midpoint so the GLB's geometric centroid
+  // is at scene's local origin, then shift the scene further so the
+  // PIVOT POINT (not the bbox center) ends up at the wrapping <group>'s
+  // local origin — this is what makes rotation feel like rotating
+  // around the red-dot pivot the user pointed at, rather than around
+  // the empty space between the pod body and the cable above it.
   //
-  // Then apply POD_Y_OFFSET to shift the model up. The bbox-recenter
-  // puts the geometric centroid at world origin, but for the pod 3d
-  // model that centroid sits in empty space BETWEEN the pod (lower
-  // portion of bounds) and the cable end (upper portion). Without an
-  // additional offset the pod ends up at the bottom of the visible
-  // frame and the cable extends just halfway up. Shifting the whole
-  // scene up by 2.5 puts the pod near canvas vertical center, with
-  // the cable continuing past the visible top edge — exactly the
-  // "pod at center, cable extending out the top" framing requested.
-  //
-  // IMPORTANT: this offset is applied INSIDE the useEffect, AFTER
-  // the bbox recenter. A `position-y` prop on the <primitive> would
-  // be CANCELLED OUT here because Box3.setFromObject computes world-
-  // space bbox (which includes any ancestor/own translation), and
-  // sub(center) would just undo whatever translation was applied.
-  // The offset has to live at the same level as sub(center) to
-  // survive.
-  // 0.6 puts the pod hovering ABOVE the studio podium with a visible
-  // air gap (instead of landed on it). At scale 2.3 the cable-top
-  // world-y reaches `0.6 + 2.3 × 2.97 = 7.43`, just above the camera
-  // frustum top (~7.3) so the cable stays cropped beyond canvas — it
-  // continues extending out into the section above as visible page
-  // chrome rather than terminating mid-canvas.
-  const POD_Y_OFFSET = 0.6;
+  // After sub(center), pivot point at GLB-local p = (0, PIVOT_LOCAL_Y, 0)
+  // is at scene-local (0, PIVOT_LOCAL_Y, 0). To move it to scene-local
+  // (0, 0, 0), shift scene.position by -SCALE × PIVOT_LOCAL_Y on y
+  // (the SCALE multiplier is needed because the wrapping primitive
+  // applies scale on top of scene.position; without compensating, the
+  // shift would be undersized by 1/SCALE).
   useEffect(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const center = box.getCenter(new THREE.Vector3());
     scene.position.sub(center);
-    scene.position.y += POD_Y_OFFSET;
+    scene.position.y += -MODEL_SCALE * PIVOT_LOCAL_Y;
 
     scene.traverse((node) => {
       const mesh = node as THREE.Mesh;
@@ -165,47 +177,26 @@ function RackModel({
     }
   });
 
-  // scale=1.0 + position-y=2.0 frames the new pod 3d model so the
-  // pod itself sits at canvas vertical center, with the cable
-  // rigging extending above the visible frame top (cropped). The
-  // bbox-recenter useEffect above puts the model's geometric centroid
-  // at world origin, but the centroid lands in empty space BETWEEN
-  // the pod (lower portion of the local Y bounds) and the cable end
-  // (upper portion). Without translation the pod ends up at the
-  // bottom of the visible frame.
+  // The wrapping <group> is the rotation reference — its local origin
+  // is the pivot point (set by PIVOT_WORLD_Y). The <primitive> inside
+  // is the model itself, scaled by MODEL_SCALE; the useEffect above
+  // already translated scene.position so the pivot point sits at the
+  // group's local origin (0,0,0), so rotating the group rotates the
+  // entire model around the user-specified red-dot pivot.
   //
-  // Math (assuming pod occupies the bottom ~30% of the local Y
-  // bounds, centered around local y ≈ -2.08):
-  //   world_y_of_pod_center = position-y + scale × pod_local_y
-  //                         = 2.0 + 1.0 × (-2.08) = -0.08 ≈ 0 ✓
-  // The cable (upper 70% of bounds, extending to local y +2.97)
-  // ends up at world y = 2.0 + 1.0 × 2.97 = 4.97, well above the
-  // ~y=2.05 visible top edge of the canvas at this camera setup —
-  // cropped out of view, exactly the requested "cable goes up out
-  // of the section" behavior.
-  //
-  // History:
-  //   • Prior Solar Freight pod (bounds 1.9 × 0.44 × 0.49 m) used
-  //     scale=3.0, no position offset.
-  //   • New pod 3d model (bounds 7.70 × 5.94 × 1.52 m) is 4× wider
-  //     and 13× taller in local units. Scale=0.65 was the initial
-  //     fit-the-whole-bbox tuning; user requested pod-at-center
-  //     framing with cable cropped, so we bumped to scale=1.0 +
-  //     position-y=2.0.
-  //   • If you swap the model again, recompute pod_local_y from
-  //     ffprobe / inspect-glb.mjs output and adjust position-y.
-  //
-  // `rotation-y={HERO_ROT_Y}` and `rotation-x={HERO_ROT_X}` set the
-  // initial rotation DECLARATIVELY via R3F's JSX-prop syntax —
-  // applied during reconciliation, before any useFrame tick.
+  // OrbitControls also uses PIVOT_WORLD_Y (in PodosRack3D below) so
+  // user drag-to-orbit pivots around the same point — both rotation
+  // mechanisms (scroll choreography on the group, drag on the camera)
+  // share a single coherent rotation pivot.
   return (
-    <primitive
+    <group
       ref={groupRef}
-      object={scene}
-      scale={2.3}
+      position-y={PIVOT_WORLD_Y}
       rotation-y={HERO_ROT_Y}
       rotation-x={HERO_ROT_X}
-    />
+    >
+      <primitive object={scene} scale={MODEL_SCALE} />
+    </group>
   );
 }
 
@@ -314,6 +305,12 @@ export default function PodosRack3D({
         rotateSpeed={0.85}
         enableDamping
         dampingFactor={0.08}
+        // Target the pivot point so drag-to-orbit rotates the camera
+        // around the same red-dot pivot the model rotates around.
+        // Without this, drag would orbit around (0,0,0) — the world
+        // origin — and the model would appear to swing eccentrically
+        // around an off-center point.
+        target={[0, PIVOT_WORLD_Y, 0]}
         onStart={() => setIsDragging(true)}
         onEnd={() => setIsDragging(false)}
       />
