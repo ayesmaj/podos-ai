@@ -63,10 +63,14 @@ const LOCK_ROT_X = 0;
 /* -------------------------------------------------------------------- */
 /* Geometry tuning                                                       */
 /* -------------------------------------------------------------------- */
-// The model's overall scale factor. Bumped 2.3 → 3.5 per user request
-// for a "much bigger" model. At this scale the cable still has plenty
-// of cropping headroom (cable_top world ~11.25, frustum top ~7.3).
-const MODEL_SCALE = 3.5;
+// The model's overall scale factor. With the new .podComposition
+// structure (canvas spans the full header+studio area), the cable's
+// upward cropping is handled by the canvas's natural top edge, not
+// by a clip-path constraint — so we can scale up further. 5.0 makes
+// the pod ~43% bigger than the previous 3.5, while staying within
+// the canvas's horizontal visible bounds (~12 world units at the
+// current camera fov).
+const MODEL_SCALE = 5.0;
 
 // Where the rotation pivot sits in the GLB's bbox-centered local
 // coordinate system. Negative = below the bbox geometric center.
