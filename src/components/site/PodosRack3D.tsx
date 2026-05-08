@@ -95,13 +95,15 @@ function RackModel({
   // sub(center) would just undo whatever translation was applied.
   // The offset has to live at the same level as sub(center) to
   // survive.
-  // Bumped 1.5 → 2.7 to compensate for scale 1.7 → 2.3. Keeping the pod
-  // at the same world-y after a scale change requires an offset bump
-  // proportional to the local-y of the focal point:
-  //   world_y_pod = offset + scale × pod_local_y
-  // Holding world_y_pod ≈ -2 with pod_local_y ≈ -2.08:
-  //   offset_new = -2 - 2.3 × (-2.08) = 2.78  → rounded to 2.7
-  const POD_Y_OFFSET = 2.7;
+  // 2.7 → 0.6 to drop the pod down to MEET the studio podium image.
+  // The cable's world-y top at scale 2.3 reaches `offset + scale × 2.97`
+  // = `offset + 6.83`. As long as that value exceeds the camera frustum
+  // top (~7.3 at camera_y 1.5 z=14 fov=45), the cable stays cropped
+  // beyond the canvas — which is what makes the cable "extend out the
+  // section above". 0.6 + 6.83 = 7.43 > 7.3 by a small margin (✓).
+  // Going below 0.47 would let the cable terminate visibly inside the
+  // canvas instead of extending out — that's the floor.
+  const POD_Y_OFFSET = 0.6;
   useEffect(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const center = box.getCenter(new THREE.Vector3());
@@ -232,13 +234,12 @@ export default function PodosRack3D({
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       shadows
       dpr={[1, 2]}
-      // Camera pulled back (z=14, was 6.5) and FOV widened (45°, was
-      // 35°) so the visible vertical world-space at z=0 is ~11.6 units
-      // (was 4.10). That's enough to fit the model's full vertical
-      // extent (5.94m local × 1.7 scale = 10.1m world) including the
-      // GLB's REAL crane cable + hook + straps without clipping.
-      // No CSS fakery — the cable in the canvas IS the model's
-      // geometry.
+      // Camera pulled back (z=14) + FOV widened (45°) gives ~11.6 units
+      // visible vertical world-space, enough to fit the full GLB cable
+      // rigging. Camera stays at y=1.5 — moving it would drag the
+      // model's on-screen Y back up (the projection is relative to
+      // the camera). Lowering the MODEL alone (via POD_Y_OFFSET) is
+      // what brings the pod down toward the podium image.
       camera={{ position: [0, 1.5, 14], fov: 45 }}
       // cursor affordance — `grab` on hover, `grabbing` while dragging.
       // OrbitControls itself doesn't manage the canvas cursor, so we
