@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView, useScroll } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import dynamic from "next/dynamic";
 import styles from "./PodosPod.module.css";
 import {
@@ -128,69 +128,6 @@ export default function PodosPod() {
     offset: ["start start", "end end"],
   });
 
-  /* ================================================================
-   * CRANE CABLE THAT CROSSES SECTIONS
-   * ----------------------------------------------------------------
-   * The cable visually extends from the pod's hook UPWARD through
-   * the SolutionCards section above PodosPod, all the way to (and
-   * past) the top of the visible viewport. It does NOT extend below
-   * the pod.
-   *
-   * Implementation:
-   *   • Cable is a child of THIS section (PodosPod), but uses a
-   *     large negative `top` to render OUTSIDE the section, into
-   *     the area occupied by SolutionCards above.
-   *   • `bottom` anchors to the canvas top edge — that's where the
-   *     pod's hook visually starts. So the cable terminates exactly
-   *     at the pod, not below it.
-   *   • Both top and height are JS-controlled via CSS custom
-   *     properties because the canvas position (relative to the
-   *     section) is variable due to .studioStage's sticky behavior.
-   *   • Section's `overflow: visible` lets the cable extend outside.
-   *   • Z-index 5 puts it in front of SolutionCards's content (which
-   *     is at default z-index).
-   * ================================================================ */
-  useEffect(() => {
-    const sectionEl = ref.current;
-    if (!sectionEl) return;
-    let raf: number | null = null;
-    const update = () => {
-      raf = null;
-      const canvasEl = sectionEl.querySelector(
-        'canvas[data-engine^="three.js"]',
-      ) as HTMLCanvasElement | null;
-      const sectionRect = sectionEl.getBoundingClientRect();
-      const canvasRect = canvasEl?.getBoundingClientRect();
-      if (!canvasRect) return;
-      // Cable extends 1.5 viewport heights above section start (covers
-      // the SolutionCards section above PodosPod and even the page
-      // header area). Anchored at the bottom to the canvas's top edge,
-      // where the pod's hook is rendered. Pod's z-index 10 then covers
-      // the cable at the hook position so the cable visually merges
-      // with the 3D model's own cable rigging.
-      const extendUp = window.innerHeight * 1.5;
-      const cableTop = -extendUp;
-      const canvasTopInSection = canvasRect.top - sectionRect.top;
-      const cableHeight = canvasTopInSection - cableTop;
-      sectionEl.style.setProperty("--pod-cable-top", `${cableTop}px`);
-      sectionEl.style.setProperty("--pod-cable-h", `${cableHeight}px`);
-    };
-    const schedule = () => {
-      if (raf !== null) return;
-      raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    const interval = window.setInterval(update, 500);
-    return () => {
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-      window.clearInterval(interval);
-      if (raf !== null) cancelAnimationFrame(raf);
-    };
-  }, []);
-
   return (
     <section
       id="podos"
@@ -198,13 +135,6 @@ export default function PodosPod() {
       className={`${styles.section} section-pad`}
       aria-labelledby="podos-heading"
     >
-      {/* Crane cable that visually extends from the pod's hook UP
-          through the section above (SolutionCards) — see the
-          useEffect above for the math. Position absolute with JS-
-          driven top + height so the bottom always lands at the
-          canvas top edge regardless of scroll. */}
-      <div className={styles.podCable} aria-hidden />
-
       {/* Background — engineer's drafting table: dense grid, a single
           ambient blue orb off-screen, faint circuit traces behind. */}
       <div className={styles.bg} aria-hidden>
@@ -254,12 +184,22 @@ export default function PodosPod() {
             Scroll-driven 3D rack. See PodosRack3D for camera,
             lighting, and rotation animation. */}
         <div ref={studioRef} className={styles.studio}>
-          {/* Crane cable — vertical line spanning the full height of
-              the studio scene. Behind the pod (z:5 < pod z:10), so
-              it visually disappears at the pod's position. Scoped to
-              .studio so it doesn't bleed through unrelated content
-              elsewhere in the section. See `.podCable` CSS. */}
-          <div className={styles.podCable} aria-hidden />
+          {/* Pod 3D visual layer — the WebGL canvas lives in its own
+              absolute layer that extends ABOVE the studioStage's
+              sticky viewport-frame so the model's REAL cable can
+              render across the section's vertical space without
+              being clipped by any "card" wrapper. No fake CSS cable.
+
+              The layer uses position: absolute + negative top so it
+              extends from somewhere up high (above the section) down
+              past the studio area, giving the GLB scene plenty of
+              vertical room to render its full crane rigging.
+              pointer-events: none on the wrapper so it doesn't block
+              clicks on text elsewhere; canvas itself stays clickable
+              for OrbitControls drag. */}
+          <div className={styles.podVisualLayer}>
+            <PodosRack3D scrollProgress={scrollYProgress} />
+          </div>
           <div className={styles.studioStage}>
             {/* Edge-to-edge static background image for the studio.
                 Lives at the .studioStage level (not inside .studioRack)
@@ -306,7 +246,9 @@ export default function PodosPod() {
                   </span>
                   <span>3D · LIVE GEOMETRY · DRAG OR SCROLL</span>
                 </div>
-                <PodosRack3D scrollProgress={scrollYProgress} />
+                {/* PodosRack3D moved out of studioRack into the
+                    .podVisualLayer above, so the canvas can extend
+                    beyond this card's bounds. */}
                 <div className={styles.studioScrollHint} aria-hidden>
                   <svg viewBox="0 0 12 12">
                     <path

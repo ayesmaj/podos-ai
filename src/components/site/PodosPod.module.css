@@ -101,42 +101,53 @@
      a single wheel notch; longer and the empty trailing space below
      the rack reads as "broken layout" before .main scrolls in. */
   height: 115vh;
-  /* Per spec: full-height crane scene (900–1100px desktop) so the
-     suspended pod has room. height:115vh already covers this on
-     desktop; min-height handles tall ultrawides. */
   min-height: clamp(900px, 100vh, 1100px);
-  /* overflow: visible so the cable + canvas can spill if needed */
-  overflow: visible;
+  /* Per user spec: every wrapper around the 3D visual must NOT clip
+     anything — the canvas extends UPWARD via its absolute layer
+     (.podVisualLayer) and would be cut off by any clipping ancestor. */
+  overflow: visible !important;
+  clip-path: none !important;
+  contain: none !important;
   margin-bottom: clamp(2rem, 3.5vw, 3rem);
 }
 
-/* Crane cable — vertical line that extends from the pod's hook
-   UP through the section above (SolutionCards) and into the page
-   header area. Lives in PodosPod section but uses negative top to
-   render outside the section into the area occupied by sibling
-   sections above. PodosPod section needs `overflow: visible`.
-   Both top and height are set by JS (PodosPod.tsx useEffect)
-   because canvas position is variable due to sticky scroll. */
-.podCable {
+/* Pod 3D visual layer — hosts the WebGL canvas in a tall absolute
+   layer that extends ABOVE the studio's sticky viewport-frame, so
+   the GLB's real cable+hook+straps render across the section's
+   vertical space without being clipped by the "card" wrapper.
+
+   No CSS fakery. The cable visible above the pod is the actual
+   3D model's geometry, just in a bigger canvas with more vertical
+   room. Camera framing (in PodosRack3D.tsx) is what determines
+   how much of the model's cable is visible.
+
+   `top: -100vh` makes the canvas DOM rectangle extend one viewport
+   height above .studio's top edge — into the section above
+   (SolutionCards). `height: calc(100% + 100vh)` covers that extension
+   plus the full studio scroll runway height.
+
+   `pointer-events: none` so the layer doesn't intercept text
+   clicks; the canvas inside re-enables pointer-events for its
+   own drag interactions (OrbitControls). */
+.podVisualLayer {
   position: absolute;
-  top: var(--pod-cable-top, -1500px);
-  height: var(--pod-cable-h, 2000px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  background: linear-gradient(
-    to bottom,
-    rgba(20, 30, 45, 0) 0%,
-    rgba(20, 30, 45, 0.35) 30%,
-    rgba(20, 30, 45, 0.85) 80%,
-    rgba(20, 30, 45, 0.95) 100%
-  );
+  top: -100vh;
+  left: 0;
+  right: 0;
+  height: calc(100% + 100vh);
   z-index: 5;
   pointer-events: none;
+  overflow: visible !important;
+}
+.podVisualLayer > * {
+  pointer-events: auto;
 }
 @media (max-width: 1020px) {
-  .podCable {
-    width: 1.5px;
+  .podVisualLayer {
+    /* Mobile: less aggressive vertical extension to avoid the
+       canvas covering the full screen on small phones. */
+    top: -50vh;
+    height: calc(100% + 50vh);
   }
 }
 @media (max-width: 1020px) {
@@ -155,14 +166,13 @@
      reasonable on tall and short viewports alike. */
   top: clamp(4rem, 8vh, 6rem);
   height: calc(100vh - clamp(5rem, 10vh, 7rem));
-  /* Block layout (was flex with align-items:center). The flex
-     centering was shrinking the studioRack to its content size,
-     leaving the WebGL canvas at ~520px tall when the full stage
-     was ~780px. Block layout + height:100% on the inner studioRack
-     lets the canvas use ALL available vertical space, giving the
-     pod's cable more room to render natively before getting
-     clipped at the canvas top edge. */
   display: block;
+  /* Per user spec: don't clip the 3D canvas. The .podVisualLayer
+     absolute child extends up via negative top — any clipping
+     would crop the model's cable. */
+  overflow: visible !important;
+  clip-path: none !important;
+  contain: none !important;
 }
 @media (max-width: 1020px) {
   .studioStage {
@@ -182,6 +192,9 @@
   display: block;
   width: 100%;
   height: 100%;
+  overflow: visible !important;
+  clip-path: none !important;
+  contain: none !important;
 }
 
 /* ==================================================================

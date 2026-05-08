@@ -226,7 +226,14 @@ export default function PodosRack3D({
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.4, 6.5], fov: 35 }}
+      // Camera pulled back (z=14, was 6.5) and FOV widened (45°, was
+      // 35°) so the visible vertical world-space at z=0 is ~11.6 units
+      // (was 4.10). That's enough to fit the model's full vertical
+      // extent (5.94m local × 1.7 scale = 10.1m world) including the
+      // GLB's REAL crane cable + hook + straps without clipping.
+      // No CSS fakery — the cable in the canvas IS the model's
+      // geometry.
+      camera={{ position: [0, 1.5, 14], fov: 45 }}
       // cursor affordance — `grab` on hover, `grabbing` while dragging.
       // OrbitControls itself doesn't manage the canvas cursor, so we
       // toggle it via the same isDragging state used to pause auto-rotate.
