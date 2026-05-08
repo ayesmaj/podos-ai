@@ -239,6 +239,13 @@
   -webkit-backdrop-filter: none;
   overflow: visible;
   z-index: 10;
+  /* CRITICAL: this div sits ON TOP of the canvas (z-index 10 vs 5 on
+     .podVisualLayer). Default pointer-events would make it eat mouse
+     events meant for the canvas — drag-to-rotate stops working, hover
+     events never fire. The text-label children (rackHead, scrollHint)
+     already opt out individually, but the wrapper itself wasn't, so
+     a "transparent wall" silently blocked the canvas. */
+  pointer-events: none;
 }
 @media (max-width: 1020px) {
   .studioRack {

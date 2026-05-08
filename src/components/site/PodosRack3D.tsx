@@ -99,9 +99,11 @@ const PIVOT_WORLD_Y = 0;
 /* -------------------------------------------------------------------- */
 function RackModel({
   paused,
+  hovering,
   scrollProgress,
 }: {
   paused: boolean;
+  hovering: boolean;
   scrollProgress?: MotionValue<number>;
 }) {
   const groupRef = useRef<THREE.Group>(null);
@@ -148,6 +150,20 @@ function RackModel({
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
+    // ── Hover-driven rotation ────────────────────────────────────
+    // When the cursor is over the canvas (and the user isn't actively
+    // dragging via OrbitControls), continuously rotate the pod on its
+    // Y axis at ~36°/sec. This gives passive viewers a sense of the
+    // model's 3D-ness without requiring them to drag. The rotation
+    // is applied DIRECTLY (no lerp toward a target) — pure angular
+    // velocity — so it feels like the pod is gently spinning rather
+    // than snapping to a pose. Drag still works (OrbitControls owns
+    // camera orbit independently of model rotation).
+    if (hovering && !paused) {
+      groupRef.current.rotation.y += delta * 0.6;
+      return;
+    }
+
     if (scrollProgress) {
       // ── Scroll-driven mode ──────────────────────────────────────
       // .get() reads current value WITHOUT triggering React re-render
@@ -158,7 +174,8 @@ function RackModel({
       const targetY = THREE.MathUtils.lerp(HERO_ROT_Y, LOCK_ROT_Y, p);
       const targetX = THREE.MathUtils.lerp(HERO_ROT_X, LOCK_ROT_X, p);
 
-      // No drift — keep the rack perfectly still, head-on.
+      // Lerp back toward scroll-target after hover ends, so the pod
+      // settles to its canonical pose without a hard snap.
       groupRef.current.rotation.y = THREE.MathUtils.lerp(
         groupRef.current.rotation.y,
         targetY,
@@ -171,10 +188,9 @@ function RackModel({
       );
     } else if (!paused) {
       // ── Idle mode ───────────────────────────────────────────────
-      // No auto-rotate — lerp the rack back to the canonical side
-      // view when the user releases a drag. They can still orbit via
-      // OrbitControls during drag; release returns to this resting
-      // angle so the model reads as a stable product profile.
+      // After hover ends (or in standalone non-scroll usage), lerp
+      // back to the canonical side angle so the model reads as a
+      // stable product profile.
       groupRef.current.rotation.y = THREE.MathUtils.lerp(
         groupRef.current.rotation.y,
         SIDE_ROT_Y,
@@ -223,6 +239,10 @@ export default function PodosRack3D({
   // and model transforms compose multiplicatively in Three.js, so the
   // two systems coexist without fighting.
   const [isDragging, setIsDragging] = useState(false);
+  // Hover state — true while the cursor is anywhere over the canvas
+  // bounds. Drives passive auto-rotation of the pod model so casual
+  // viewers see the model spin without needing to drag.
+  const [isHovering, setIsHovering] = useState(false);
 
   return (
     <Canvas
@@ -240,6 +260,14 @@ export default function PodosRack3D({
       // OrbitControls itself doesn't manage the canvas cursor, so we
       // toggle it via the same isDragging state used to pause auto-rotate.
       style={{ cursor: isDragging ? "grabbing" : "grab" }}
+      // DOM mouse events on the Canvas wrapper div — these fire when
+      // the cursor enters/leaves the canvas's bounding rect. We use
+      // them to toggle hover-driven rotation. NOTE: R3F's `onPointerOver`
+      // and friends are different — those are raycasted scene events
+      // that only fire when over a 3D object. We want any-cursor-on-
+      // canvas behavior, so the DOM events are the right choice here.
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
     >
       {/* Ambient floor — keeps the dark side of the rack from going pitch */}
       <ambientLight intensity={0.55} />
@@ -268,7 +296,11 @@ export default function PodosRack3D({
       <pointLight position={[0, 4, -5]} intensity={1.4} color="#3b82f6" />
 
       <Suspense fallback={null}>
-        <RackModel paused={isDragging} scrollProgress={scrollProgress} />
+        <RackModel
+          paused={isDragging}
+          hovering={isHovering}
+          scrollProgress={scrollProgress}
+        />
 
         {/* PBR environment so anything metallic on the rack picks up
             warehouse reflections — looks much more plausible than flat
