@@ -1,0 +1,303 @@
+/* YossiVideoSection — premium custom video player styles
+   ----------------------------------------------------------------
+   Three control surfaces:
+     1. Center play overlay (big tappable button when paused)
+     2. Bottom controls bar (play/pause + time + scrubber + volume + fullscreen)
+     3. Optional fullscreen container state (no padding, no rounded corners)
+
+   Range inputs are styled custom — CSS `appearance: none` on the
+   <input> + ::-webkit-slider-thumb / ::-moz-range-thumb pseudos for
+   the draggable handle. Progress fill uses a custom property
+   `--progress` written from JSX so the bar visually fills as the
+   value changes (range inputs don't have a native filled-portion
+   element). */
+
+.section {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.02) 0%, transparent 100%),
+    var(--paper);
+  border-top: 1px solid var(--edge-faint);
+  border-bottom: 1px solid var(--edge-faint);
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 2rem);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.eyebrowIdx { color: var(--brand-deep); }
+.eyebrowSep { color: var(--ink-faint); opacity: 0.5; }
+
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink-strong);
+  margin: 0;
+}
+.headlineAccent {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* === Player frame ============================================ */
+.player {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 24px 60px -20px rgba(15, 23, 42, 0.22),
+    0 0 0 1px rgba(15, 23, 42, 0.06);
+  outline: none;
+  cursor: pointer;
+}
+.player:focus-visible {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 24px 60px -20px rgba(15, 23, 42, 0.22),
+    0 0 0 3px rgba(37, 99, 235, 0.45);
+}
+
+/* Fullscreen state — strip the radius + shadow so the OS fullscreen
+   doesn't show a floating rectangle. */
+.playerFullscreen {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* preserves aspect, letterboxes if needed */
+  display: block;
+}
+
+/* === Center play overlay ===================================== */
+.centerPlay {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  border: 0;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 240ms ease;
+}
+.centerPlay:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+}
+.centerPlay::before {
+  content: "";
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  transition: transform 240ms ease;
+}
+.centerPlay:hover::before {
+  transform: scale(1.08);
+}
+.centerPlay > * {
+  position: relative;          /* sit on top of the ::before circle */
+  z-index: 1;
+  transform: translateX(2px);  /* visually center the play triangle */
+}
+
+/* === Bottom controls bar ===================================== */
+.controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.55) 60%,
+    rgba(0, 0, 0, 0.75) 100%
+  );
+  color: #ffffff;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 220ms ease, transform 220ms ease;
+  pointer-events: none;
+}
+.player[data-controls-visible] .controls {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: transparent;
+  border: 0;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 180ms ease, transform 180ms ease;
+}
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+.iconBtn:active {
+  transform: scale(0.94);
+}
+.iconBtn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 1px;
+}
+
+.timeLabel {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+  user-select: none;
+}
+.timeSep { opacity: 0.5; margin: 0 0.15rem; }
+
+/* === Custom range inputs (scrubber + volume) ================= */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  height: 16px;
+  margin: 0;
+}
+.range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.9) var(--progress, 0%),
+    rgba(255, 255, 255, 0.22) var(--progress, 0%),
+    rgba(255, 255, 255, 0.22) 100%
+  );
+}
+.range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.22);
+}
+.range::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.9);
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;       /* center the thumb on the 4px track */
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  border: 0;
+  transition: transform 160ms ease;
+}
+.range::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+}
+.range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  border: 0;
+}
+
+.scrubber {
+  flex: 1;
+  min-width: 0;
+}
+
+.volumeWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.volume {
+  width: 80px;
+}
+
+/* === Mobile responsive ======================================= */
+@media (max-width: 640px) {
+  .controls {
+    gap: 0.4rem;
+    padding: 0.6rem 0.7rem;
+  }
+  /* Hide the volume slider on phones — the mute toggle alone is
+     enough, and the slider takes scarce horizontal space. */
+  .volume {
+    display: none;
+  }
+  .timeLabel {
+    font-size: 0.72rem;
+  }
+  .iconBtn {
+    width: 32px;
+    height: 32px;
+  }
+  .centerPlay::before {
+    width: 72px;
+    height: 72px;
+  }
+}

@@ -7,6 +7,7 @@ import UseCases from "@/components/site/UseCases";
 import Manufacturing from "@/components/site/Manufacturing";
 import DesignTechEnvironment from "@/components/site/DesignTechEnvironment";
 import MeetTheTeam from "@/components/site/MeetTheTeam";
+import YossiVideoSection from "@/components/site/YossiVideoSection";
 import RequestAccessCTA from "@/components/site/RequestAccessCTA";
 import Footer from "@/components/site/Footer";
 import ScrollProgressRail from "@/components/site/ScrollProgressRail";
@@ -22,6 +23,13 @@ export default function Home() {
 
       <main className="pageOverlay">
         <ProblemDiagnosis />
+        {/* Founder video — "What we're building, and why now." with
+            custom controls (play/pause, scrubber, mute, volume,
+            fullscreen, keyboard shortcuts). Mounted RIGHT AFTER the
+            Problem section so the user hears Yossi answer "what + why
+            now" BEFORE they see the solution detailed in cards — the
+            founder's framing sets up everything that follows. */}
+        <YossiVideoSection />
         <SolutionCards />
         <PodosPod />
         <DeploymentTimeline />

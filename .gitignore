@@ -51,3 +51,20 @@ WhatsApp Image*.jpeg
 sequanse helicopter/
 *.aep
 *.psd
+
+# Working files / source assets (added 2026-05-20)
+# Source videos before transcode (the production transcodes live in /public/videos/)
+podos yossi video.mp4
+# Working ChatGPT-generated reference images (not site assets)
+public/ChatGPT Image*.png
+public/**/ChatGPT Image*.png
+# Working/temp MP4 outputs from ffmpeg
+public/tmp*.mp4
+public/background 3d.mp4
+public/factory to site.mp4
+public/intro 2.mp4
+public/new pod.png
+# Meshy AI 3D model exports (not referenced from src)
+public/Meshy_AI_*.glb
+# Source folder for team headshots (the production-ready photos live in /public/team/)
+teams/

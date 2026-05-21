@@ -25,6 +25,7 @@ const TEAM: Member[] = [
     role: "Founder & Inventor",
     bio: "Creator of all 76+ patent claims across both platforms — inventor of record on every USPTO filing. Technical architect of PODOS Pod, MEGA SILO, Syntropic, and Optimus.",
     monogram: "JE",
+    photo: "/team/josef.jpg",
   },
   {
     idx: "T-02",
