@@ -21,25 +21,56 @@
    premium glass look when the page is still.
    ============================================================ */
 
-/* 1. Kill ALL backdrop-filters during scroll. */
+/* 1. Kill ALL backdrop-filters during scroll.
+ *
+ *    Bundler workaround (2026-06-03): Lightning CSS (Next.js's CSS
+ *    optimizer) AGGRESSIVELY dedupes `backdrop-filter` and
+ *    `-webkit-backdrop-filter` even when written in separate rule
+ *    blocks with the same selector — it keeps only the prefixed one,
+ *    which modern Chrome ignores entirely. The screenshot you sent
+ *    showed cards "whited out" because of an earlier flawed fallback
+ *    rule; this rule silently did NOTHING because the standard
+ *    property was stripped from the bundle.
+ *
+ *    Three independent neutralizers below so at least one always lands:
+ *
+ *      (a) `--liquid-glass: none` — overrides the CSS variable that
+ *          ProblemDiagnosis.module.css uses (`backdrop-filter:
+ *          var(--liquid-glass)`). Pure cascade — no !important needed
+ *          and no bundler dedup risk.
+ *
+ *      (b) `@supports (backdrop-filter: none) { ... }` — wraps the
+ *          standard property in a feature query so it lives in a
+ *          separate cascade context the bundler can't merge into the
+ *          unprefixed rule.
+ *
+ *      (c) Bare `-webkit-backdrop-filter: none !important` — covers
+ *          older Safari that only knows the prefix. */
 html[data-scrolling] *,
 html[data-scrolling] *::before,
 html[data-scrolling] *::after {
-  backdrop-filter: none !important;
+  --liquid-glass: none;
   -webkit-backdrop-filter: none !important;
 }
 
-/* 2. Transparent glass cards rely entirely on backdrop-filter for
-      their fill (background-color is transparent). Without a fallback
-      they'd flash to a bare border outline mid-scroll. Give them an
-      opaque-ish light panel background while scrolling. Targeted by
-      module name so we don't accidentally repaint dark panels. */
-html[data-scrolling] [class*="ProblemDiagnosis"][class*="card"],
-html[data-scrolling] [class*="NewSections"][class*="card"],
-html[data-scrolling] [class*="NewSections"][class*="eyebrow"],
-html[data-scrolling] [class*="PodosPod"][class*="ScrollHint"] {
-  background-color: rgba(255, 255, 255, 0.86) !important;
+@supports (backdrop-filter: none) {
+  html[data-scrolling] *,
+  html[data-scrolling] *::before,
+  html[data-scrolling] *::after {
+    backdrop-filter: none !important;
+  }
 }
+
+/* 2. NOTE on background fallbacks (2026-06-03 revision):
+      Earlier draft of this rule painted transparent glass cards with
+      rgba(255, 255, 255, 0.86) during scroll, on the theory that they
+      "needed" a fill when the backdrop-filter dropped. That was wrong —
+      ProblemDiagnosis cards live on a DARK section background and the
+      white fallback whited them out completely during scroll, hiding
+      their content. The cards already have a border + inset shadow that
+      keep their shape readable; with no backdrop-filter they simply
+      become subtly transparent, which the motion blur of the scroll
+      itself disguises. No artificial background fill. */
 
 /* 3. Neutralize decorative blur-filter orbs during scroll. These are
       soft radial-gradient glows; the extra `filter: blur()` on top is
