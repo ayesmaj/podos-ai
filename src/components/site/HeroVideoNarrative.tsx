@@ -128,6 +128,20 @@ export default function HeroVideoNarrative() {
     const loadFrame = (i: number) => {
       const img = new window.Image();
       img.src = `/intro-frames/${String(i + 1).padStart(3, "0")}.jpg`;
+      // CRITICAL perf: decode the JPEG off the main thread NOW, during
+      // idle, instead of letting the first drawImage() during scroll
+      // trigger a synchronous decode. A 1280×720 JPEG decode is
+      // 5–15ms on the main thread — do that 209× while scrolling and
+      // the hero drops to ~14 FPS (measured). img.decode() hands the
+      // work to the browser's image-decoding thread; by the time the
+      // user scrubs to frame N it's already a ready-to-blit bitmap.
+      if (typeof img.decode === "function") {
+        img.decode().catch(() => {
+          /* decode can reject if the image errors or is detached —
+             harmless, drawFrame's `complete`/`naturalWidth` guard
+             still protects the draw path. */
+        });
+      }
       frames[i] = img;
       return img;
     };
@@ -237,41 +251,68 @@ export default function HeroVideoNarrative() {
       const eased = 1 - Math.pow(1 - textProgress, 3);
       chapterRefs.current.forEach((ref) => {
         if (!ref) return;
+        // opacity + transform only — both run on the compositor and
+        // cost ~nothing. The previous `filter: blur()` here forced a
+        // main-thread re-rasterization of each chapter element every
+        // scroll frame (expensive, and invisible at scroll speed).
         ref.style.opacity = String(eased);
         ref.style.transform = `translateY(${(1 - eased) * 24}px)`;
-        ref.style.filter = `blur(${(1 - eased) * 6}px)`;
       });
     };
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    // === SCROLL HANDLING (2026-05-20 perf pass) =====================
+    // Previously this effect registered THREE handlers all calling
+    // onScroll(): a window scroll listener, a Lenis "scroll" listener,
+    // AND a self-perpetuating requestAnimationFrame loop that ran
+    // 60Hz forever. The rAF loop alone was responsible for the
+    // "stuck" feel — it forced layout via getBoundingClientRect on
+    // every chapter, every frame, regardless of whether the user was
+    // actually scrolling.
+    //
+    // New approach: a single rAF-throttled handler shared by all
+    // scroll sources. Scroll events queue at most one rAF; the rAF
+    // does the geometry read + style writes. No continuous loop.
+    let rafPending = false;
+    const scheduleScroll = () => {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => {
+        rafPending = false;
+        if (!stopped) onScroll();
+      });
+    };
 
-    // Hook into Lenis when it becomes available (race-safe poll)
+    // Initial paint — one synchronous read so the page is correct
+    // before the user touches the wheel.
+    onScroll();
+
+    window.addEventListener("scroll", scheduleScroll, { passive: true });
+
+    // Hook into Lenis when it becomes available (race-safe poll).
+    // Lenis fires "scroll" on its own RAF when it's animating; we
+    // still throttle to one DOM read per frame via scheduleScroll.
     let lenisHooked: { off: (e: string, cb: () => void) => void } | null = null;
     const tryHookLenis = () => {
       const lenis = (window as unknown as { __lenis?: { on: (e: string, cb: () => void) => void; off: (e: string, cb: () => void) => void } }).__lenis;
       if (lenis && !lenisHooked) {
-        lenis.on("scroll", onScroll);
+        lenis.on("scroll", scheduleScroll);
         lenisHooked = lenis;
       }
     };
     tryHookLenis();
-    const lenisPoll = window.setInterval(tryHookLenis, 100);
-
-    // Self-perpetuating rAF fallback — covers cases where neither
-    // scroll event fires (some smooth-scroll setups suppress them).
-    const tick = () => {
-      if (stopped) return;
-      onScroll();
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    // Poll for Lenis is bounded — give up after 2 seconds so we don't
+    // spin the interval forever if the provider never mounts.
+    let polls = 0;
+    const lenisPoll = window.setInterval(() => {
+      tryHookLenis();
+      if (++polls > 20 || lenisHooked) window.clearInterval(lenisPoll);
+    }, 100);
 
     return () => {
       stopped = true;
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", scheduleScroll);
       window.clearInterval(lenisPoll);
-      lenisHooked?.off("scroll", onScroll);
+      lenisHooked?.off("scroll", scheduleScroll);
     };
   }, [isMobile, skipped]);
 

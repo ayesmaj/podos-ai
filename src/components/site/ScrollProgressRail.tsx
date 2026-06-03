@@ -65,33 +65,59 @@ export default function ScrollProgressRail() {
 
     sectionsRef.current = children;
 
-    // Pick the section whose top is closest to the viewport's upper
-    // reading line (~40% down) — this matches what a reader actually
-    // considers the "current" section while scrolling.
-    const pickActive = () => {
+    // === Scroll handler perf (2026-05-20 pass) ===========================
+    // OLD: ran on EVERY scroll event. Each call did:
+    //   - reads scrollHeight (forced layout)
+    //   - reads getBoundingClientRect() on all 9 sections (9 forced layouts!)
+    //   - calls setProgress() + setActive() — two React re-renders
+    // At Lenis's smoothWheel rate (~60Hz), that's ~10 forced layouts +
+    // 2 React renders PER FRAME during scroll. This was a top contributor
+    // to the "1,350ms total forced reflow" the Chrome trace reported.
+    //
+    // NEW: rAF-throttled (one tick per actual paint frame, max) + dedup
+    // (skip setProgress/setActive when value unchanged so React doesn't
+    // schedule a no-op re-render).
+    let rafPending = false;
+    let lastActive = -1;
+    let lastProgress = -1;
+    const tick = () => {
+      rafPending = false;
+      const max =
+        document.documentElement.scrollHeight - window.innerHeight || 1;
+      const p = Math.min(1, Math.max(0, window.scrollY / max));
+      // Quantize to 0.001 so micro-changes (sub-pixel scroll) don't
+      // trigger React renders that produce no visible difference.
+      const pQ = Math.round(p * 1000) / 1000;
+      if (pQ !== lastProgress) {
+        lastProgress = pQ;
+        setProgress(pQ);
+      }
+      // pickActive() inlined here so we can dedup its result too.
       const mid = window.innerHeight * 0.4;
       let bestIdx = 0;
       let bestDist = Infinity;
-      sectionsRef.current.forEach((el, i) => {
-        const r = el.getBoundingClientRect();
+      const sections = sectionsRef.current;
+      for (let i = 0; i < sections.length; i++) {
+        const r = sections[i].getBoundingClientRect();
         const distance =
           r.top <= mid && r.bottom > mid ? 0 : Math.abs(r.top - mid);
         if (distance < bestDist) {
           bestDist = distance;
           bestIdx = i;
         }
-      });
-      setActive(bestIdx);
+      }
+      if (bestIdx !== lastActive) {
+        lastActive = bestIdx;
+        setActive(bestIdx);
+      }
     };
-
     const onScroll = () => {
-      const max =
-        document.documentElement.scrollHeight - window.innerHeight || 1;
-      setProgress(Math.min(1, Math.max(0, window.scrollY / max)));
-      pickActive();
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(tick);
     };
 
-    onScroll();
+    tick(); // initial paint
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
 

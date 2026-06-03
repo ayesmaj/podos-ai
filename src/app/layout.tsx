@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import "./mobile.css";
+import "./perf.css";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import GlobalEnergyLayer from "@/components/site/GlobalEnergyLayer";
 

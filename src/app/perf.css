@@ -1,0 +1,62 @@
+/* ============================================================
+   PERFORMANCE · scroll-gated heavy effects (2026-05-20)
+   ============================================================
+   Diagnosis (Chrome DevTools trace): scrolling the page rendered at
+   ~2 FPS. The dominant cost was `backdrop-filter` — the single most
+   expensive CSS property. Each backdrop-filter element re-samples and
+   re-blurs everything behind it whenever the backdrop changes, which
+   is EVERY frame during scroll. The site had ~38 of them (many at
+   blur(40–60px), an enormous radius), all re-compositing per frame.
+   Add ~32 decorative `filter: blur()` orbs + 16 `mix-blend-mode`
+   layers and the compositor falls hopelessly behind.
+
+   Fix: while the page is ACTIVELY scrolling, drop every backdrop-filter
+   and decorative blur. Restore them ~140ms after scroll stops (see
+   SmoothScrollProvider, which toggles `data-scrolling` on <html>).
+
+   Why this is visually lossless: the human eye cannot resolve a
+   frosted-glass blur while the content is sliding past at scroll
+   speed — motion blur from the scroll itself dominates. At rest the
+   full glass returns instantly. You get butter-smooth scroll AND the
+   premium glass look when the page is still.
+   ============================================================ */
+
+/* 1. Kill ALL backdrop-filters during scroll. */
+html[data-scrolling] *,
+html[data-scrolling] *::before,
+html[data-scrolling] *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 2. Transparent glass cards rely entirely on backdrop-filter for
+      their fill (background-color is transparent). Without a fallback
+      they'd flash to a bare border outline mid-scroll. Give them an
+      opaque-ish light panel background while scrolling. Targeted by
+      module name so we don't accidentally repaint dark panels. */
+html[data-scrolling] [class*="ProblemDiagnosis"][class*="card"],
+html[data-scrolling] [class*="NewSections"][class*="card"],
+html[data-scrolling] [class*="NewSections"][class*="eyebrow"],
+html[data-scrolling] [class*="PodosPod"][class*="ScrollHint"] {
+  background-color: rgba(255, 255, 255, 0.86) !important;
+}
+
+/* 3. Neutralize decorative blur-filter orbs during scroll. These are
+      soft radial-gradient glows; the extra `filter: blur()` on top is
+      near-redundant visually but expensive (continuous rasterization).
+      Dropping it mid-scroll is invisible. */
+html[data-scrolling] [class*="orb"],
+html[data-scrolling] [class*="Orb"],
+html[data-scrolling] [class*="lightOrb"],
+html[data-scrolling] [class*="glow"],
+html[data-scrolling] [class*="Glow"] {
+  filter: none !important;
+}
+
+/* 4. Respect reduced-motion users: they may have a static experience
+      already, but ensure the gate never causes a flash for them. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-scrolling] * {
+    transition: none !important;
+  }
+}

@@ -15,11 +15,28 @@ export default function SmoothScrollProvider({
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
+    // Lenis tuning (2026-05-20 — second perf pass):
+    //  - Switched from `duration` to `lerp`. duration: 0.9 meant every
+    //    wheel tick triggered ~54 frames of interpolation, each running
+    //    the full scroll-handler chain (Lenis emit → ScrollTrigger update
+    //    → scroll-gate → ScrollProgressRail tick → every framer-motion
+    //    useScroll measure). lerp: 0.15 catches up in ~8 frames (~133ms)
+    //    — same butter-smooth feel, ~6× less per-tick work.
+    //  - wheelMultiplier dropped 1.4 → 1.0. The boosted multiplier made
+    //    each wheel tick scroll further → longer settle → more frames of
+    //    JS work. Native multiplier gives proper page-down behavior on
+    //    real wheel mice without the perceived "boost lag".
+    //  - smoothWheel stays true so trackpads/precision mice still feel
+    //    silky. Touch scrolling on mobile is unaffected (always smooth).
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.15,
       orientation: "vertical",
       smoothWheel: true,
+      wheelMultiplier: 1.0,
+      // syncTouch off — touch scrolling uses the browser's native momentum
+      // which is GPU-accelerated and free. Forcing Lenis into the loop
+      // there hurts mobile perf.
+      syncTouch: false,
     });
 
     lenisRef.current = lenis;
@@ -32,10 +49,42 @@ export default function SmoothScrollProvider({
     // Keep GSAP ScrollTrigger in sync with Lenis virtual scroll
     lenis.on("scroll", ScrollTrigger.update);
 
+    // === Scroll-gate for heavy CSS effects (2026-05-20 perf pass) ===
+    // While scrolling, set data-scrolling on <html> so perf.css can
+    // drop backdrop-filters + decorative blurs (the #1 cause of the
+    // ~2 FPS scroll we measured). Clear it 140ms after the last scroll
+    // event so the glass returns at rest. The doc element write is
+    // cheap and idempotent; we only touch the DOM on the leading edge
+    // and the trailing timeout, NOT every frame.
+    const docEl = document.documentElement;
+    let scrollIdleTimer = 0;
+    let scrollFlagOn = false;
+    const onScrollGate = () => {
+      if (!scrollFlagOn) {
+        docEl.setAttribute("data-scrolling", "");
+        scrollFlagOn = true;
+      }
+      if (scrollIdleTimer) window.clearTimeout(scrollIdleTimer);
+      scrollIdleTimer = window.setTimeout(() => {
+        docEl.removeAttribute("data-scrolling");
+        scrollFlagOn = false;
+      }, 140);
+    };
+    lenis.on("scroll", onScrollGate);
+    // Also catch native scroll (touch / keyboard / programmatic) which
+    // Lenis may not always emit for.
+    window.addEventListener("scroll", onScrollGate, { passive: true });
+
+    // GSAP ticker drives Lenis. The previous lagSmoothing(0) call
+    // DISABLED frame-skipping protection — when the page was busy, GSAP
+    // would keep trying to catch up on missed frames instead of dropping
+    // them, which feels like "stutter on every scroll". Default smoothing
+    // (500ms threshold, 33ms target) is what production Lenis+GSAP setups
+    // use; it lets the browser breathe under load.
     gsap.ticker.add((time) => {
       lenis.raf(time * 1000);
     });
-    gsap.ticker.lagSmoothing(0);
+    gsap.ticker.lagSmoothing(500, 33);
 
     // Anchor-link handling. Lenis owns scroll, so native <a href="#x">
     // clicks update the URL hash but don't actually scroll. This delegated
@@ -72,6 +121,9 @@ export default function SmoothScrollProvider({
 
     return () => {
       document.removeEventListener("click", onAnchorClick);
+      window.removeEventListener("scroll", onScrollGate);
+      if (scrollIdleTimer) window.clearTimeout(scrollIdleTimer);
+      docEl.removeAttribute("data-scrolling");
       lenis.destroy();
       gsap.ticker.remove((time) => lenis.raf(time * 1000));
       delete (window as unknown as { __lenis?: Lenis }).__lenis;
