@@ -45,10 +45,11 @@ const TEAM: Member[] = [
   },
   {
     idx: "T-04",
-    name: "Barbara Liebeck",
-    role: "VP Sales & Business Dev.",
-    bio: "Enterprise account management across AI infrastructure. Leads the customer pipeline for EcoSynQ, the Israel market, and hyperscaler prospects.",
-    monogram: "BL",
+    name: "Jesse Ramirez",
+    role: "Real Estate Consultant",
+    bio: "Site strategy and real estate partnerships for PODOS pod deployments. Sources industrial-grade locations with power, grid access, and permitting clearance for customer installations.",
+    monogram: "JR",
+    photo: "/team/jesse.png",
   },
   {
     idx: "T-05",
