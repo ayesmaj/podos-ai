@@ -237,9 +237,9 @@ export default function RequestAccessCTA() {
                 <span className={styles.contactRowLabel}>Phone</span>
                 <a
                   className={`${styles.contactRowValue} ${styles.contactRowValueLink}`}
-                  href="tel:+1"
+                  href="tel:+14087189946"
                 >
-                  +1 (555) 000-0000
+                  +1 (408) 718-9946
                 </a>
               </div>
             </div>
