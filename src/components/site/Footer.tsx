@@ -35,6 +35,12 @@ export default function Footer() {
             facilities that need serious compute capacity, without waiting
             years for hyperscale construction.
           </p>
+          <a
+            href="mailto:info@podosai.com"
+            className={styles.footerContactEmail}
+          >
+            info@podosai.com
+          </a>
           <div className={styles.footerSocials}>
             <a href="#" className={styles.footerSocial} aria-label="LinkedIn">
               <LinkedinIcon />

@@ -1522,6 +1522,28 @@
   max-width: 26rem;
 }
 
+/* Footer contact email — placed between tagline and social icons in
+   the brand block. Mono-cased to read as a contact endpoint rather
+   than a marketing CTA; cyan-bright on hover to match the link
+   accent used elsewhere in the footer. */
+.footerContactEmail {
+  display: inline-block;
+  margin-top: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  color: var(--bone);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--cyan-bright) 35%, transparent);
+  padding-bottom: 2px;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+.footerContactEmail:hover,
+.footerContactEmail:focus-visible {
+  color: var(--cyan-bright);
+  border-bottom-color: var(--cyan-bright);
+}
+
 /* Social icon row — small square buttons with hairline borders.
    Border lights up cyan on hover; icon color shifts from dim to bright. */
 .footerSocials {

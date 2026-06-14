@@ -53,7 +53,7 @@ export default function RequestAccessCTA() {
 
   const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText("hello@podos.ai");
+      await navigator.clipboard.writeText("info@podosai.com");
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -114,7 +114,7 @@ export default function RequestAccessCTA() {
           transition={{ duration: 0.75 * t, delay: 0.5 * t, ease: "easeOut" }}
         >
           <a
-            href="mailto:hello@podos.ai?subject=PODOS%20AI%20%C2%B7%20Deployment%20conversation&body=Organization%3A%20%0ALocation%3A%20%0ATimeline%3A%20%0ACompute%20need%3A%20%0A"
+            href="mailto:info@podosai.com?subject=PODOS%20AI%20%C2%B7%20Deployment%20conversation&body=Organization%3A%20%0ALocation%3A%20%0ATimeline%3A%20%0ACompute%20need%3A%20%0A"
             className={styles.primary}
           >
             <span className={styles.primaryGlow} aria-hidden />
@@ -141,10 +141,10 @@ export default function RequestAccessCTA() {
             type="button"
             onClick={copyEmail}
             className={styles.secondary}
-            aria-label="Copy hello@podos.ai to clipboard"
+            aria-label="Copy info@podosai.com to clipboard"
           >
             <span className={styles.secondaryDot} aria-hidden />
-            <span className={styles.secondaryText}>hello@podos.ai</span>
+            <span className={styles.secondaryText}>info@podosai.com</span>
             <span className={styles.secondaryHint}>
               {copied ? "COPIED" : "CLICK TO COPY"}
             </span>
@@ -222,9 +222,9 @@ export default function RequestAccessCTA() {
                 <span className={styles.contactRowLabel}>Email</span>
                 <a
                   className={`${styles.contactRowValue} ${styles.contactRowValueLink}`}
-                  href="mailto:hello@podos.ai"
+                  href="mailto:info@podosai.com"
                 >
-                  hello@podos.ai
+                  info@podosai.com
                 </a>
               </div>
             </div>
