@@ -37,7 +37,7 @@ export const HERO = {
   sub: "PODOS combines power, cooling, server racks, communications, and operations inside factory-built modular units — designed to deploy in months instead of waiting years for traditional data-center construction.",
   investorLine: "Own a piece of the company building a faster path to AI capacity.",
   primaryCta: "Explore the Opportunity",
-  secondaryCta: "Watch the 35-Second Story",
+  secondaryCta: "Watch the Film",
   tertiaryCta: "Get Investor Access",
   accessModule: {
     label: "Investor access",
@@ -54,8 +54,13 @@ export const HERO = {
 /* ================================ FILM ================================ */
 
 export const FILM = {
-  eyebrow: "PODOS in 35 seconds",
+  eyebrow: "The PODOS investor film",
   headline: ["From power", "to AI capacity."],
+  /** real produced film — when set, PodosFilm renders a video player
+   *  instead of the still-sequence storyboard */
+  videoSrc: "/videos/podos-investor-film.mp4",
+  poster: "/videos/podos-film-poster.jpg",
+  durationLabel: "3 MIN",
   scenes: [
     { imageId: "ca-power", text: ["POWER EXISTS."], seconds: 4.5 },
     { imageId: "server-integration", text: ["AI DEMAND IS", "ACCELERATING."], seconds: 4.5 },
@@ -67,7 +72,7 @@ export const FILM = {
     { imageId: "final-vision", text: ["TURN POWER", "INTO AI CAPACITY."], seconds: 5 },
   ],
   closing: "PODOS — Modular AI Infrastructure",
-  footnote: "*Deployment timeline is a PODOS target. Visual sequence contains conceptual renders.",
+  footnote: "Film contains conceptual visualizations. Deployment timelines shown are PODOS targets.",
   cta: "Explore the Investment Opportunity",
 };
 

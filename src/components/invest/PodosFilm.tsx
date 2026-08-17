@@ -1,157 +1,103 @@
 "use client";
 
 /**
- * PodosFilm — the "35-second story": a timed cinematic sequence built from
- * the approved still frames with on-screen typography, following the V3
- * storyboard. Runs like a film (auto-advance, per-scene progress bar,
- * pause out of viewport, replay), but ships as images + CSS so it costs a
- * fraction of a video download.
+ * PodosFilm — the investor film section. Plays the real produced film
+ * (FILM.videoSrc) with a poster + play overlay, native controls once
+ * playing, preload="metadata" (the ~66MB master never blocks page load),
+ * and auto-pause when scrolled out of the viewport.
  *
- * ponytail: when a real produced MP4 exists, swap the scene player for a
- * <video> with the same poster/controls — the section shell stays.
+ * If FILM.videoSrc is ever unset, the section still renders the poster
+ * frame — the old storyboard player was retired when the real film
+ * arrived (git: ec53f3c has it if ever needed again).
  */
 
-import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
-import { Pause, Play, RotateCcw } from "lucide-react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+import { Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FILM, CTA } from "@/data/investContent";
-import GeneratedSectionImage from "./GeneratedSectionImage";
 import Reveal from "./Reveal";
 
 export default function PodosFilm() {
-  const [scene, setScene] = useState(0);
-  const [playing, setPlaying] = useState(true);
-  const [done, setDone] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
-  const inView = useInView(frameRef, { amount: 0.35 });
+  const [started, setStarted] = useState(false);
+  const inView = useInView(frameRef, { amount: 0.3 });
   const reduced = useReducedMotion();
 
-  const active = playing && inView && !done && !reduced;
-
+  /* pause when the film scrolls out of view */
   useEffect(() => {
-    if (!active) return;
-    const t = setTimeout(() => {
-      if (scene < FILM.scenes.length - 1) setScene(scene + 1);
-      else setDone(true);
-    }, FILM.scenes[scene].seconds * 1000);
-    return () => clearTimeout(t);
-  }, [active, scene]);
+    const v = videoRef.current;
+    if (!v || !started) return;
+    if (!inView && !v.paused) v.pause();
+  }, [inView, started]);
 
-  const replay = () => {
-    setScene(0);
-    setDone(false);
-    setPlaying(true);
+  const start = () => {
+    setStarted(true);
+    // play after the overlay unmounts so controls receive focus cleanly
+    requestAnimationFrame(() => videoRef.current?.play());
   };
-
-  const current = FILM.scenes[scene];
 
   return (
     <section id="film" className="iv-section" style={{ background: "var(--iv-beige)" }}>
       <div className="iv-container">
         <Reveal>
-          <span className="iv-eyebrow">{FILM.eyebrow}</span>
-          <h2 className="iv-display-md mt-5">
-            {FILM.headline[0]}
-            <br />
-            {FILM.headline[1]}
-          </h2>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <span className="iv-eyebrow">{FILM.eyebrow}</span>
+              <h2 className="iv-display-md mt-5">
+                {FILM.headline[0]}
+                <br />
+                {FILM.headline[1]}
+              </h2>
+            </div>
+            <span
+              className="iv-claim-chip"
+              style={{ fontSize: 11, padding: "6px 12px" }}
+            >
+              {FILM.durationLabel}
+            </span>
+          </div>
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div ref={frameRef} className="iv-film mt-12" role="group" aria-label="PODOS 35-second story">
-            {/* reduced-motion fallback: static final frame + full text list */}
-            {reduced ? (
-              <>
-                <GeneratedSectionImage id="final-vision" fill label={false} sizes="100vw" />
-                <div className="iv-film-scrim" />
-                <div className="iv-film-text">
-                  <span>TURN POWER</span>
-                  <span>INTO AI CAPACITY.</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <AnimatePresence mode="sync">
-                  <motion.div
-                    key={done ? "done" : scene}
-                    className="iv-film-scene"
-                    initial={{ opacity: 0, scale: 1.04 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    <GeneratedSectionImage
-                      id={done ? "final-vision" : current.imageId}
-                      fill
-                      label={false}
-                      sizes="(max-width: 768px) 100vw, 1200px"
-                    />
-                  </motion.div>
-                </AnimatePresence>
-                <div className="iv-film-scrim" />
+          <div ref={frameRef} className="iv-film mt-12">
+            <video
+              ref={videoRef}
+              src={FILM.videoSrc}
+              poster={FILM.poster}
+              preload="metadata"
+              playsInline
+              controls={started}
+              className="absolute inset-0 h-full w-full object-cover"
+              aria-label="PODOS investor film"
+            />
 
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={done ? "closing" : `t-${scene}`}
-                    className="iv-film-text"
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    {done ? (
-                      <>
-                        <span>TURN POWER</span>
-                        <span>INTO AI CAPACITY.</span>
-                        <span
-                          className="mt-4 text-[11px] font-medium tracking-[0.3em]"
-                          style={{ fontFamily: "var(--iv-mono)" }}
-                        >
-                          {FILM.closing.toUpperCase()}
-                        </span>
-                      </>
-                    ) : (
-                      current.text.map((l) => <span key={l}>{l}</span>)
-                    )}
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* controls */}
-                <div className="iv-film-controls">
-                  {done ? (
-                    <button className="iv-film-btn" onClick={replay} aria-label="Replay story">
-                      <RotateCcw size={13} /> REPLAY
-                    </button>
-                  ) : (
-                    <button
-                      className="iv-film-btn"
-                      onClick={() => setPlaying(!playing)}
-                      aria-label={playing ? "Pause story" : "Play story"}
-                    >
-                      {playing ? <Pause size={13} /> : <Play size={13} />}
-                      {playing ? "PAUSE" : "PLAY"}
-                    </button>
-                  )}
-                </div>
-
-                {/* per-scene progress */}
-                <div className="iv-film-progress" aria-hidden>
-                  {FILM.scenes.map((s, i) => (
-                    <span key={s.imageId}>
-                      {i < scene || done ? (
-                        <i style={{ transform: "scaleX(1)" }} />
-                      ) : i === scene ? (
-                        <motion.i
-                          key={`p-${scene}-${active}`}
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: active ? 1 : 0 }}
-                          transition={{ duration: s.seconds, ease: "linear" }}
-                        />
-                      ) : null}
-                    </span>
-                  ))}
-                </div>
-              </>
+            {!started && (
+              <button
+                onClick={start}
+                className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-5"
+                aria-label="Play the PODOS investor film"
+                style={{ background: "rgba(23,25,27,0.18)" }}
+              >
+                <motion.span
+                  className="flex h-20 w-20 items-center justify-center rounded-full"
+                  style={{
+                    background: "rgba(247,246,242,0.92)",
+                    backdropFilter: "blur(10px)",
+                    boxShadow: "0 18px 60px -12px rgba(23,25,27,0.6)",
+                  }}
+                  whileHover={reduced ? undefined : { scale: 1.07 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Play size={26} strokeWidth={2} style={{ color: "var(--iv-ink)", marginLeft: 3 }} />
+                </motion.span>
+                <span
+                  className="text-[12px] font-semibold tracking-[0.22em] text-white"
+                  style={{ fontFamily: "var(--iv-mono)", textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}
+                >
+                  WATCH THE FILM
+                </span>
+              </button>
             )}
           </div>
         </Reveal>
