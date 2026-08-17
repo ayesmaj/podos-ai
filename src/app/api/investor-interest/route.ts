@@ -7,6 +7,11 @@
  * Storage: Supabase (podos-invest project) via PostgREST — the table is
  * RLS-locked to INSERT-only for the anon role, and the key stays
  * server-side. Env: PODOS_SUPABASE_URL, PODOS_SUPABASE_ANON_KEY.
+ *
+ * Notification: when RESEND_API_KEY is set, each recorded submission is
+ * also emailed to info@podosai.com (NOTIFY_EMAIL to override). Email is
+ * best-effort — a mail failure never loses the lead, the DB row is the
+ * source of truth.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -108,5 +113,47 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  await notifyTeam({ fullName, email, phone: body.phone?.trim(), amount, investorType: body.investorType, accredited: body.accredited });
+
   return NextResponse.json({ ok: true });
+}
+
+/** Best-effort email notification via Resend — never blocks the lead. */
+async function notifyTeam(lead: {
+  fullName: string;
+  email: string;
+  phone?: string;
+  amount: number;
+  investorType?: string;
+  accredited?: string;
+}) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return;
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: process.env.NOTIFY_FROM ?? "PODOS Invest <onboarding@resend.dev>",
+        to: [process.env.NOTIFY_EMAIL ?? "info@podosai.com"],
+        reply_to: lead.email,
+        subject: `New investor interest — ${lead.fullName} · $${lead.amount.toLocaleString("en-US")}`,
+        text: [
+          "New indication of investor interest from podosai.com/invest:",
+          "",
+          `Name:        ${lead.fullName}`,
+          `Email:       ${lead.email}`,
+          `Phone:       ${lead.phone || "—"}`,
+          `Amount:      $${lead.amount.toLocaleString("en-US")} (non-binding)`,
+          `Investing as: ${lead.investorType === "entity" ? "Entity / Fund" : "Individual"}`,
+          `Accredited:  ${lead.accredited ?? "unsure"}`,
+          "",
+          "Full record: Supabase → podos-invest → investor_interest",
+        ].join("\n"),
+      }),
+    });
+    if (!res.ok) console.error("notify email failed:", res.status, (await res.text()).slice(0, 200));
+  } catch (e) {
+    console.error("notify email error:", e);
+  }
 }
