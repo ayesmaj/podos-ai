@@ -23,6 +23,7 @@
   --iv-gold-deep: #8a6f3c;       /* darkened for small-text contrast */
   --iv-blue: #dae5f1;            /* cold architectural blue */
   --iv-bluegray: #cad6e8;
+  --iv-tech: #2f6cc4;            /* technical accent — system callouts */
   --iv-glasshi: #e8eef6;
   --iv-glass: rgba(255, 255, 255, 0.65);
   --iv-glass-strong: rgba(255, 255, 255, 0.85);

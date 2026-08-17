@@ -99,15 +99,17 @@ export const VALIDATION = {
 export const ANATOMY = {
   eyebrow: "One integrated system",
   headline: ["Everything required", "to turn power", "into compute."],
+  /* x = horizontal focus (% across the cutaway, left→right), zoom = camera
+     push-in used by the scroll-driven zone view */
   systems: [
-    { n: "01", title: "Power input", body: "Connects the PODOS unit to the available site power infrastructure." },
-    { n: "02", title: "Electrical distribution", body: "Conditions and distributes utility power to every internal system." },
-    { n: "03", title: "Cooling", body: "Maintains the thermal environment required by high-density compute systems." },
-    { n: "04", title: "Server racks", body: "Provides the physical compute architecture within a standardized modular enclosure." },
-    { n: "05", title: "Communications", body: "Integrates networking, fiber, switching, monitoring, and external connectivity." },
-    { n: "06", title: "Monitoring", body: "Tracks power, thermal, and system health across the unit in real time." },
-    { n: "07", title: "Safety & security", body: "Physical access control, fire suppression, and protective systems." },
-    { n: "08", title: "Service access", body: "Engineered access panels and corridors for maintenance without downtime." },
+    { n: "01", title: "Power input", body: "Connects the PODOS unit to the available site power infrastructure.", x: 5, zoom: 2.0 },
+    { n: "02", title: "Electrical distribution", body: "Conditions and distributes utility power to every internal system.", x: 16, zoom: 2.1 },
+    { n: "03", title: "Cooling", body: "Maintains the thermal environment required by high-density compute systems.", x: 30, zoom: 2.0 },
+    { n: "04", title: "Server racks", body: "Provides the physical compute architecture within a standardized modular enclosure.", x: 50, zoom: 1.9 },
+    { n: "05", title: "Communications", body: "Integrates networking, fiber, switching, monitoring, and external connectivity.", x: 66, zoom: 2.1 },
+    { n: "06", title: "Monitoring", body: "Tracks power, thermal, and system health across the unit in real time.", x: 77, zoom: 2.2 },
+    { n: "07", title: "Safety & security", body: "Physical access control, fire suppression, and protective systems.", x: 88, zoom: 2.0 },
+    { n: "08", title: "Service access", body: "Engineered access panels and corridors for maintenance without downtime.", x: 96, zoom: 1.9 },
   ],
 };
 

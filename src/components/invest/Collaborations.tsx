@@ -10,7 +10,6 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import Image from "next/image";
 import { VALIDATION } from "@/data/investContent";
 import { visibleCollaborations, collaborationsFootnote } from "@/data/investOffering";
 import GeneratedSectionImage from "./GeneratedSectionImage";
@@ -79,11 +78,33 @@ export default function Collaborations() {
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={flowInView ? { opacity: 1, scale: 1 } : {}}
                   transition={{ duration: 0.6, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative z-10 flex flex-col items-center gap-2"
+                  className="relative z-10 flex flex-col items-center gap-2.5"
                 >
-                  <Image src="/products/pod.png" alt="PODOS unit" width={110} height={30} style={{ width: 110, height: "auto" }} />
-                  <span className="iv-label" style={{ color: "var(--iv-ink)" }}>
-                    {VALIDATION.flowLabels.center}
+                  {/* abstracted unit node: black slab echoing the pod's
+                      long low form — reads cleanly at spine scale */}
+                  <span
+                    className="flex h-[38px] w-[112px] items-center justify-center rounded-[10px]"
+                    style={{
+                      background: "linear-gradient(160deg, #23272d, #14161a 70%)",
+                      border: "1px solid rgba(255,255,255,0.14)",
+                      boxShadow:
+                        "0 12px 28px -10px rgba(23,25,27,0.55), inset 0 1px 0 rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--iv-mono)",
+                        fontSize: 11,
+                        letterSpacing: "0.3em",
+                        color: "#e8e6df",
+                        paddingLeft: "0.3em",
+                      }}
+                    >
+                      PODOS
+                    </span>
+                  </span>
+                  <span className="iv-label" style={{ color: "var(--iv-steel)" }}>
+                    1-MW UNIT
                   </span>
                 </motion.div>
                 <motion.div

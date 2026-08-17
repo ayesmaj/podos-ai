@@ -1,21 +1,29 @@
 "use client";
 
 /**
- * ProductAnatomy — interactive cutaway: the anatomy render stays pinned on
- * the left while the eight integrated systems highlight one at a time as
- * the user scrolls the list. Labels live in the UI, not the image.
+ * ProductAnatomy — interactive system tour of the cutaway render.
+ *
+ * As each system in the list crosses mid-viewport, the pinned "camera"
+ * pushes into that system's zone of the cutaway (scale + transform-origin
+ * pan) and a technical-blue callout labels it. The active list item gets
+ * the same tech-blue mark. Reduced motion: static full view, list
+ * highlight only.
  */
 
-import { motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { ANATOMY } from "@/data/investContent";
-import GeneratedSectionImage from "./GeneratedSectionImage";
+import { getInvestImage } from "@/data/invest-page-images";
+
 import Reveal from "./Reveal";
 
 export default function ProductAnatomy() {
   const [active, setActive] = useState(0);
   const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
   const reduced = useReducedMotion();
+  const img = getInvestImage("product-anatomy");
+  const sys = ANATOMY.systems[active];
 
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -48,20 +56,78 @@ export default function ProductAnatomy() {
         </Reveal>
 
         <div className="mt-14 grid gap-12 lg:grid-cols-[1.15fr_0.85fr]">
-          {/* pinned cutaway */}
+          {/* pinned system camera */}
           <div className="lg:sticky lg:top-[110px] lg:self-start">
-            <GeneratedSectionImage
-              id="product-anatomy"
-              sizes="(max-width: 1024px) 100vw, 660px"
-              labelText="ENGINEERING CONCEPT"
-            />
+            <div
+              className="relative overflow-hidden"
+              style={{
+                borderRadius: 12,
+                aspectRatio: img ? `${img.width} / ${img.height}` : "3 / 2",
+                background: "#f0efe9",
+              }}
+            >
+              {img?.status === "ready" && (
+                <motion.div
+                  className="absolute inset-0"
+                  animate={
+                    reduced
+                      ? undefined
+                      : { scale: sys.zoom, transformOrigin: `${sys.x}% 55%` }
+                  }
+                  transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 660px"
+                    style={{ objectFit: "cover" }}
+                  />
+                </motion.div>
+              )}
+
+              {/* technical callout — blue, mono, precise */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={sys.n}
+                  className="absolute left-4 top-4 flex items-center gap-2.5"
+                  initial={reduced ? false : { opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{ background: "var(--iv-tech)", boxShadow: "0 0 0 4px rgba(47,108,196,0.18)" }}
+                  />
+                  <span
+                    className="px-3 py-1.5"
+                    style={{
+                      fontFamily: "var(--iv-mono)",
+                      fontSize: 11,
+                      letterSpacing: "0.16em",
+                      color: "var(--iv-tech)",
+                      background: "rgba(255,255,255,0.85)",
+                      backdropFilter: "blur(8px)",
+                      border: "1px solid rgba(47,108,196,0.3)",
+                      borderRadius: 4,
+                    }}
+                  >
+                    {sys.n} · {sys.title.toUpperCase()}
+                  </span>
+                </motion.div>
+              </AnimatePresence>
+
+              <span className="iv-concept-tag">ENGINEERING CONCEPT</span>
+            </div>
+
             <div
               className="mt-4 flex items-center justify-between"
               style={{ fontFamily: "var(--iv-mono)", fontSize: 11, color: "var(--iv-steel)" }}
             >
               <span>PODOS UNIT — SYSTEM VIEW</span>
-              <span className="iv-num">
-                {ANATOMY.systems[active].n} / {String(ANATOMY.systems.length).padStart(2, "0")}
+              <span className="iv-num" style={{ color: "var(--iv-tech)" }}>
+                {sys.n} / {String(ANATOMY.systems.length).padStart(2, "0")}
               </span>
             </div>
           </div>
@@ -77,14 +143,14 @@ export default function ProductAnatomy() {
                 className="border-b py-6 pl-5 transition-colors duration-300"
                 style={{
                   borderColor: "var(--iv-border-soft)",
-                  borderLeft: `2px solid ${active === i ? "var(--iv-gold)" : "transparent"}`,
-                  background: active === i ? "rgba(255,255,255,0.55)" : "transparent",
+                  borderLeft: `2px solid ${active === i ? "var(--iv-tech)" : "transparent"}`,
+                  background: active === i ? "rgba(218,229,241,0.28)" : "transparent",
                 }}
               >
                 <div className="flex items-baseline gap-4">
                   <span
                     className="iv-num text-[13px] font-semibold"
-                    style={{ color: active === i ? "var(--iv-gold-deep)" : "var(--iv-warmgray)" }}
+                    style={{ color: active === i ? "var(--iv-tech)" : "var(--iv-warmgray)" }}
                   >
                     {s.n}
                   </span>
