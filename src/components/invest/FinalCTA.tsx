@@ -10,11 +10,11 @@ import { ArrowRight } from "lucide-react";
 import { FINAL_CTA, CTA } from "@/data/investContent";
 import { offering, termsLive } from "@/data/investOffering";
 import GeneratedSectionImage from "./GeneratedSectionImage";
+import { openInvestorAccess } from "./investAccess";
 import Reveal from "./Reveal";
 
 export default function FinalCTA() {
   const live = termsLive();
-  const primaryHref = live && offering.portalURL ? offering.portalURL : CTA.accessHref;
   const primaryLabel = live ? FINAL_CTA.primaryLive : FINAL_CTA.primary;
 
   return (
@@ -41,10 +41,20 @@ export default function FinalCTA() {
           </Reveal>
           <Reveal delay={0.15}>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <a href={primaryHref} className="iv-btn iv-btn-primary !px-9 !py-[18px] !text-[15.5px]">
-                {primaryLabel}
-                <ArrowRight size={18} strokeWidth={2.2} />
-              </a>
+              {live && offering.portalURL ? (
+                <a href={offering.portalURL} className="iv-btn iv-btn-primary !px-9 !py-[18px] !text-[15.5px]">
+                  {primaryLabel}
+                  <ArrowRight size={18} strokeWidth={2.2} />
+                </a>
+              ) : (
+                <button
+                  onClick={() => openInvestorAccess()}
+                  className="iv-btn iv-btn-primary !px-9 !py-[18px] !text-[15.5px]"
+                >
+                  {primaryLabel}
+                  <ArrowRight size={18} strokeWidth={2.2} />
+                </button>
+              )}
               <a href={CTA.talkToTeamHref} className="iv-btn iv-btn-ghost">
                 {FINAL_CTA.secondary}
               </a>

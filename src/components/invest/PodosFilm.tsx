@@ -14,7 +14,8 @@
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { FILM, CTA } from "@/data/investContent";
+import { FILM } from "@/data/investContent";
+import { openInvestorAccess } from "./investAccess";
 import Reveal from "./Reveal";
 
 export default function PodosFilm() {
@@ -107,9 +108,9 @@ export default function PodosFilm() {
             <p className="text-[11.5px]" style={{ color: "var(--iv-warmgray)" }}>
               {FILM.footnote}
             </p>
-            <a href={CTA.accessHref} className="iv-btn iv-btn-ghost !py-3 !text-[13.5px]">
+            <button onClick={() => openInvestorAccess()} className="iv-btn iv-btn-ghost !py-3 !text-[13.5px]">
               {FILM.cta}
-            </a>
+            </button>
           </div>
         </Reveal>
       </div>

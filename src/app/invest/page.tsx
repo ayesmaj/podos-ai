@@ -32,6 +32,7 @@ import ProcessSection from "@/components/invest/ProcessSection";
 import FinalCTA from "@/components/invest/FinalCTA";
 import LegalDisclaimer from "@/components/invest/LegalDisclaimer";
 import StickyInvestCTA from "@/components/invest/StickyInvestCTA";
+import InvestorAccessFlow from "@/components/invest/InvestorAccessFlow";
 
 export const metadata: Metadata = {
   title: "Invest in PODOS — Turn Available Power into Deployable AI Compute",
@@ -65,6 +66,7 @@ export default function InvestPage() {
       <FinalCTA />
       <LegalDisclaimer />
       <StickyInvestCTA />
+      <InvestorAccessFlow />
     </main>
   );
 }

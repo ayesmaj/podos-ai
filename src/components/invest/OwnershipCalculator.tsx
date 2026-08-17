@@ -20,7 +20,6 @@ import { ArrowRight } from "lucide-react";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   OWNERSHIP,
-  CTA,
   MIN_INVESTMENT,
   MAX_INVESTMENT,
   QUICK_AMOUNTS,
@@ -28,6 +27,7 @@ import {
   fmtPct,
 } from "@/data/investContent";
 import { offering, termsLive } from "@/data/investOffering";
+import { openInvestorAccess } from "./investAccess";
 import Reveal from "./Reveal";
 
 const LOG_MIN = Math.log(MIN_INVESTMENT);
@@ -183,10 +183,10 @@ export default function OwnershipCalculator() {
                   <p className="text-[13px] leading-relaxed" style={{ color: "var(--iv-steel)" }}>
                     {OWNERSHIP.demoNotice}
                   </p>
-                  <a href={CTA.documentsHref} className="iv-btn iv-btn-primary mt-5">
+                  <button onClick={() => openInvestorAccess(amount)} className="iv-btn iv-btn-primary mt-5">
                     {OWNERSHIP.demoCta}
                     <ArrowRight size={16} strokeWidth={2.2} />
-                  </a>
+                  </button>
                 </div>
               )}
             </div>

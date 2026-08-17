@@ -7,7 +7,7 @@
 
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CTA } from "@/data/investContent";
+import { openInvestorAccess } from "./investAccess";
 
 export default function StickyInvestCTA() {
   const [visible, setVisible] = useState(false);
@@ -39,14 +39,14 @@ export default function StickyInvestCTA() {
         transition: "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
       }}
     >
-      <a
-        href={CTA.accessHref}
+      <button
+        onClick={() => openInvestorAccess()}
         className="iv-btn iv-btn-primary w-full !py-4"
         style={{ boxShadow: "0 12px 40px -10px rgba(23,25,27,0.5)" }}
       >
         INVESTOR ACCESS
         <ArrowRight size={17} strokeWidth={2.2} />
-      </a>
+      </button>
     </div>
   );
 }

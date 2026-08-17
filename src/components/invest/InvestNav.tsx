@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { NAV_LINKS } from "@/data/investContent";
+import { openInvestorAccess } from "./investAccess";
 
 export default function InvestNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -56,9 +57,12 @@ export default function InvestNav() {
           ))}
         </nav>
 
-        <a href="#access" className="iv-btn iv-btn-primary !px-6 !py-2.5 !text-[13.5px]">
+        <button
+          onClick={() => openInvestorAccess()}
+          className="iv-btn iv-btn-primary !px-6 !py-2.5 !text-[13.5px]"
+        >
           Investor Access
-        </a>
+        </button>
       </div>
     </header>
   );

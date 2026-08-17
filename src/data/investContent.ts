@@ -199,7 +199,7 @@ export const OWNERSHIP = {
     securities: "Estimated securities",
     ownership: "Estimated ownership",
   },
-  demoCta: "Request official offering documents",
+  demoCta: "Continue with this amount",
   viewActual: "Actual scale",
   viewMagnified: "Magnified view",
   magnifiedNote: "Magnified for visibility — the number is the truth.",

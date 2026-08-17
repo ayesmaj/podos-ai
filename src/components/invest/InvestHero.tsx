@@ -11,8 +11,9 @@
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 import { useRef, type ReactNode } from "react";
-import { HERO, CTA } from "@/data/investContent";
+import { HERO } from "@/data/investContent";
 import GeneratedSectionImage from "./GeneratedSectionImage";
+import { openInvestorAccess } from "./investAccess";
 
 function Rise({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   const reduced = useReducedMotion();
@@ -112,13 +113,13 @@ export default function InvestHero() {
                     </div>
                   ))}
                 </dl>
-                <a
-                  href={CTA.accessHref}
-                  className="mt-5 flex items-center justify-between text-[14px] font-semibold transition-opacity hover:opacity-70"
+                <button
+                  onClick={() => openInvestorAccess()}
+                  className="mt-5 flex w-full cursor-pointer items-center justify-between text-[14px] font-semibold transition-opacity hover:opacity-70"
                 >
                   {HERO.accessModule.cta}
                   <ArrowRight size={16} strokeWidth={2.2} />
-                </a>
+                </button>
                 <p className="mt-4 text-[11px] leading-relaxed" style={{ color: "var(--iv-warmgray)" }}>
                   {HERO.accessModule.note}
                 </p>
