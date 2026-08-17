@@ -26,7 +26,7 @@ export default function ProcessSection() {
           <h2 className="iv-display-md mt-5">{PROCESS.headline}</h2>
         </Reveal>
 
-        <div ref={lineRef} className="relative mt-16 grid gap-10 md:grid-cols-4 md:gap-6">
+        <div ref={lineRef} className="relative mt-10 grid gap-10 md:grid-cols-4 md:gap-6">
           <div className="iv-process-line hidden md:block">
             <motion.i
               initial={{ scaleX: 0 }}
@@ -68,7 +68,7 @@ export default function ProcessSection() {
 
         {/* FAQ / risk & offering information */}
         <Reveal delay={0.1}>
-          <div className="mx-auto mt-20 max-w-3xl">
+          <div className="mx-auto mt-8 max-w-3xl">
             <div className="iv-label mb-4">Risk &amp; offering information</div>
             {FAQ.map((item, i) => (
               <div key={item.q} className="iv-faq-item">

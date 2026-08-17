@@ -40,7 +40,7 @@ export default function FinalCTA() {
             </h2>
           </Reveal>
           <Reveal delay={0.15}>
-            <div className="mt-11 flex flex-wrap items-center justify-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <a href={primaryHref} className="iv-btn iv-btn-primary !px-9 !py-[18px] !text-[15.5px]">
                 {primaryLabel}
                 <ArrowRight size={18} strokeWidth={2.2} />

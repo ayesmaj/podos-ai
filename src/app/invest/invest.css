@@ -56,7 +56,8 @@
   padding-inline: clamp(20px, 5vw, 48px);
 }
 .iv-section {
-  padding-block: clamp(72px, 10vw, 140px);
+  /* tight vertical rhythm — sections should approach one viewport */
+  padding-block: clamp(52px, 6.5vw, 84px);
   position: relative;
 }
 
@@ -350,7 +351,7 @@ body:has(.invest) .global-energy-layer {
 .iv-display {
   font-family: var(--iv-serif);
   font-weight: 800;
-  font-size: clamp(2.6rem, 7vw, 5.6rem);
+  font-size: clamp(2.3rem, 5.6vw, 4.4rem);
   line-height: 0.98;
   letter-spacing: -0.04em;
   text-transform: uppercase;
@@ -358,7 +359,7 @@ body:has(.invest) .global-energy-layer {
 .iv-display-md {
   font-family: var(--iv-serif);
   font-weight: 800;
-  font-size: clamp(2rem, 4.8vw, 3.8rem);
+  font-size: clamp(1.8rem, 4vw, 3rem);
   line-height: 1.02;
   letter-spacing: -0.035em;
   text-transform: uppercase;
@@ -425,13 +426,16 @@ body:has(.invest) .global-energy-layer {
   color: var(--iv-gold-deep);
 }
 
-/* film player */
+/* film player — height-capped so header + film fit one viewport */
 .iv-film {
   position: relative;
   overflow: hidden;
   border-radius: 12px;
   background: var(--iv-graphite);
   aspect-ratio: 16 / 9;
+  max-height: 62svh;
+  width: min(100%, calc(62svh * 16 / 9));
+  margin-inline: auto;
 }
 .iv-film-scene {
   position: absolute;

@@ -58,6 +58,13 @@ const REFS = {
   "modular-campus": [POD],
   "capital-capacity": [POD],
   "final-vision": [POD],
+  "engineering-design": [POD],
+  "rack-install": [POD, "public/optimus/optimus-pod-front.png"],
+  "factory-line": [POD],
+  // evidence-engineering: still-life, no pod in frame — no refs
+  "evidence-power": [POD],
+  "evidence-cooling": [POD, "public/optimus/optimus-pod-front.png"],
+  "evidence-industry": [POD],
 };
 
 const wanted = process.argv[2]

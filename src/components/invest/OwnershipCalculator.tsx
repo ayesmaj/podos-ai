@@ -99,7 +99,7 @@ export default function OwnershipCalculator() {
         </Reveal>
 
         <Reveal delay={0.12}>
-          <div className="mt-16 grid gap-14 lg:grid-cols-2 lg:gap-10">
+          <div className="mt-10 grid gap-14 lg:grid-cols-2 lg:gap-10">
             {/* ---- controls ---- */}
             <div>
               <span className="iv-eyebrow">{OWNERSHIP.eyebrow}</span>

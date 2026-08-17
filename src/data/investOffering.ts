@@ -201,6 +201,11 @@ export interface EvidenceModule {
   detail?: string;
   status: "verified" | "in-progress" | "target" | "conceptual";
   approvedForPublicUse: boolean;
+  /** optional visual from the invest image registry — AI renders are
+   *  automatically labeled CONCEPT on the card, never shown as proof */
+  imageId?: string;
+  /** span two grid columns (used to balance the wall's last row) */
+  wide?: boolean;
 }
 
 /* Only approved modules render. Add prototype photos, IP filings, LOIs,
@@ -214,6 +219,7 @@ export const evidence: EvidenceModule[] = [
     detail: "Industrial design and system architecture developed to manufacturable specification.",
     status: "in-progress",
     approvedForPublicUse: true,
+    imageId: "evidence-engineering",
   },
   {
     id: "power-architecture",
@@ -222,6 +228,7 @@ export const evidence: EvidenceModule[] = [
     statement: "Electrical architecture designed for utility-scale interconnection at standard industrial sites.",
     status: "in-progress",
     approvedForPublicUse: true,
+    imageId: "evidence-power",
   },
   {
     id: "cooling-architecture",
@@ -230,6 +237,7 @@ export const evidence: EvidenceModule[] = [
     statement: "Thermal architecture specified for high-density AI compute loads within the modular envelope.",
     status: "in-progress",
     approvedForPublicUse: true,
+    imageId: "evidence-cooling",
   },
   {
     id: "industry-engagement",
@@ -238,6 +246,7 @@ export const evidence: EvidenceModule[] = [
     statement: "Active engagement across the power and compute-infrastructure ecosystem, including a major California utility and a leading server, rack and communications provider.",
     status: "in-progress",
     approvedForPublicUse: true,
+    imageId: "evidence-industry",
   },
   {
     id: "team",
@@ -247,6 +256,7 @@ export const evidence: EvidenceModule[] = [
     detail: "See podosai.com for the full team.",
     status: "verified",
     approvedForPublicUse: true,
+    
   },
   /* Hidden until real, publicly-approved material exists: */
   { id: "prototype", index: "06", title: "PROTOTYPE", statement: "", status: "in-progress", approvedForPublicUse: false },

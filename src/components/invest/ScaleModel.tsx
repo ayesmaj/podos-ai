@@ -45,14 +45,16 @@ export default function ScaleModel() {
           <p className="iv-sub mt-6">{SCALE.sub}</p>
         </Reveal>
 
-        <div ref={ref} className="relative mt-14">
-          <div className="relative overflow-hidden" style={{ borderRadius: 12 }}>
-            <motion.div style={reduced ? undefined : { scale: imgScale }}>
+        <div ref={ref} className="relative mt-10">
+          {/* height-capped crop so header + frame + ladder fit one viewport */}
+          <div className="relative h-[46svh] overflow-hidden" style={{ borderRadius: 12 }}>
+            <motion.div className="absolute inset-0" style={reduced ? undefined : { scale: imgScale }}>
               <GeneratedSectionImage
                 id="modular-campus"
                 sizes="(max-width: 768px) 100vw, 1200px"
                 label={false}
                 rounded={false}
+                fill
               />
             </motion.div>
             <span className="iv-concept-tag">ILLUSTRATIVE SCALE MODEL</span>

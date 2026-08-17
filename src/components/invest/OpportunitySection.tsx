@@ -102,7 +102,7 @@ export default function OpportunitySection() {
           </h2>
         </Reveal>
 
-        <div className="mt-14 grid gap-14 lg:grid-cols-2 lg:gap-10">
+        <div className="mt-9 grid gap-14 lg:grid-cols-2 lg:gap-10">
           <Reveal>
             <GeneratedSectionImage
               id="traditional-construction"
@@ -123,7 +123,7 @@ export default function OpportunitySection() {
 
           <Reveal delay={0.12}>
             <GeneratedSectionImage
-              id="manufacturing"
+              id="factory-line"
               sizes="(max-width: 1024px) 100vw, 580px"
             />
             <div className="mt-8">

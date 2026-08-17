@@ -5,6 +5,7 @@
  * Transparent over the hero, frosts once the page scrolls.
  */
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { NAV_LINKS } from "@/data/investContent";
@@ -30,15 +31,16 @@ export default function InvestNav() {
       }}
     >
       <div className="iv-container flex h-[68px] items-center justify-between">
-        <Link
-          href="/"
-          className="font-semibold tracking-[0.22em] text-[15px]"
-          style={{ fontFamily: "var(--iv-mono)" }}
-        >
-          PODOS
-          <span className="ml-2 text-[10px] tracking-[0.28em]" style={{ color: "var(--iv-gold-deep)" }}>
-            INVEST
-          </span>
+        <Link href="/" aria-label="PODOS AI — home">
+          <Image
+            src="/podos-invest-logo.png"
+            alt="PODOS AI Invest — Infrastructure, Intelligence, Impact"
+            width={2172}
+            height={724}
+            priority
+            sizes="150px"
+            style={{ width: "auto", height: 44 }}
+          />
         </Link>
 
         <nav className="hidden items-center gap-7 lg:flex">

@@ -55,7 +55,7 @@ export default function ProductAnatomy() {
           </h2>
         </Reveal>
 
-        <div className="mt-14 grid gap-12 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="mt-9 grid gap-12 lg:grid-cols-[1.15fr_0.85fr]">
           {/* pinned system camera */}
           <div className="lg:sticky lg:top-[110px] lg:self-start">
             <div
@@ -140,7 +140,7 @@ export default function ProductAnatomy() {
                 ref={(el) => {
                   itemRefs.current[i] = el;
                 }}
-                className="border-b py-6 pl-5 transition-colors duration-300"
+                className="border-b py-3 pl-5 transition-colors duration-300"
                 style={{
                   borderColor: "var(--iv-border-soft)",
                   borderLeft: `2px solid ${active === i ? "var(--iv-tech)" : "transparent"}`,

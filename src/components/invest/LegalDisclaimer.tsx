@@ -3,6 +3,7 @@
  * Server component; static text from investContent.
  */
 
+import Image from "next/image";
 import { LEGAL, CTA } from "@/data/investContent";
 
 export default function LegalDisclaimer() {
@@ -12,6 +13,15 @@ export default function LegalDisclaimer() {
       style={{ borderColor: "var(--iv-border-soft)", background: "var(--iv-bg)" }}
     >
       <div className="iv-container py-14">
+        <Image
+          src="/podos-invest-logo.png"
+          alt="PODOS AI Invest"
+          width={2172}
+          height={724}
+          sizes="190px"
+          style={{ width: "auto", height: 56 }}
+          className="mb-8"
+        />
         <div className="iv-label">{LEGAL.title}</div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           {LEGAL.paragraphs.map((p) => (

@@ -40,16 +40,17 @@ export default function Collaborations() {
         </Reveal>
 
         {/* POWER → PODOS → COMPUTE */}
-        <div ref={flowRef} className="mt-14">
+        <div ref={flowRef} className="mt-10">
           <div className="grid items-stretch gap-6 lg:grid-cols-[1fr_auto_1fr]">
             {/* power side */}
             <Reveal>
               <figure>
-                <div className="iv-figure" style={{ borderRadius: 12, overflow: "hidden" }}>
+                <div className="relative h-[34svh] overflow-hidden" style={{ borderRadius: 12 }}>
                   <GeneratedSectionImage
                     id={power.imageId}
                     sizes="(max-width: 1024px) 100vw, 560px"
                     rounded={false}
+                    fill
                   />
                 </div>
                 <figcaption className="mt-5">
@@ -120,11 +121,12 @@ export default function Collaborations() {
             {/* compute side */}
             <Reveal delay={0.12}>
               <figure>
-                <div className="iv-figure" style={{ borderRadius: 12, overflow: "hidden" }}>
+                <div className="relative h-[34svh] overflow-hidden" style={{ borderRadius: 12 }}>
                   <GeneratedSectionImage
                     id={compute.imageId}
                     sizes="(max-width: 1024px) 100vw, 560px"
                     rounded={false}
+                    fill
                   />
                 </div>
                 <figcaption className="mt-5">
@@ -167,7 +169,7 @@ export default function Collaborations() {
           </Reveal>
         </div>
 
-        <p className="mt-12 text-center text-[11.5px]" style={{ color: "var(--iv-warmgray)" }}>
+        <p className="mt-8 text-center text-[11.5px]" style={{ color: "var(--iv-warmgray)" }}>
           {collaborationsFootnote}
         </p>
       </div>

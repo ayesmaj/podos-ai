@@ -37,7 +37,7 @@ export default function InvestHero() {
   return (
     <section ref={ref} className="relative overflow-hidden" style={{ background: "var(--iv-bg)" }}>
       {/* architectural canvas */}
-      <div className="relative min-h-[92svh]">
+      <div className="relative min-h-[88svh]">
         <motion.div
           className="absolute inset-0"
           style={reduced ? undefined : { scale: imgScale, y: imgY }}
@@ -59,7 +59,7 @@ export default function InvestHero() {
           />
         </motion.div>
 
-        <div className="iv-container relative flex min-h-[92svh] flex-col justify-between pb-10 pt-[118px]">
+        <div className="iv-container relative flex min-h-[88svh] flex-col justify-between pb-10 pt-[96px]">
           {/* left editorial block */}
           <div className="max-w-3xl">
             <Rise>
@@ -94,7 +94,7 @@ export default function InvestHero() {
 
           {/* minimal investor-access module, lower-right */}
           <Rise delay={0.36}>
-            <div className="mt-12 flex justify-end">
+            <div className="mt-8 flex justify-end">
               <div
                 className="w-full max-w-[380px] border-t-2 px-6 py-5"
                 style={{

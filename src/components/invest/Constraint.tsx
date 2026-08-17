@@ -11,7 +11,7 @@ import { CONSTRAINT } from "@/data/investContent";
 import { approvedClaims } from "@/data/investOffering";
 import Reveal from "./Reveal";
 
-const OFFSETS = ["lg:mt-0", "lg:mt-20", "lg:mt-8", "lg:mt-28"];
+const OFFSETS = ["lg:mt-0", "lg:mt-8", "lg:mt-8", "lg:mt-12"];
 
 export default function Constraint() {
   const stats = approvedClaims();
@@ -31,15 +31,20 @@ export default function Constraint() {
           <p className="iv-sub mt-7">{CONSTRAINT.sub}</p>
         </Reveal>
 
-        <div className="mt-16 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((c, i) => (
             <Reveal key={c.id} delay={i * 0.1} className={OFFSETS[i % OFFSETS.length]}>
               <div className="border-t pt-5" style={{ borderColor: "var(--iv-ink)" }}>
                 <div className="flex items-baseline gap-2">
                   <span className="iv-num text-[clamp(3.4rem,6vw,5.2rem)] font-extrabold leading-none tracking-tight">
                     {c.value}
+                    {/* symbol units (×) ride the numeral at near-full size;
+                        word units (YEARS/DAYS/MW) sit smaller beside it */}
+                    {c.unit && c.unit.length === 1 && (
+                      <span style={{ color: "var(--iv-gold-deep)", fontSize: "0.62em" }}>{c.unit}</span>
+                    )}
                   </span>
-                  {c.unit && (
+                  {c.unit && c.unit.length > 1 && (
                     <span
                       className="iv-num text-[clamp(1.2rem,2vw,1.7rem)] font-bold"
                       style={{ color: "var(--iv-gold-deep)" }}
