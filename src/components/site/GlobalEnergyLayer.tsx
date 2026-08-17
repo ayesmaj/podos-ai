@@ -36,7 +36,7 @@ import styles from "./GlobalEnergyLayer.module.css";
  */
 export default function GlobalEnergyLayer() {
   return (
-    <div className={styles.root} aria-hidden>
+    <div className={`${styles.root} global-energy-layer`} aria-hidden>
       {/*
         Scan beam removed 2026-04-25 per user feedback — the
         top→bottom sweeping cyan band was visually distracting and

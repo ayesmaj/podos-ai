@@ -1,12 +1,15 @@
 /**
- * /invest — premium investor landing page for PODOS.
+ * /invest — PODOS investor experience (V3).
  *
- * Bright luxury visual system (scoped in invest.css), editorial serif
- * headlines (Cormorant Garamond via next/font), section components under
- * components/invest/, and every number/word configurable in
- * data/investContent.ts. AI-generated visuals are registered in
- * data/invest-page-images.ts and regenerated via
- * scripts/generate-invest-images.mjs or POST /api/generate-image.
+ * Narrative order (per V3 brief §20): product clarity → 35-second film →
+ * market constraint → confidential industry collaborations → product
+ * anatomy → deployment-model comparison → manufacturing & deployment
+ * journey → illustrative scale model → evidence → money moment → capital
+ * cycle → ownership → process/risk → monumental final CTA.
+ *
+ * All financial/relational claims are gated by src/data/investOffering.ts.
+ * Visual assets are approved GPT-Image-2 renders (bright architectural
+ * world, consistent pod) registered in src/data/invest-page-images.ts.
  */
 
 import type { Metadata } from "next";
@@ -14,24 +17,30 @@ import "./invest.css";
 
 import InvestNav from "@/components/invest/InvestNav";
 import InvestHero from "@/components/invest/InvestHero";
-import WhyNow from "@/components/invest/WhyNow";
+import PodosFilm from "@/components/invest/PodosFilm";
+import Constraint from "@/components/invest/Constraint";
+import Collaborations from "@/components/invest/Collaborations";
+import ProductAnatomy from "@/components/invest/ProductAnatomy";
 import OpportunitySection from "@/components/invest/OpportunitySection";
+import DeploymentJourney from "@/components/invest/DeploymentJourney";
+import ScaleModel from "@/components/invest/ScaleModel";
+import Evidence from "@/components/invest/Evidence";
+import MoneyMoment from "@/components/invest/MoneyMoment";
+import CapitalCycle from "@/components/invest/CapitalCycle";
 import OwnershipCalculator from "@/components/invest/OwnershipCalculator";
-import CapitalAllocationSection from "@/components/invest/CapitalAllocationSection";
-import MoneySection from "@/components/invest/MoneySection";
-import TrustSection from "@/components/invest/TrustSection";
-import InvestmentSteps from "@/components/invest/InvestmentSteps";
+import ProcessSection from "@/components/invest/ProcessSection";
 import FinalCTA from "@/components/invest/FinalCTA";
 import LegalDisclaimer from "@/components/invest/LegalDisclaimer";
+import StickyInvestCTA from "@/components/invest/StickyInvestCTA";
 
 export const metadata: Metadata = {
-  title: "Invest in PODOS — Own a Piece of the Infrastructure Powering AI",
+  title: "Invest in PODOS — Turn Available Power into Deployable AI Compute",
   description:
-    "PODOS builds modular AI compute and power infrastructure for the accelerating demands of artificial intelligence. Investment access begins at $1,000.",
+    "PODOS builds factory-made modular units that integrate power, cooling, server racks, and communications — a faster path to AI capacity. Explore the investment opportunity.",
   openGraph: {
     title: "Invest in PODOS",
     description:
-      "Own a piece of the infrastructure powering the AI era. Access begins at $1,000.",
+      "Own a piece of the company building a faster path to AI capacity.",
     url: "https://podosai.com/invest",
   },
 };
@@ -41,15 +50,21 @@ export default function InvestPage() {
     <main className="invest">
       <InvestNav />
       <InvestHero />
-      <WhyNow />
+      <PodosFilm />
+      <Constraint />
+      <Collaborations />
+      <ProductAnatomy />
       <OpportunitySection />
+      <DeploymentJourney />
+      <ScaleModel />
+      <Evidence />
+      <MoneyMoment />
+      <CapitalCycle />
       <OwnershipCalculator />
-      <CapitalAllocationSection />
-      <MoneySection />
-      <TrustSection />
-      <InvestmentSteps />
+      <ProcessSection />
       <FinalCTA />
       <LegalDisclaimer />
+      <StickyInvestCTA />
     </main>
   );
 }

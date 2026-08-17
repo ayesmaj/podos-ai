@@ -25,20 +25,39 @@ if (!KEY) {
 const MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-2";
 
 // ponytail: regex-parse the TS registry instead of adding a build step.
-// Works because entries are flat object literals with double-quoted strings.
+// Prompts may be double-quoted strings or template literals interpolating
+// the two shared constants (PODOS_PRODUCT_VISUAL_DNA / NO_SCIFI).
 const src = await readFile(DATA, "utf8");
-const entries = [...src.matchAll(/\{\s*id:\s*"([^"]+)"[\s\S]*?prompt:\s*"((?:[^"\\]|\\.)*)"[\s\S]*?width:\s*(\d+),\s*height:\s*(\d+),\s*status:\s*"(\w+)"/g)]
-  .map((m) => ({ id: m[1], prompt: m[2].replace(/\\"/g, '"'), width: +m[3], height: +m[4], status: m[5] }));
+const CONSTS = {};
+for (const m of src.matchAll(/(?:const|export const)\s+(\w+)\s*=\s*\n?\s*"((?:[^"\\]|\\.)*)";/g)) {
+  CONSTS[m[1]] = m[2].replace(/\\"/g, '"');
+}
+const resolveTemplate = (t) => t.replace(/\$\{(\w+)\}/g, (_, name) => CONSTS[name] ?? "");
+const entries = [...src.matchAll(/\{\s*id:\s*"([^"]+)"[\s\S]*?prompt:\s*(?:"((?:[^"\\]|\\.)*)"|`([^`]*)`)[\s\S]*?width:\s*(\d+),\s*height:\s*(\d+),\s*status:\s*"(\w+)"/g)]
+  .map((m) => ({
+    id: m[1],
+    prompt: m[2] !== undefined ? m[2].replace(/\\"/g, '"') : resolveTemplate(m[3]),
+    width: +m[4],
+    height: +m[5],
+    status: m[6],
+  }));
 
 // Brand reference images per asset — the real pod render + logo lockup.
 // When refs exist we hit /v1/images/edits (image-to-image) so every
 // generation stays faithful to the actual PODOS product and brand colors.
+const POD = "public/products/pod.png";
 const REFS = {
-  "hero-product": ["public/products/pod.png", "public/podos-logo-lockup.png"],
-  "opportunity-network": ["public/products/pod.png"],
-  "ownership-abstract": ["public/logo.png"],
-  "capital-allocation": ["public/products/pod.png"],
-  "final-cta": ["public/products/pod.png"],
+  "hero-pavilion": [POD],
+  "ca-power": [POD],
+  "server-integration": [POD, "public/optimus/optimus-pod-front.png"],
+  // traditional-construction: no refs — no PODOS unit in frame
+  "product-anatomy": [POD, "public/optimus/optimus-pod-front.png"],
+  manufacturing: [POD],
+  transportation: [POD],
+  commissioning: [POD],
+  "modular-campus": [POD],
+  "capital-capacity": [POD],
+  "final-vision": [POD],
 };
 
 const wanted = process.argv[2]

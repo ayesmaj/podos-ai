@@ -1,14 +1,24 @@
 /**
  * invest-page-images.ts — prompt registry for AI-generated /invest visuals.
  *
- * Each entry is the single source of truth for one generated asset:
- * its prompt (editable), where it renders, and its current status.
- * Regenerate any asset with:  node scripts/generate-invest-images.mjs [id]
- * After regenerating, bump the ?v= on that asset's src — the version query
- * busts both the browser cache and Next's image-optimizer cache.
- * Assets land in public/visuals/invest/<id>.png and are served through
- * next/image (which auto-delivers WebP/AVIF).
+ * V3 art direction: BLACK PODOS HARDWARE inside a BRIGHT PREMIUM WORLD.
+ * Warm white architecture, daylight industrial spaces, brushed aluminum,
+ * architectural concrete, champagne accents. Blue only as a tiny
+ * operational accent. Never a black void, never cyberpunk.
+ *
+ * Every prompt embeds PODOS_PRODUCT_VISUAL_DNA and the generator script
+ * passes the real pod render as an image-edit reference so the product
+ * stays consistent across frames.
+ *
+ * Regenerate:  node --env-file=.env.local scripts/generate-invest-images.mjs [id]
+ * After regenerating, bump that asset's ?v= (busts browser + optimizer caches).
  */
+
+export const PODOS_PRODUCT_VISUAL_DNA =
+  "The PODOS unit: a physically believable modular AI compute and power infrastructure unit — long horizontal industrial enclosure, premium matte-black and graphite exterior, controlled rounded end sections, clean modular panel seams, low heavy-duty structural base, integrated roof surface, restrained PODOS wordmark, realistic ventilation and service points, serious engineered proportions, faithful to the reference image. No redesign, no spaceship styling, no neon, no fictional logos, no fake text.";
+
+const NO_SCIFI =
+  "No neon floors, no black void, no cyberpunk, no holograms, no glowing fantasy energy lines, no fake interface text, no company logos.";
 
 export type InvestImageStatus = "pending" | "ready" | "failed";
 
@@ -21,63 +31,131 @@ export interface InvestImage {
   width: number;
   height: number;
   status: InvestImageStatus;
+  /** true = AI concept render; UI must label it (never documentary proof) */
+  conceptual: boolean;
 }
 
 export const INVEST_IMAGES: InvestImage[] = [
   {
-    id: "hero-product",
+    id: "hero-pavilion",
     section: "InvestHero",
-    prompt:
-      "Using the reference images of the PODOS modular compute pod (long, low, matte-black unit with segmented side panels, rounded corners, and a solar-panel roof) and the PODOS logo, create a cinematic luxury product reveal render of this exact pod. Keep the pod's proportions and design faithful to the reference. Dramatic hero composition, deep navy-black void background (#02050C), electric blue rim light (#1FA8FF) tracing the pod's edges, subtle glowing particle waves on the floor, glossy dark reflective ground, Octane-quality photorealism, no added text or labels beyond the small PODOS wordmark already on the pod.",
-    alt: "PODOS modular compute pod in a dark studio with electric blue rim lighting",
-    src: "/visuals/invest/hero-product.png?v=2",
+    prompt: `Monumental photorealistic commercial architecture photograph of the PODOS modular AI infrastructure unit inside an enormous bright industrial pavilion. ${PODOS_PRODUCT_VISUAL_DNA} Warm white polished concrete floor, huge architectural ceiling with white structural beams, soft daylight entering through enormous openings, subtle volumetric haze, brushed aluminum and glass details, bright horizon visible outside. Low 30mm cinematic camera angle. Tiny engineers far in the background for scale. Matte-black unit with controlled highlights and only tiny subtle blue operational status lighting. IMAX-level industrial photography, institutional and expensive mood. ${NO_SCIFI}`,
+    alt: "Monumental black PODOS unit inside a vast bright white architectural pavilion with tiny engineers for scale",
+    src: "/visuals/invest/hero-pavilion.png",
     width: 1536,
     height: 1024,
     status: "ready",
+    conceptual: true,
   },
   {
-    id: "opportunity-network",
-    section: "OpportunitySection",
-    prompt:
-      "Using the reference image of the PODOS modular compute pod (long, low, matte-black unit with segmented panels and solar roof), create a conceptual premium visualization: a traditional massive data center facility on the left dissolving into an elegant distributed network of many PODOS pods connected by glowing electric-blue energy lines (#1FA8FF) across a deep navy landscape (#02050C). Keep every pod faithful to the reference design. Cinematic isometric composition, luminous atmosphere, dramatic contrast, suitable for a luxury investor page. No text, no labels.",
-    alt: "Traditional data center transforming into a glowing network of PODOS modular pods",
-    src: "/visuals/invest/opportunity-network.png?v=2",
+    id: "ca-power",
+    section: "Collaborations / Film scene 1",
+    prompt: `Highly realistic editorial infrastructure photograph set in California: modern high-voltage electrical substation, transmission towers and utility-scale power distribution, dry golden landscape with distant mountains, warm early-morning light. One PODOS unit positioned conceptually near a prepared industrial pad in the middle distance. ${PODOS_PRODUCT_VISUAL_DNA} No utility branding, no identifiable uniforms, credible electrical engineering, institutional infrastructure photography. ${NO_SCIFI}`,
+    alt: "California high-voltage substation and transmission lines at dawn with a PODOS unit near a prepared site",
+    src: "/visuals/invest/ca-power.png",
     width: 1536,
     height: 1024,
     status: "ready",
+    conceptual: true,
   },
   {
-    id: "ownership-abstract",
-    section: "OwnershipCalculator",
-    prompt:
-      "Using the reference image of the PODOS logo (spherical mark built from curved blue gradient blades), create a luxurious fintech-style abstract visual representing ownership and capital participation: elegant concentric glass rings orbiting a glowing core that echoes the logo's curved-blade sphere geometry and its light-blue-to-deep-blue gradient (#67E8F9 to #1FA8FF). Deep navy background (#02050C), precision geometry, premium glowing glass textures, subtle bokeh starfield, sophisticated dark atmosphere. No text, no numbers, no labels.",
-    alt: "Abstract glowing blue rings echoing the PODOS logo, representing ownership",
-    src: "/visuals/invest/ownership-abstract.png?v=2",
-    width: 1024,
-    height: 1024,
-    status: "ready",
-  },
-  {
-    id: "capital-allocation",
-    section: "CapitalAllocationSection",
-    prompt:
-      "Using the reference image of the PODOS modular compute pod (long, low, matte-black unit with segmented panels and solar roof), create a premium concept image of a high-tech factory assembly line manufacturing these exact pods: robotic arms with electric-blue task lighting (#1FA8FF) assembling matte-black pod modules in a dark refined industrial hall, deep navy atmosphere (#02050C), cinematic rim lighting, luxury industrial photography feel, dramatic contrast, believable engineering detail. Keep the pods faithful to the reference design. No text, no labels.",
-    alt: "PODOS pods on a high-tech assembly line with electric blue lighting",
-    src: "/visuals/invest/capital-allocation.png?v=2",
+    id: "server-integration",
+    section: "Collaborations / Film scene 2",
+    prompt: `Ultra-realistic bright technical interior of the PODOS modular infrastructure unit during system integration: high-density server racks, clean fiber distribution, communications and network switching equipment, power distribution, cooling interfaces, disciplined cable management, two engineers performing inspection, realistic rack spacing and service access, bright neutral industrial lighting. ${PODOS_PRODUCT_VISUAL_DNA} No visible manufacturer logos, no blue science-fiction glow, no impossible components. ${NO_SCIFI}`,
+    alt: "Bright interior of a PODOS unit with server racks, fiber distribution and engineers inspecting integration",
+    src: "/visuals/invest/server-integration.png",
     width: 1536,
     height: 1024,
     status: "ready",
+    conceptual: true,
   },
   {
-    id: "final-cta",
-    section: "FinalCTA",
-    prompt:
-      "Using the reference image of the PODOS modular compute pod (long, low, matte-black unit with segmented panels and solar roof), create an aspirational cinematic wide shot of a vast fleet of these exact pods deployed in perfect rows across a dark minimalist plain at night, each pod traced with electric blue rim light (#1FA8FF), glowing energy lines connecting them across the ground, deep navy sky (#02050C) with a subtle starfield, sense of massive scale and future growth, refined industrial design, dramatic contrast, wealthy powerful mood. Keep the pods faithful to the reference design. No text, no labels.",
-    alt: "Vast night-time fleet of PODOS pods glowing with electric blue light",
-    src: "/visuals/invest/final-cta.png?v=2",
+    id: "traditional-construction",
+    section: "Opportunity / Film scene 3",
+    prompt: `Photorealistic editorial aerial photograph of an enormous traditional hyperscale data center campus under construction in daylight: tower cranes, poured concrete structures, earthworks, electrical infrastructure staging, hundreds of construction vehicles and workers at realistic scale. Clean professional construction site — represents scale and complexity, not failure or dystopia. Bright natural light, Bloomberg Businessweek editorial aerial photography. ${NO_SCIFI}`,
+    alt: "Aerial view of a massive traditional data center construction site with cranes and concrete structures",
+    src: "/visuals/invest/traditional-construction.png",
     width: 1536,
     height: 1024,
     status: "ready",
+    conceptual: true,
+  },
+  {
+    id: "product-anatomy",
+    section: "ProductAnatomy / Film scene 4",
+    prompt: `Technically believable premium cutaway visualization of the PODOS modular AI infrastructure unit on a bright neutral studio background, showing separate but integrated internal zones: electrical input and power distribution at one end, cooling systems, rows of server racks, networking and communications, monitoring, and service access corridor. ${PODOS_PRODUCT_VISUAL_DNA} Architectural visualization quality, graphite and silver materials, warm white environment, clean section cut with the outer shell partially removed — not an impossible transparent hologram. Leave label areas empty; no text in the image. ${NO_SCIFI}`,
+    alt: "Cutaway view of a PODOS unit revealing power, cooling, server racks, networking and service zones",
+    src: "/visuals/invest/product-anatomy.png",
+    width: 1536,
+    height: 1024,
+    status: "ready",
+    conceptual: true,
+  },
+  {
+    id: "manufacturing",
+    section: "DeploymentJourney / Film scene 5",
+    prompt: `Realistic premium industrial manufacturing photograph: technicians assembling the PODOS modular enclosure in a bright clean factory hall. Structural assembly, electrical integration, rack installation stations, inspection tooling, overhead gantry crane, natural daylight through high windows plus neutral industrial lighting. ${PODOS_PRODUCT_VISUAL_DNA} Aerospace / advanced-manufacturing documentary quality — believable human work, not robot-arm science fiction, no impossible automation. ${NO_SCIFI}`,
+    alt: "Technicians assembling a black PODOS enclosure in a bright factory with overhead crane",
+    src: "/visuals/invest/manufacturing.png",
+    width: 1536,
+    height: 1024,
+    status: "ready",
+    conceptual: true,
+  },
+  {
+    id: "transportation",
+    section: "DeploymentJourney / Film scene 6",
+    prompt: `Highly realistic infrastructure logistics photograph: one PODOS modular unit secured to a heavy industrial lowboy transport trailer traveling on a desert highway toward a prepared deployment site in the American Southwest, warm early-morning light, realistic road and vehicle scale, escort vehicle behind. ${PODOS_PRODUCT_VISUAL_DNA} No futuristic transporter, no impossible dimensions. ${NO_SCIFI}`,
+    alt: "PODOS unit on a heavy transport trailer traveling a desert highway at dawn",
+    src: "/visuals/invest/transportation.png",
+    width: 1536,
+    height: 1024,
+    status: "ready",
+    conceptual: true,
+  },
+  {
+    id: "commissioning",
+    section: "DeploymentJourney / Film scene 6b",
+    prompt: `Photorealistic deployment and commissioning scene in bright daylight: one PODOS unit positioned on a prepared concrete industrial pad, technicians in safety gear connecting electrical and communications systems, realistic utility infrastructure and switchgear nearby, service vehicles, credible safety clearances, sophisticated engineering photography. ${PODOS_PRODUCT_VISUAL_DNA} No fake glowing cables. ${NO_SCIFI}`,
+    alt: "Technicians commissioning a PODOS unit on a concrete pad with utility connections",
+    src: "/visuals/invest/commissioning.png",
+    width: 1536,
+    height: 1024,
+    status: "ready",
+    conceptual: true,
+  },
+  {
+    id: "modular-campus",
+    section: "ScaleModel / Film scene 7",
+    prompt: `Aerial editorial infrastructure photograph at warm golden dawn: a believable modular AI compute campus containing ten PODOS units arranged in realistic industrial clusters with proper spacing, an electrical substation, utility connections, service roads, drainage, maintenance vehicles and small human figures for scale, real desert terrain with distant mountains. ${PODOS_PRODUCT_VISUAL_DNA} Looks like something that could physically be built tomorrow — no endless duplicated grid, no fantasy network beams. ${NO_SCIFI}`,
+    alt: "Aerial dawn view of a realistic campus of about ten PODOS units with substation and service roads",
+    src: "/visuals/invest/modular-campus.png",
+    width: 1536,
+    height: 1024,
+    status: "ready",
+    conceptual: true,
+  },
+  {
+    id: "capital-capacity",
+    section: "CapitalCycle",
+    prompt: `Premium editorial still-life visual narrative on a warm ivory architectural background showing the transformation of capital into physical infrastructure WITHOUT any money imagery: from left to right — engineering drawings and a precision component, a partially assembled PODOS module section, and the finished matte-black PODOS unit, connected by a single thin restrained champagne-gold line. ${PODOS_PRODUCT_VISUAL_DNA} Bright institutional aesthetic, realistic materials, soft studio daylight. Absolutely no coins, bills, charts, or hands shaking. ${NO_SCIFI}`,
+    alt: "Editorial sequence from engineering drawings to components to a finished PODOS unit, linked by a thin gold line",
+    src: "/visuals/invest/capital-capacity.png",
+    width: 1536,
+    height: 1024,
+    status: "ready",
+    conceptual: true,
+  },
+  {
+    id: "final-vision",
+    section: "FinalCTA / Film scene 8",
+    prompt: `Monumental photorealistic image: the PODOS modular compute unit inside a huge bright architectural infrastructure hall at sunrise, enormous open portal revealing warm desert light outside, polished concrete, white structural beams, brushed metal, cinematic volumetric sunlight, subtle human silhouettes for scale. ${PODOS_PRODUCT_VISUAL_DNA} Optimistic, rich, institutional mood — Apple product launch meets architectural cinema. ${NO_SCIFI}`,
+    alt: "PODOS unit in a vast bright hall at sunrise with an open portal to warm desert light",
+    src: "/visuals/invest/final-vision.png",
+    width: 1536,
+    height: 1024,
+    status: "ready",
+    conceptual: true,
   },
 ];
 

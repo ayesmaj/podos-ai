@@ -7,25 +7,27 @@
    =================================================================== */
 
 .invest {
-  /* palette */
-  --iv-bg: #f7f7f3;
+  /* V3 palette — institutional wealth × architectural cinema.
+     White belongs to the world, black to the product and typography,
+     gold to ownership, blue is only a technical accent. */
+  --iv-bg: #f7f6f2;              /* warm ivory */
   --iv-white: #ffffff;
-  --iv-beige: #edebe4;
-  --iv-stone: #d9d4c7;
-  /* warmgray/gold-deep darkened from spec values for WCAG small-text
-     contrast on the off-white ground (ui-ux-pro-max review) */
-  --iv-warmgray: #85806f;
-  --iv-ink: #1a1a1a;
-  --iv-steel: #565968;
-  --iv-gold: #c8a96b;
-  --iv-gold-deep: #8f6f35;
-  --iv-blue: #aebed3;
+  --iv-beige: #efede7;           /* section wash */
+  --iv-stone: #ded8ca;           /* warm stone */
+  --iv-silver: #c9cdd2;
+  --iv-warmgray: #827d6e;        /* darkened for WCAG small text */
+  --iv-ink: #17191b;             /* charcoal */
+  --iv-graphite: #23272d;
+  --iv-steel: #545862;
+  --iv-gold: #b79a63;            /* restrained champagne */
+  --iv-gold-deep: #8a6f3c;       /* darkened for small-text contrast */
+  --iv-blue: #dae5f1;            /* cold architectural blue */
   --iv-bluegray: #cad6e8;
   --iv-glasshi: #e8eef6;
   --iv-glass: rgba(255, 255, 255, 0.65);
-  --iv-glass-strong: rgba(255, 255, 255, 0.82);
-  --iv-border: rgba(20, 20, 20, 0.08);
-  --iv-border-soft: rgba(20, 20, 20, 0.05);
+  --iv-glass-strong: rgba(255, 255, 255, 0.85);
+  --iv-border: rgba(23, 25, 27, 0.1);
+  --iv-border-soft: rgba(23, 25, 27, 0.05);
 
   /* type */
   /* display face — regular site sans (Geist), per design feedback;
@@ -332,6 +334,247 @@
 .iv-btn-light:hover {
   transform: translateY(-2px);
   box-shadow: 0 18px 44px -14px rgba(2, 5, 12, 0.7), 0 0 0 5px rgba(255, 255, 255, 0.15);
+}
+
+/* ============================= V3 ADDITIONS ============================ */
+
+/* The site-wide ambient energy layer (blue sparks, pulsing grid) belongs
+   to the main site's aesthetic — suppress it behind the invest page's
+   architectural ivory world. */
+body:has(.invest) .global-energy-layer {
+  display: none;
+}
+
+/* mega editorial display type — annual report meets architecture monograph */
+.iv-display {
+  font-family: var(--iv-serif);
+  font-weight: 800;
+  font-size: clamp(2.6rem, 7vw, 5.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+.iv-display-md {
+  font-family: var(--iv-serif);
+  font-weight: 800;
+  font-size: clamp(2rem, 4.8vw, 3.8rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+/* hairline rules for editorial structure (instead of card borders) */
+.iv-rule {
+  height: 1px;
+  background: var(--iv-border);
+}
+.iv-rule-gold {
+  height: 1px;
+  background: linear-gradient(90deg, var(--iv-gold), transparent);
+}
+
+/* full-bleed cinematic figure */
+.iv-figure {
+  position: relative;
+  overflow: hidden;
+}
+.iv-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* conceptual-render label — visible, elegant, never hidden in the footer */
+.iv-concept-tag {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 2;
+  font-family: var(--iv-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  padding: 6px 10px;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(23, 25, 27, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.iv-concept-tag--dark {
+  color: rgba(23, 25, 27, 0.75);
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(23, 25, 27, 0.12);
+}
+
+/* status chips for claims: PODOS TARGET / INDUSTRY ESTIMATE */
+.iv-claim-chip {
+  display: inline-block;
+  font-family: var(--iv-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--iv-border);
+  color: var(--iv-steel);
+  background: rgba(255, 255, 255, 0.5);
+}
+.iv-claim-chip--target {
+  border-color: rgba(183, 154, 99, 0.5);
+  color: var(--iv-gold-deep);
+}
+
+/* film player */
+.iv-film {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--iv-graphite);
+  aspect-ratio: 16 / 9;
+}
+.iv-film-scene {
+  position: absolute;
+  inset: 0;
+}
+.iv-film-scene img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.iv-film-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2px;
+  color: #ffffff;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
+  font-family: var(--iv-serif);
+  font-weight: 800;
+  font-size: clamp(1.4rem, 3.6vw, 3rem);
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.iv-film-scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(90% 70% at 50% 50%, transparent 40%, rgba(10, 12, 14, 0.42));
+  pointer-events: none;
+}
+.iv-film-controls {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+.iv-film-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--iv-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #fff;
+  background: rgba(23, 25, 27, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.25s ease;
+}
+.iv-film-btn:hover {
+  background: rgba(23, 25, 27, 0.75);
+}
+.iv-film-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  z-index: 3;
+  display: flex;
+  gap: 3px;
+  padding: 0 3px 3px;
+}
+.iv-film-progress span {
+  flex: 1;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  position: relative;
+}
+.iv-film-progress span i {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  background: rgba(255, 255, 255, 0.9);
+  display: block;
+}
+
+/* deployment journey film-strip */
+.iv-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(280px, 420px);
+  gap: 1px;
+  overflow-x: auto;
+  background: var(--iv-border);
+  border-block: 1px solid var(--iv-border);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+.iv-strip > * {
+  scroll-snap-align: start;
+  background: var(--iv-bg);
+}
+
+/* sticky mobile investor CTA */
+.iv-sticky-cta {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 60;
+  display: none;
+}
+@media (max-width: 767px) {
+  .iv-sticky-cta {
+    display: block;
+  }
+  .invest {
+    padding-bottom: 76px;
+  }
+}
+
+/* process line */
+.iv-process-line {
+  position: absolute;
+  top: 22px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--iv-border);
+}
+.iv-process-line i {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  background: var(--iv-gold);
+  display: block;
+}
+
+/* dark editorial band (money moment sits on ivory; final band uses image) */
+.iv-band-ink {
+  background: var(--iv-ink);
+  color: #f5f4f0;
 }
 
 /* reduced motion: kill transform transitions */

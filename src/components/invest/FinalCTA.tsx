@@ -1,73 +1,61 @@
 "use client";
 
 /**
- * FinalCTA — the closing conversion moment: generated aspirational
- * visual behind a centered glass card with the two final actions.
+ * FinalCTA (V3) — bright and monumental: the sunrise portal frame,
+ * full-bleed, with a light legibility wash and dark editorial type.
+ * No dark fleet, no scrim of doom.
  */
 
 import { ArrowRight } from "lucide-react";
-import { FINAL_CTA, CTA, MIN_INVESTMENT, fmtUSD } from "@/data/investContent";
-import Reveal from "./Reveal";
+import { FINAL_CTA, CTA } from "@/data/investContent";
+import { offering, termsLive } from "@/data/investOffering";
 import GeneratedSectionImage from "./GeneratedSectionImage";
+import Reveal from "./Reveal";
 
 export default function FinalCTA() {
+  const live = termsLive();
+  const primaryHref = live && offering.portalURL ? offering.portalURL : CTA.accessHref;
+  const primaryLabel = live ? FINAL_CTA.primaryLive : FINAL_CTA.primary;
+
   return (
-    <section className="iv-section">
-      <div className="iv-container">
-        <Reveal>
-          <div className="relative overflow-hidden rounded-[28px]">
-            <div className="absolute inset-0">
-              <GeneratedSectionImage
-                id="final-cta"
-                sizes="1200px"
-                className="h-full w-full !rounded-none object-cover"
-              />
-              {/* dark scrim keeps text ≥4.5:1 over the navy brand imagery */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(2,5,12,0.45), rgba(2,5,12,0.8) 75%)",
-                }}
-              />
+    <section id="access" className="relative overflow-hidden">
+      <div className="relative min-h-[86svh]">
+        <GeneratedSectionImage id="final-vision" fill label={false} sizes="100vw" />
+        {/* bright wash for dark-type legibility */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(247,246,242,0.88) 0%, rgba(247,246,242,0.55) 34%, rgba(247,246,242,0.12) 65%, rgba(247,246,242,0.55) 100%)",
+          }}
+        />
+        <div className="iv-container relative flex min-h-[86svh] flex-col items-center justify-center py-24 text-center">
+          <Reveal>
+            <h2 className="iv-display max-w-4xl">
+              {FINAL_CTA.headline[0]}
+              <br />
+              {FINAL_CTA.headline[1]}
+              <br />
+              <span style={{ color: "var(--iv-gold-deep)" }}>{FINAL_CTA.headline[2]}</span>
+            </h2>
+          </Reveal>
+          <Reveal delay={0.15}>
+            <div className="mt-11 flex flex-wrap items-center justify-center gap-4">
+              <a href={primaryHref} className="iv-btn iv-btn-primary !px-9 !py-[18px] !text-[15.5px]">
+                {primaryLabel}
+                <ArrowRight size={18} strokeWidth={2.2} />
+              </a>
+              <a href={CTA.talkToTeamHref} className="iv-btn iv-btn-ghost">
+                {FINAL_CTA.secondary}
+              </a>
             </div>
-
-            <div className="relative mx-auto max-w-2xl px-6 py-20 text-center md:py-28">
-              <h2 className="iv-h2" style={{ color: "#f7f9fc" }}>
-                {FINAL_CTA.headline}
-              </h2>
-              <p className="iv-sub mx-auto mt-6" style={{ color: "rgba(237,242,248,0.82)" }}>
-                {FINAL_CTA.sub}
-              </p>
-
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                <a href={CTA.continueHref} className="iv-btn iv-btn-light">
-                  {FINAL_CTA.primary}
-                  <ArrowRight size={17} strokeWidth={2.2} />
-                </a>
-                <a
-                  href={CTA.talkToTeamHref}
-                  className="iv-btn"
-                  style={{
-                    color: "#f7f9fc",
-                    background: "rgba(255,255,255,0.09)",
-                    border: "1px solid rgba(255,255,255,0.35)",
-                    backdropFilter: "blur(10px)",
-                  }}
-                >
-                  {FINAL_CTA.secondary}
-                </a>
-              </div>
-
-              <p
-                className="mt-8 text-[12px]"
-                style={{ fontFamily: "var(--iv-mono)", color: "rgba(237,242,248,0.65)" }}
-              >
-                Entry from {fmtUSD(MIN_INVESTMENT)} · {CTA.email} · {CTA.phone}
-              </p>
-            </div>
-          </div>
-        </Reveal>
+          </Reveal>
+          <Reveal delay={0.25}>
+            <p className="mt-9 max-w-md text-[12px] leading-relaxed" style={{ color: "var(--iv-steel)", fontFamily: "var(--iv-mono)" }}>
+              {FINAL_CTA.note}
+            </p>
+          </Reveal>
+        </div>
       </div>
     </section>
   );

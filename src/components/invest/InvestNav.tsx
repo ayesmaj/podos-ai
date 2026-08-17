@@ -54,8 +54,8 @@ export default function InvestNav() {
           ))}
         </nav>
 
-        <a href="#calculator" className="iv-btn iv-btn-primary !px-6 !py-2.5 !text-[13.5px]">
-          Invest Now
+        <a href="#access" className="iv-btn iv-btn-primary !px-6 !py-2.5 !text-[13.5px]">
+          Investor Access
         </a>
       </div>
     </header>

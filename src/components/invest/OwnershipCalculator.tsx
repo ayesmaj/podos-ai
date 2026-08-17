@@ -1,54 +1,51 @@
 "use client";
 
 /**
- * OwnershipCalculator — the page's interactive centerpiece.
+ * OwnershipCalculator (V3) — "YOUR PIECE OF PODOS".
  *
- * Input + log-scaled slider + quick chips drive an estimated position:
- * shares, ownership %, and an animated "equity ring" showing the user's
- * slice of the company. The slice is drawn with a minimum visible arc
- * (real early-stage stakes are fractions of a degree) and honestly
- * captioned as enlarged for visibility.
+ * Two hard modes, decided by the offering config (never by JSX):
+ *   EXPLORATION (offering.termsApproved !== true) — amount exploration
+ *     only. No securities, prices, or ownership numbers are shown or
+ *     implied; the ring is labeled an exploration view and the CTA points
+ *     at official offering documents.
+ *   LIVE — real terms exist: securities + ownership math, with an
+ *     ACTUAL SCALE / MAGNIFIED VIEW toggle so tiny slices are never
+ *     geometrically inflated without saying so.
  *
- * All math derives from placeholder constants in data/investContent.ts.
+ * Motion is precise and silent (350–700ms), no casino effects.
  */
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { animate, motion } from "framer-motion";
+import { animate, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
-  CALCULATOR,
+  OWNERSHIP,
   CTA,
   MIN_INVESTMENT,
   MAX_INVESTMENT,
   QUICK_AMOUNTS,
-  SECURITY_TYPE_SHORT,
-  estimatedShares,
-  estimatedOwnershipPct,
   fmtUSD,
   fmtPct,
 } from "@/data/investContent";
+import { offering, termsLive } from "@/data/investOffering";
 import Reveal from "./Reveal";
-import GeneratedSectionImage from "./GeneratedSectionImage";
 
-/* slider maps 0..1 -> log scale between MIN and MAX so small amounts
-   aren't crushed into the first few pixels */
 const LOG_MIN = Math.log(MIN_INVESTMENT);
 const LOG_MAX = Math.log(MAX_INVESTMENT);
 const posToAmount = (p: number) =>
   Math.round(Math.exp(LOG_MIN + (LOG_MAX - LOG_MIN) * p) / 100) * 100;
-const amountToPos = (a: number) => (Math.log(a) - LOG_MIN) / (LOG_MAX - LOG_MIN);
+const amountToPos = (a: number) =>
+  (Math.log(Math.max(MIN_INVESTMENT, a)) - LOG_MIN) / (LOG_MAX - LOG_MIN);
 
-const R = 118;
+const R = 128;
 const CIRC = 2 * Math.PI * R;
 
 function AnimatedNumber({ value, format }: { value: number; format: (n: number) => string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const shown = useRef(value);
-  // layout effect rewrites the text before paint, so the render below
-  // never flashes the final value ahead of the tween
   useLayoutEffect(() => {
     const controls = animate(shown.current, value, {
-      duration: 0.7,
+      duration: 0.55,
       ease: [0.22, 1, 0.36, 1],
       onUpdate: (v) => {
         shown.current = v;
@@ -61,18 +58,24 @@ function AnimatedNumber({ value, format }: { value: number; format: (n: number) 
 }
 
 export default function OwnershipCalculator() {
-  const [amount, setAmount] = useState(10_000);
+  const [amount, setAmount] = useState(25_000);
+  const [view, setView] = useState<"actual" | "magnified">("magnified");
+  const reduced = useReducedMotion();
+  const live = termsLive();
 
   const clamp = (n: number) => Math.min(MAX_INVESTMENT, Math.max(MIN_INVESTMENT, n));
-  const shares = estimatedShares(amount);
-  const ownership = estimatedOwnershipPct(amount);
-
-  /* the visible gold arc: true proportion, floored at 3% of the ring so
-     it reads at all — caption declares the enlargement */
-  const trueFrac = ownership / 100;
-  const visFrac = Math.max(trueFrac, 0.03);
-  const enlarged = visFrac > trueFrac;
   const sliderPos = useMemo(() => amountToPos(amount), [amount]);
+
+  /* live-mode math — only meaningful when real terms exist */
+  const securities = live ? Math.floor(amount / (offering.pricePerSecurity ?? 1)) : 0;
+  const ownershipPct = live ? (securities / (offering.fullyDilutedShares ?? 1)) * 100 : 0;
+
+  /* ring fraction:
+     exploration → position within the exploration range (labeled as such)
+     live actual → true ownership fraction
+     live magnified → floored at 3% of the ring, labeled magnified */
+  const trueFrac = live ? ownershipPct / 100 : sliderPos;
+  const frac = live && view === "magnified" ? Math.max(trueFrac, 0.03) : trueFrac;
 
   const onInput = (raw: string) => {
     const digits = Number(raw.replace(/[^0-9]/g, ""));
@@ -80,27 +83,36 @@ export default function OwnershipCalculator() {
   };
 
   return (
-    <section id="calculator" className="iv-section relative overflow-hidden">
-      <div className="iv-light" style={{ opacity: 0.7 }} />
-      <div className="iv-container relative">
-        <Reveal className="max-w-3xl">
-          <span className="iv-eyebrow">{CALCULATOR.eyebrow}</span>
-          <h2 className="iv-h2 mt-5">{CALCULATOR.headline}</h2>
-          <p className="iv-sub mt-6">{CALCULATOR.sub}</p>
+    <section id="calculator" className="iv-section" style={{ background: "var(--iv-white)" }}>
+      <div className="iv-container">
+        {/* earned transition */}
+        <Reveal className="mx-auto max-w-4xl text-center">
+          <h2 className="iv-display-md">
+            {OWNERSHIP.transition[0]}
+            <br />
+            {OWNERSHIP.transition[1]}
+            <br />
+            <span style={{ color: "var(--iv-gold-deep)" }}>
+              {OWNERSHIP.transition[2]} {OWNERSHIP.transition[3]}
+            </span>
+          </h2>
         </Reveal>
 
         <Reveal delay={0.12}>
-          <div className="iv-card iv-card-solid mt-14 grid overflow-hidden lg:grid-cols-[1.05fr_0.95fr]">
-            {/* ---- left: controls + outputs ---- */}
-            <div className="p-8 md:p-10">
-              <label className="iv-label" htmlFor="iv-amount">
-                {CALCULATOR.outputs.investment}
+          <div className="mt-16 grid gap-14 lg:grid-cols-2 lg:gap-10">
+            {/* ---- controls ---- */}
+            <div>
+              <span className="iv-eyebrow">{OWNERSHIP.eyebrow}</span>
+              <h3 className="mt-4 text-[24px] font-extrabold tracking-tight">{OWNERSHIP.headline}</h3>
+              <p className="mt-3 text-[14px] leading-relaxed" style={{ color: "var(--iv-steel)" }}>
+                {OWNERSHIP.sub}
+              </p>
+
+              <label className="iv-label mt-9 block" htmlFor="iv-amount">
+                {OWNERSHIP.outputs.investment}
               </label>
-              <div
-                className="mt-3 flex items-center gap-1 border-b pb-3"
-                style={{ borderColor: "var(--iv-border)" }}
-              >
-                <span className="iv-num text-[clamp(1.9rem,3.4vw,2.6rem)] font-semibold" style={{ color: "var(--iv-warmgray)" }}>
+              <div className="mt-2 flex items-center gap-1 border-b pb-3" style={{ borderColor: "var(--iv-ink)" }}>
+                <span className="iv-num text-[clamp(1.9rem,3.2vw,2.5rem)] font-bold" style={{ color: "var(--iv-warmgray)" }}>
                   $
                 </span>
                 <input
@@ -120,135 +132,147 @@ export default function OwnershipCalculator() {
                 max={1000}
                 value={Math.round(sliderPos * 1000)}
                 onChange={(e) => setAmount(clamp(posToAmount(Number(e.target.value) / 1000)))}
-                className="iv-range mt-8"
+                className="iv-range mt-7"
                 style={{ ["--iv-range-fill" as string]: `${sliderPos * 100}%` }}
                 aria-label="Investment amount slider"
               />
-              <div
-                className="mt-2 flex justify-between"
-                style={{ fontFamily: "var(--iv-mono)", fontSize: 11, color: "var(--iv-warmgray)" }}
-              >
+              <div className="mt-2 flex justify-between" style={{ fontFamily: "var(--iv-mono)", fontSize: 11, color: "var(--iv-warmgray)" }}>
                 <span>{fmtUSD(MIN_INVESTMENT)}</span>
                 <span>{fmtUSD(MAX_INVESTMENT)}</span>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-2.5">
+              <div className="-mx-1 mt-5 flex gap-2.5 overflow-x-auto px-1 pb-1">
                 {QUICK_AMOUNTS.map((q) => (
-                  <button
-                    key={q}
-                    className="iv-chip"
-                    data-active={amount === q}
-                    onClick={() => setAmount(q)}
-                  >
+                  <button key={q} className="iv-chip shrink-0" data-active={amount === q} onClick={() => setAmount(q)}>
                     {fmtUSD(q)}
                   </button>
                 ))}
               </div>
 
-              <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-7">
-                <div>
-                  <div className="iv-label">{CALCULATOR.outputs.shares}</div>
-                  <div className="iv-num mt-1.5 text-[30px] font-semibold">
-                    <AnimatedNumber
-                      value={shares}
-                      format={(v) => Math.round(v).toLocaleString("en-US")}
-                    />
-                    <span className="text-[15px]" style={{ color: "var(--iv-warmgray)" }}>
-                      *
-                    </span>
+              {live ? (
+                <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-6">
+                  <div>
+                    <div className="iv-label">{OWNERSHIP.outputs.investment}</div>
+                    <div className="iv-num mt-1 text-[28px] font-bold">
+                      <AnimatedNumber value={amount} format={(v) => fmtUSD(Math.round(v))} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="iv-label">{OWNERSHIP.outputs.securities}</div>
+                    <div className="iv-num mt-1 text-[28px] font-bold">
+                      <AnimatedNumber value={securities} format={(v) => Math.round(v).toLocaleString("en-US")} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="iv-label">{OWNERSHIP.outputs.ownership}</div>
+                    <div className="iv-num mt-1 text-[28px] font-bold">
+                      <AnimatedNumber value={ownershipPct} format={(v) => fmtPct(Math.max(0, v))} />
+                    </div>
+                  </div>
+                  <div className="self-end">
+                    {offering.portalURL && (
+                      <a href={offering.portalURL} className="iv-btn iv-btn-primary w-full">
+                        Continue to the offering
+                        <ArrowRight size={16} strokeWidth={2.2} />
+                      </a>
+                    )}
                   </div>
                 </div>
-                <div>
-                  <div className="iv-label">{CALCULATOR.outputs.ownership}</div>
-                  <div className="iv-num mt-1.5 text-[30px] font-semibold">
-                    <AnimatedNumber value={ownership} format={(v) => fmtPct(Math.max(0, v))} />
-                    <span className="text-[15px]" style={{ color: "var(--iv-warmgray)" }}>
-                      *
-                    </span>
-                  </div>
+              ) : (
+                <div className="mt-10 border-l-2 pl-5" style={{ borderColor: "var(--iv-gold)" }}>
+                  <p className="text-[13px] leading-relaxed" style={{ color: "var(--iv-steel)" }}>
+                    {OWNERSHIP.demoNotice}
+                  </p>
+                  <a href={CTA.documentsHref} className="iv-btn iv-btn-primary mt-5">
+                    {OWNERSHIP.demoCta}
+                    <ArrowRight size={16} strokeWidth={2.2} />
+                  </a>
                 </div>
-                <div>
-                  <div className="iv-label">{CALCULATOR.outputs.security}</div>
-                  <div className="mt-1.5 text-[15px] font-medium">{SECURITY_TYPE_SHORT}</div>
-                </div>
-                <div>
-                  <div className="iv-label">{CALCULATOR.outputs.participation}</div>
-                  <div className="mt-1.5 text-[13.5px] leading-snug" style={{ color: "var(--iv-steel)" }}>
-                    {CALCULATOR.participationNote}
-                  </div>
-                </div>
-              </div>
-
-              <a href={CTA.continueHref} className="iv-btn iv-btn-primary mt-10 w-full sm:w-auto">
-                Continue with {fmtUSD(amount)}
-                <ArrowRight size={17} strokeWidth={2.2} />
-              </a>
+              )}
             </div>
 
-            {/* ---- right: equity ring ---- */}
-            <div
-              className="relative flex flex-col items-center justify-center gap-6 p-10"
-              style={{
-                background:
-                  "linear-gradient(160deg, rgba(232,238,246,0.75), rgba(237,235,228,0.85))",
-                borderLeft: "1px solid var(--iv-border-soft)",
-              }}
-            >
-              <div className="absolute inset-0 opacity-[0.16]">
-                <GeneratedSectionImage
-                  id="ownership-abstract"
-                  sizes="640px"
-                  className="h-full w-full object-cover"
-                />
-              </div>
+            {/* ---- YOUR PIECE OF PODOS ---- */}
+            <div className="flex flex-col items-center justify-center">
+              {live && (
+                <div className="mb-6 flex gap-px" style={{ background: "var(--iv-border)" }} role="tablist">
+                  {(["actual", "magnified"] as const).map((v) => (
+                    <button
+                      key={v}
+                      role="tab"
+                      aria-selected={view === v}
+                      onClick={() => setView(v)}
+                      className="px-5 py-2.5 text-[11.5px] font-semibold tracking-[0.1em]"
+                      style={{
+                        fontFamily: "var(--iv-mono)",
+                        background: view === v ? "var(--iv-ink)" : "var(--iv-white)",
+                        color: view === v ? "#f5f4f0" : "var(--iv-steel)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {v === "actual" ? OWNERSHIP.viewActual.toUpperCase() : OWNERSHIP.viewMagnified.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <div className="relative">
-                <svg width="300" height="300" viewBox="0 0 300 300" role="img" aria-label="Estimated ownership visualization">
-                  {/* decorative concentric rings */}
-                  <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(20,20,20,0.05)" strokeWidth="1" />
-                  <circle cx="150" cy="150" r="96" fill="none" stroke="rgba(20,20,20,0.05)" strokeWidth="1" />
-                  {/* the company */}
-                  <circle
-                    cx="150" cy="150" r={R} fill="none"
-                    stroke="rgba(20,20,20,0.1)" strokeWidth="10"
-                  />
-                  {/* the user's slice */}
-                  <motion.circle
-                    cx="150" cy="150" r={R} fill="none"
-                    stroke="url(#ivGold)" strokeWidth="12" strokeLinecap="round"
-                    strokeDasharray={CIRC}
-                    animate={{ strokeDashoffset: CIRC * (1 - visFrac) }}
-                    transition={{ type: "spring", stiffness: 60, damping: 20 }}
-                    transform="rotate(-90 150 150)"
-                    style={{ filter: "drop-shadow(0 0 10px rgba(200,169,107,0.55))" }}
-                  />
+                <svg width="320" height="320" viewBox="0 0 320 320" role="img" aria-label="Participation visualization">
                   <defs>
-                    <linearGradient id="ivGold" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#d8bc82" />
-                      <stop offset="100%" stopColor="#a8874a" />
+                    <linearGradient id="ivTitanium" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#e8e9ec" />
+                      <stop offset="45%" stopColor="#c9cdd2" />
+                      <stop offset="100%" stopColor="#f2f3f5" />
+                    </linearGradient>
+                    <linearGradient id="ivChampagne" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#d3ba85" />
+                      <stop offset="100%" stopColor="#8a6f3c" />
                     </linearGradient>
                   </defs>
+                  {/* optical-glass outer rim */}
+                  <circle cx="160" cy="160" r="152" fill="none" stroke="rgba(23,25,27,0.06)" strokeWidth="1" />
+                  {/* brushed titanium body ring */}
+                  <circle cx="160" cy="160" r={R} fill="none" stroke="url(#ivTitanium)" strokeWidth="16" />
+                  {/* black inset detail */}
+                  <circle cx="160" cy="160" r={R - 14} fill="none" stroke="var(--iv-ink)" strokeWidth="1.5" opacity="0.5" />
+                  {/* the user's piece — restrained gold only */}
+                  <motion.circle
+                    cx="160"
+                    cy="160"
+                    r={R}
+                    fill="none"
+                    stroke="url(#ivChampagne)"
+                    strokeWidth="16"
+                    strokeDasharray={CIRC}
+                    animate={{ strokeDashoffset: CIRC * (1 - Math.max(0.0015, frac)) }}
+                    transition={reduced ? { duration: 0 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                    transform="rotate(-90 160 160)"
+                  />
+                  <circle cx="160" cy="160" r={R - 30} fill="var(--iv-bg)" stroke="var(--iv-border)" strokeWidth="1" />
                 </svg>
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <div className="iv-label">Your stake</div>
-                  <div className="iv-num mt-1 text-[34px] font-semibold leading-none">
-                    <AnimatedNumber value={ownership} format={(v) => fmtPct(Math.max(0, v))} />
+                  <div className="iv-label">{live ? "Your stake" : "Exploring"}</div>
+                  <div className="iv-num mt-1 text-[32px] font-extrabold leading-none tracking-tight">
+                    {live ? (
+                      <AnimatedNumber value={ownershipPct} format={(v) => fmtPct(Math.max(0, v))} />
+                    ) : (
+                      <AnimatedNumber value={amount} format={(v) => fmtUSD(Math.round(v))} />
+                    )}
                   </div>
-                  <div className="iv-num mt-2 text-[15px]" style={{ color: "var(--iv-steel)" }}>
-                    <AnimatedNumber value={amount} format={(v) => fmtUSD(Math.round(v))} />
-                  </div>
+                  {live && (
+                    <div className="iv-num mt-2 text-[14px]" style={{ color: "var(--iv-steel)" }}>
+                      <AnimatedNumber value={amount} format={(v) => fmtUSD(Math.round(v))} />
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <p
-                className="relative max-w-[280px] text-center text-[11.5px] leading-relaxed"
-                style={{ color: "var(--iv-warmgray)" }}
-              >
-                {enlarged
-                  ? "Gold arc enlarged for visibility — the number shown is your actual estimated stake."
-                  : "Gold arc drawn to scale."}{" "}
-                *Estimates based on placeholder terms.
+              <p className="mt-5 max-w-[300px] text-center text-[11.5px] leading-relaxed" style={{ color: "var(--iv-warmgray)" }}>
+                {live
+                  ? view === "magnified" && frac > trueFrac
+                    ? OWNERSHIP.magnifiedNote
+                    : "Drawn to actual scale."
+                  : "Exploration view — the gold arc reflects your position within the exploration range, not ownership."}
               </p>
             </div>
           </div>
