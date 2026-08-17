@@ -135,7 +135,14 @@ async function notifyTeam(lead: {
     try {
       const res = await fetch(`https://formsubmit.co/ajax/${to}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          // FormSubmit rejects server-side calls without browser-style
+          // origin headers (returns 200 + success:"false")
+          Origin: "https://www.podosai.com",
+          Referer: "https://www.podosai.com/invest",
+        },
         body: JSON.stringify({
           _subject: `New investor interest — ${lead.fullName} · $${lead.amount.toLocaleString("en-US")}`,
           _template: "table",
@@ -150,7 +157,10 @@ async function notifyTeam(lead: {
           Source: "podosai.com/invest",
         }),
       });
-      if (!res.ok) console.error("formsubmit notify failed:", res.status, (await res.text()).slice(0, 200));
+      const json = (await res.json().catch(() => null)) as { success?: string; message?: string } | null;
+      if (!res.ok || json?.success !== "true") {
+        console.error("formsubmit notify failed:", res.status, json?.message ?? "no body");
+      }
     } catch (e) {
       console.error("formsubmit notify error:", e);
     }
