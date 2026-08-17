@@ -34,14 +34,13 @@ function throttled(ip: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const url = process.env.PODOS_SUPABASE_URL;
-  const key = process.env.PODOS_SUPABASE_ANON_KEY;
-  if (!url || !key) {
-    return NextResponse.json(
-      { ok: false, error: "Interest capture is not configured" },
-      { status: 503 }
-    );
-  }
+  /* The publishable key is designed for public exposure (client bundles
+   * ship it in every Supabase app); security lives in RLS, which locks
+   * this key to INSERT-only on investor_interest — verified: reads
+   * return nothing. Env vars remain as overrides. */
+  const url = process.env.PODOS_SUPABASE_URL ?? "https://buqghwxjjksqperiamag.supabase.co";
+  const key =
+    process.env.PODOS_SUPABASE_ANON_KEY ?? "sb_publishable_1W4q68h6ES47vNdJZVsq7g_p88eLPi5";
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (throttled(ip)) {
