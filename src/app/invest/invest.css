@@ -326,6 +326,88 @@
   border-radius: 6px;
 }
 
+/* hero investor-access card — private-bank membership object:
+   graphite body, champagne detailing, soft sheen */
+.iv-access-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 2px solid var(--iv-gold);
+  background: linear-gradient(150deg, #23272d 0%, #16181c 55%, #1b1e23 100%);
+  box-shadow:
+    0 30px 80px -24px rgba(23, 25, 27, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+.iv-access-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(130% 90% at 88% -12%, rgba(183, 154, 99, 0.18), transparent 55%),
+    radial-gradient(70% 50% at 0% 110%, rgba(218, 229, 241, 0.06), transparent 70%);
+}
+.iv-access-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 11px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 13.5px;
+}
+.iv-access-row dt {
+  color: rgba(245, 244, 240, 0.55);
+}
+.iv-access-row dd {
+  color: #f5f4f0;
+  font-weight: 600;
+}
+.iv-access-cta {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(183, 154, 99, 0.55);
+  border-radius: 999px;
+  padding: 13px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #e9d9b4;
+  background: rgba(183, 154, 99, 0.08);
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.iv-access-cta svg {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.iv-access-cta:hover {
+  background: var(--iv-gold);
+  border-color: var(--iv-gold);
+  color: #17191b;
+}
+.iv-access-cta:hover svg {
+  transform: translateX(4px);
+}
+@keyframes iv-status-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(183, 154, 99, 0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(183, 154, 99, 0); }
+}
+.iv-status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--iv-gold);
+  animation: iv-status-pulse 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .iv-status-dot { animation: none; }
+}
+
 /* light button for dark imagery surfaces (final CTA) */
 .iv-btn-light {
   color: var(--iv-ink);

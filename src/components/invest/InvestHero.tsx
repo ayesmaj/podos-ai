@@ -93,36 +93,47 @@ export default function InvestHero() {
             </Rise>
           </div>
 
-          {/* minimal investor-access module, lower-right */}
+          {/* investor-access card — graphite membership object, lower-right */}
           <Rise delay={0.36}>
             <div className="mt-8 flex justify-end">
-              <div
-                className="w-full max-w-[380px] border-t-2 px-6 py-5"
-                style={{
-                  borderColor: "var(--iv-gold)",
-                  background: "var(--iv-glass-strong)",
-                  backdropFilter: "blur(16px)",
-                }}
-              >
-                <div className="iv-label">{HERO.accessModule.label}</div>
-                <dl className="mt-4 space-y-2.5">
-                  {HERO.accessModule.rows.map((r) => (
-                    <div key={r.k} className="flex items-baseline justify-between gap-4 text-[13.5px]">
-                      <dt style={{ color: "var(--iv-steel)" }}>{r.k}</dt>
-                      <dd className="iv-num font-semibold">{r.v}</dd>
-                    </div>
-                  ))}
-                </dl>
-                <button
-                  onClick={() => openInvestorAccess()}
-                  className="mt-5 flex w-full cursor-pointer items-center justify-between text-[14px] font-semibold transition-opacity hover:opacity-70"
-                >
-                  {HERO.accessModule.cta}
-                  <ArrowRight size={16} strokeWidth={2.2} />
-                </button>
-                <p className="mt-4 text-[11px] leading-relaxed" style={{ color: "var(--iv-warmgray)" }}>
-                  {HERO.accessModule.note}
-                </p>
+              <div className="iv-access-card w-full max-w-[390px] p-7">
+                <div className="relative">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="iv-label"
+                      style={{ color: "var(--iv-gold)", letterSpacing: "0.22em" }}
+                    >
+                      {HERO.accessModule.label}
+                    </span>
+                    <span className="iv-status-dot" aria-hidden />
+                  </div>
+
+                  <dl className="mt-5">
+                    {HERO.accessModule.rows.map((r, i) => (
+                      <div key={r.k} className="iv-access-row">
+                        <dt>{r.k}</dt>
+                        <dd
+                          className={`iv-num ${i === 1 ? "text-[19px]" : ""}`}
+                          style={i === 1 ? { color: "#e9d9b4" } : undefined}
+                        >
+                          {r.v}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+
+                  <button onClick={() => openInvestorAccess()} className="iv-access-cta mt-6">
+                    {HERO.accessModule.cta}
+                    <ArrowRight size={16} strokeWidth={2.2} />
+                  </button>
+
+                  <p
+                    className="mt-4 text-[10.5px] leading-relaxed"
+                    style={{ color: "rgba(245,244,240,0.42)" }}
+                  >
+                    {HERO.accessModule.note}
+                  </p>
+                </div>
               </div>
             </div>
           </Rise>
