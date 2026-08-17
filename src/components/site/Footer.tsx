@@ -72,6 +72,7 @@ export default function Footer() {
             <li><a className={styles.footerLink} href="#deployment">Process</a></li>
             <li><a className={styles.footerLink} href="#manufacturing">Manufacturing</a></li>
             <li><a className={styles.footerLink} href="#use-cases">Use Cases</a></li>
+            <li><a className={styles.footerLink} href="/invest">Invest</a></li>
             <li><a className={styles.footerLink} href="#access">Get in Touch</a></li>
           </ul>
         </div>

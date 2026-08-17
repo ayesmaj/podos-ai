@@ -149,7 +149,11 @@
   --font-mono: var(--font-body);
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* Unlayered reset — beats Tailwind's layered utilities, so the .invest
+   subtree (which lays out with Tailwind spacing utilities) is excluded;
+   Tailwind preflight still zeroes margins/paddings there via @layer base. */
+*:where(:not(.invest, .invest *)), *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.invest :where(*) { box-sizing: border-box; }
 
 html {
   background: var(--paper);

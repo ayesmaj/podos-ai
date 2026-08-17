@@ -1,0 +1,343 @@
+/* ===================================================================
+   /invest — scoped design system.
+   Warm bright luxury: off-white paper, stone/titanium neutrals,
+   restrained gold, airy technology blue. Deliberately warmer than the
+   main site's blue/cyan system; everything is namespaced under .invest
+   so the two palettes never collide.
+   =================================================================== */
+
+.invest {
+  /* palette */
+  --iv-bg: #f7f7f3;
+  --iv-white: #ffffff;
+  --iv-beige: #edebe4;
+  --iv-stone: #d9d4c7;
+  /* warmgray/gold-deep darkened from spec values for WCAG small-text
+     contrast on the off-white ground (ui-ux-pro-max review) */
+  --iv-warmgray: #85806f;
+  --iv-ink: #1a1a1a;
+  --iv-steel: #565968;
+  --iv-gold: #c8a96b;
+  --iv-gold-deep: #8f6f35;
+  --iv-blue: #aebed3;
+  --iv-bluegray: #cad6e8;
+  --iv-glasshi: #e8eef6;
+  --iv-glass: rgba(255, 255, 255, 0.65);
+  --iv-glass-strong: rgba(255, 255, 255, 0.82);
+  --iv-border: rgba(20, 20, 20, 0.08);
+  --iv-border-soft: rgba(20, 20, 20, 0.05);
+
+  /* type */
+  /* display face — regular site sans (Geist), per design feedback;
+     variable keeps its name so every reference stays one-line swappable */
+  --iv-serif: var(--font-geist), system-ui, sans-serif;
+  --iv-sans: var(--font-inter-tight), system-ui, sans-serif;
+  --iv-mono: var(--font-geist-mono), monospace;
+
+  background: var(--iv-bg);
+  color: var(--iv-ink);
+  font-family: var(--iv-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* anchored sections clear the fixed glass nav */
+.invest section[id] {
+  scroll-margin-top: 90px;
+}
+
+/* ---------- layout ---------- */
+.iv-container {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 5vw, 48px);
+}
+.iv-section {
+  padding-block: clamp(72px, 10vw, 140px);
+  position: relative;
+}
+
+/* ---------- typography ---------- */
+.iv-eyebrow {
+  font-family: var(--iv-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--iv-gold-deep);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.iv-eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: var(--iv-gold);
+}
+.iv-h1 {
+  font-family: var(--iv-serif);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 5.6vw, 4.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+}
+.iv-h2 {
+  font-family: var(--iv-serif);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 3.8vw, 2.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.iv-sub {
+  color: var(--iv-steel);
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.62;
+  max-width: 44rem;
+}
+.iv-num {
+  font-family: var(--iv-serif);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.iv-label {
+  font-family: var(--iv-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--iv-steel);
+}
+
+/* ---------- surfaces ---------- */
+.iv-card {
+  background: var(--iv-glass);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--iv-border);
+  border-radius: 20px;
+  box-shadow:
+    0 1px 2px rgba(20, 20, 20, 0.04),
+    0 12px 40px -18px rgba(20, 20, 20, 0.12);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease;
+}
+.iv-card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(200, 169, 107, 0.45);
+  box-shadow:
+    0 1px 2px rgba(20, 20, 20, 0.04),
+    0 24px 60px -20px rgba(20, 20, 20, 0.18),
+    0 0 0 4px rgba(200, 169, 107, 0.07);
+}
+.iv-card-solid {
+  background: var(--iv-glass-strong);
+}
+
+/* ---------- buttons ---------- */
+.iv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--iv-sans);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  border-radius: 999px;
+  padding: 16px 30px;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.3s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.iv-btn:active {
+  transform: scale(0.98);
+}
+.iv-btn-primary {
+  color: #fdfcf9;
+  background: linear-gradient(135deg, #23211c 0%, #3a362d 55%, #4a4331 100%);
+  border: 1px solid rgba(200, 169, 107, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 10px 30px -12px rgba(26, 26, 26, 0.5);
+}
+.iv-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 18px 44px -14px rgba(26, 26, 26, 0.55),
+    0 0 0 5px rgba(200, 169, 107, 0.14);
+}
+.iv-btn-ghost {
+  color: var(--iv-ink);
+  background: var(--iv-glass);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--iv-border);
+}
+.iv-btn-ghost:hover {
+  transform: translateY(-2px);
+  background: var(--iv-glass-strong);
+  box-shadow: 0 14px 34px -16px rgba(20, 20, 20, 0.25);
+}
+
+/* ---------- ambience ---------- */
+.iv-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 42% at 18% 0%, rgba(202, 214, 232, 0.5), transparent 70%),
+    radial-gradient(50% 38% at 88% 12%, rgba(200, 169, 107, 0.14), transparent 70%),
+    radial-gradient(70% 55% at 50% 110%, rgba(232, 238, 246, 0.8), transparent 70%);
+}
+.iv-grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(20, 20, 20, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 20, 20, 0.028) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(75% 65% at 50% 35%, black, transparent 85%);
+}
+.iv-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--iv-border), transparent);
+}
+
+/* ---------- calculator slider ---------- */
+.iv-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--iv-gold) 0%,
+    var(--iv-gold) var(--iv-range-fill, 0%),
+    var(--iv-stone) var(--iv-range-fill, 0%),
+    var(--iv-stone) 100%
+  );
+  outline: none;
+}
+.iv-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffffff, #efece3);
+  border: 1px solid rgba(200, 169, 107, 0.6);
+  box-shadow:
+    0 2px 10px rgba(20, 20, 20, 0.18),
+    0 0 0 5px rgba(200, 169, 107, 0.12);
+  cursor: grab;
+  transition: box-shadow 0.25s ease;
+}
+.iv-range::-webkit-slider-thumb:hover {
+  box-shadow:
+    0 2px 10px rgba(20, 20, 20, 0.22),
+    0 0 0 8px rgba(200, 169, 107, 0.18);
+}
+.iv-range::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffffff, #efece3);
+  border: 1px solid rgba(200, 169, 107, 0.6);
+  box-shadow: 0 2px 10px rgba(20, 20, 20, 0.18), 0 0 0 5px rgba(200, 169, 107, 0.12);
+  cursor: grab;
+}
+
+/* chips */
+.iv-chip {
+  font-family: var(--iv-mono);
+  font-size: 13px;
+  padding: 12px 18px; /* ≥44px touch target */
+  border-radius: 999px;
+  border: 1px solid var(--iv-border);
+  background: var(--iv-glass);
+  color: var(--iv-steel);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.iv-chip:hover {
+  border-color: rgba(200, 169, 107, 0.5);
+  color: var(--iv-ink);
+}
+.iv-chip[data-active="true"] {
+  background: var(--iv-ink);
+  color: #fdfcf9;
+  border-color: var(--iv-ink);
+}
+
+/* input */
+.iv-input {
+  font-family: var(--iv-serif);
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  font-weight: 600;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--iv-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* FAQ */
+.iv-faq-item {
+  border-bottom: 1px solid var(--iv-border-soft);
+}
+.iv-faq-q {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  padding: 22px 4px;
+  font-weight: 600;
+  font-size: 1.02rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--iv-ink);
+  font-family: var(--iv-sans);
+}
+
+/* visible keyboard focus — .iv-input/.iv-range drop the UA outline,
+   so every interactive element gets an explicit ring */
+.invest .iv-btn:focus-visible,
+.invest .iv-chip:focus-visible,
+.invest .iv-faq-q:focus-visible,
+.invest .iv-input:focus-visible,
+.invest .iv-range:focus-visible,
+.invest a:focus-visible {
+  outline: 2px solid var(--iv-gold-deep);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* light button for dark imagery surfaces (final CTA) */
+.iv-btn-light {
+  color: var(--iv-ink);
+  background: linear-gradient(145deg, #ffffff, #eef0f4);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 10px 30px -12px rgba(2, 5, 12, 0.6);
+}
+.iv-btn-light:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px -14px rgba(2, 5, 12, 0.7), 0 0 0 5px rgba(255, 255, 255, 0.15);
+}
+
+/* reduced motion: kill transform transitions */
+@media (prefers-reduced-motion: reduce) {
+  .invest * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
