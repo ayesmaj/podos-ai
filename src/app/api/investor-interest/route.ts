@@ -118,7 +118,10 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
-/** Best-effort email notification via Resend — never blocks the lead. */
+/** Best-effort email notification — never blocks the lead.
+ *  Uses Resend when RESEND_API_KEY is set; otherwise relays through
+ *  FormSubmit (no account — info@podosai.com clicks a one-time
+ *  activation link on the first submission). */
 async function notifyTeam(lead: {
   fullName: string;
   email: string;
@@ -128,7 +131,32 @@ async function notifyTeam(lead: {
   accredited?: string;
 }) {
   const key = process.env.RESEND_API_KEY;
-  if (!key) return;
+  const to = process.env.NOTIFY_EMAIL ?? "info@podosai.com";
+  if (!key) {
+    try {
+      const res = await fetch(`https://formsubmit.co/ajax/${to}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          _subject: `New investor interest — ${lead.fullName} · $${lead.amount.toLocaleString("en-US")}`,
+          _template: "table",
+          _captcha: "false",
+          _replyto: lead.email,
+          Name: lead.fullName,
+          Email: lead.email,
+          Phone: lead.phone || "—",
+          "Intended amount": `$${lead.amount.toLocaleString("en-US")} (non-binding)`,
+          "Investing as": lead.investorType === "entity" ? "Entity / Fund" : "Individual",
+          Accredited: lead.accredited ?? "unsure",
+          Source: "podosai.com/invest",
+        }),
+      });
+      if (!res.ok) console.error("formsubmit notify failed:", res.status, (await res.text()).slice(0, 200));
+    } catch (e) {
+      console.error("formsubmit notify error:", e);
+    }
+    return;
+  }
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
