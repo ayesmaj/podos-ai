@@ -200,7 +200,7 @@ export default function HeroAIWall() {
           >
             <span><b>1-MW</b> Modular Pods</span>
             <span className="hr-trustSep">·</span>
-            <span><b>90–120 day</b> Deploy</span>
+            <span><b>90-day</b> Deploy</span>
             <span className="hr-trustSep">·</span>
             <span><b>Factory-Built</b> Infrastructure</span>
             <span className="hr-trustSep">·</span>

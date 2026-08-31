@@ -59,7 +59,7 @@ const STEPS: Step[] = [
   },
   {
     range: [0.40, 0.60],
-    headline: "PODOS deploys AI infrastructure in 90–120 days.",
+    headline: "PODOS deploys AI infrastructure in 90 days.",
     subline:
       "Factory-built modular supercomputers designed for speed, scale, and real-world energy deployment.",
   },

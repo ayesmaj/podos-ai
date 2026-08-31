@@ -252,10 +252,10 @@ export const OPTIMUS_COMPONENTS: OptimusComponent[] = [
       title: "Compute Backplane",
       subtitle: "On-board GPU cluster",
       specs: [
-        { label: "GPU Count", value: "64 × H200 / B200 class" },
+        { label: "GPU Count", value: "128 × H200 / B200 class" },
         { label: "Per-GPU Power", value: "1,000 W TDP" },
         { label: "Interconnect", value: "NVLink + 400G InfiniBand" },
-        { label: "Memory Pool", value: "9.2 TB HBM3e aggregate" },
+        { label: "Memory Pool", value: "18.0 TB HBM3e aggregate" },
         { label: "Form Factor", value: "4× 16-GPU sleds, hot-swap" },
       ],
       description:

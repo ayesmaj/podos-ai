@@ -60,7 +60,7 @@ export default function DeployTimelineScrub() {
           loop
         />
         <span className={styles.eyebrow}>
-          DEPLOY · 90–120 DAYS · FACTORY TO FIRST MW
+          DEPLOY · 90 DAYS · FACTORY TO FIRST MW
         </span>
       </div>
     </div>

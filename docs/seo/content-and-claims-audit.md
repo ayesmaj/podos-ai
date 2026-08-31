@@ -151,3 +151,5 @@ Do not resolve without an explicit decision on each:
 ---
 
 *Prepared from repo state at commit `d847028` and live HTML fetched 2026-08-31. No conflicts were resolved; all copy left untouched.*
+
+> **Resolution addendum (2026-08-31):** Founder resolved **C1 = 90 days** and **C2 = 128 GPUs per pod** in chat. All text occurrences updated (PodosPod, ProductShowcase, DeployTimelineScrub, HeroAIWall, PodosScrollHeroIntro, optimusComponents 64→128 + memory pool rescaled, MEGA SILO 24→20 pods so 2,560 = 20 × 128); dead `siteContent.ts` deleted. Outstanding: `pod.png` artwork still shows 90–120 (asset regeneration pending). See `src/content/data/claims.ts` for the authoritative register.

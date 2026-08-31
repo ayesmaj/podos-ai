@@ -36,7 +36,7 @@ const PodosRack3D = dynamic(() => import("./PodosRack3D"), {
  *
  * After the PROBLEM section diagnoses a broken industry, PODOS opens
  * with the hardware answer: a 1-MW modular pod, factory-built, shipped
- * in 90–120 days. Reads like a CAD package cover page — blueprint pod on
+ * in 90 days. Reads like a CAD package cover page — blueprint pod on
  * the left, spec sheet on the right, deploy timeline below.
  *
  * Aesthetic choices:
@@ -46,7 +46,7 @@ const PodosRack3D = dynamic(() => import("./PodosRack3D"), {
  *     fill — the productive volume of the pod.
  *   - The spec rail reads as a manufacturer nameplate: label-value rows,
  *     tabular figures, subtle hairlines between. No icons, no flourishes.
- *   - 90–120 day timeline is the ONE place we let the brand gradient fill
+ *   - 90-day timeline is the ONE place we let the brand gradient fill
  *     a whole line — "this is how fast the physical stack lands".
  *   - Blueprint path-draws in as the section enters viewport
  *     (pathLength 0→1 over ~1.8s), so the user sees the pod "assemble".
@@ -67,7 +67,7 @@ const specs = [
   { label: "ENCLOSURE",value: "Thermos", unit: "",    note: "6-surface foam + reflective barrier" },
   { label: "OFF-GRID", value: "Solar + battery + generator", unit: "", note: "no fiber or grid required" },
   { label: "HEAT RECOVERY", value: "ORC", unit: "engine", note: "60–110 kW reclaimed per pod" },
-  { label: "DEPLOY",   value: "90–120", unit: "days",  note: "door to dashboard" },
+  { label: "DEPLOY",   value: "90", unit: "days",  note: "door to dashboard" },
   { label: "MFG",      value: "California", unit: "", note: "shipped · not sited" },
   { label: "RELOCATION", value: "Yes", unit: "",      note: "redeployable foundation option" },
 ];
@@ -79,7 +79,7 @@ const timeline = [
   { d: "D+0",  label: "Order placed",      detail: "Site engineering kickoff." },
   { d: "D+30", label: "Factory complete",  detail: "Pod integrated, burned-in, shipped." },
   { d: "D+60", label: "Site + arrival",    detail: "Concrete pad cured, pod craned in." },
-  { d: "D+90–120", label: "Serving inference", detail: "First megawatt online." },
+  { d: "D+90", label: "Serving inference", detail: "First megawatt online." },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -200,7 +200,7 @@ export default function PodosPod() {
             </span>
             <h2 id="podos-heading" className={`${styles.headline} t-display`}>
               Deploy <span className="t-sweep-brand">one megawatt</span> in
-              90–120 days.
+              90 days.
               <br />
               Not four years.
             </h2>
@@ -308,7 +308,7 @@ export default function PodosPod() {
             via display:none. Remove once the scrub video is approved. */}
         <div className={styles.timelineWrap} hidden>
           <div className={styles.timelineHead}>
-            <span className="t-eyebrow">DEPLOY · 90–120 DAYS · FACTORY TO FIRST MW</span>
+            <span className="t-eyebrow">DEPLOY · 90 DAYS · FACTORY TO FIRST MW</span>
           </div>
           <div className={styles.timeline}>
             <div className={styles.timelineTrack}>
@@ -346,7 +346,7 @@ export default function PodosPod() {
         {/* ============ PRODUCT LADDER ============
             POD (1 MW) → MEGA SILO (20 MW). Same factory DNA, different
             scale. Positioned AFTER the timeline so the reader has
-            absorbed "90–120 days to 1 MW" before being asked to picture
+            absorbed "90 days to 1 MW" before being asked to picture
             the 20-MW cluster. */}
         <ProductShowcase />
 

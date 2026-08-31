@@ -31,7 +31,7 @@ const PRODUCTS = [
       { k: "POWER", v: "1 MW" },
       { k: "COMPUTE", v: "128 GPUs" },
       { k: "FOOTPRINT", v: "720 sq ft" },
-      { k: "DEPLOY", v: "90–120 days" },
+      { k: "DEPLOY", v: "90 days" },
     ],
     badge: "PILOT · VALIDATED",
     badgeTone: "signed" as const,
@@ -43,7 +43,7 @@ const PRODUCTS = [
     name: "MEGA SILO",
     tag: "20 MW · CLUSTER",
     subtitle:
-      "Hyperbaric N₂ compound at 3–5+ atm. 24 pods in 20,000 sq ft — replaces 100,000 sq ft of traditional data center (83% smaller).",
+      "Hyperbaric N₂ compound at 3–5+ atm. 20 pods in 20,000 sq ft — replaces 100,000 sq ft of traditional data center (83% smaller).",
     specs: [
       { k: "POWER", v: "20 MW" },
       { k: "COMPUTE", v: "2,560 GPUs" },

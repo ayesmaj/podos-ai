@@ -61,7 +61,7 @@
   .stage {
     border-radius: 0.75rem;
   }
-  /* On phones the long eyebrow ("DEPLOY · 90–120 DAYS · FACTORY TO FIRST MW")
+  /* On phones the long eyebrow ("DEPLOY · 90 DAYS · FACTORY TO FIRST MW")
      wrapped to 2–3 lines inside a 335px-wide stage — three letter-spaced
      mono words don't fit at 0.72rem with 0.22em tracking.
      - shrink font + letter-spacing to free horizontal room
