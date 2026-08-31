@@ -68,3 +68,12 @@ public/new pod.png
 public/Meshy_AI_*.glb
 # Source folder for team headshots (the production-ready photos live in /public/team/)
 teams/
+
+# Large source media kept locally but never referenced by the app —
+# excluded so they don't bloat the Vercel deployment.
+public/factory.mp4
+public/factory to site.mp4
+public/Meshy_AI_PODOS_Solar_Freight_C_0507220136_texture.glb
+*.mp4.bak
+public/use-cases/helicopter.mov
+public/problem-bg.mp4
