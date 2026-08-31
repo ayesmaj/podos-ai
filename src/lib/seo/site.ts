@@ -41,10 +41,22 @@ export const INDEXABLE_ROUTES: IndexableRoute[] = [
   { path: "/engineering", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
   { path: "/engineering/direct-to-chip-liquid-cooling", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
   { path: "/engineering/data-center-power-architecture", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
+  { path: "/engineering/networking-fiber", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
+  { path: "/engineering/safety-security", changeFrequency: "monthly", priority: 0.7, cluster: "engineering" },
+  { path: "/engineering/high-density-gpu-infrastructure", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
+  { path: "/engineering/monitoring-controls", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
+  { path: "/engineering/data-center-heat-recovery", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
+  { path: "/engineering/thermal-enclosure", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
   { path: "/deploy", changeFrequency: "monthly", priority: 0.8, cluster: "deploy" },
   { path: "/use-cases", changeFrequency: "monthly", priority: 0.8, cluster: "use-cases" },
   { path: "/compare/modular-ai-data-center-vs-traditional-data-center", changeFrequency: "monthly", priority: 0.7, cluster: "compare" },
+  { path: "/compare/factory-built-vs-site-built-data-center", changeFrequency: "monthly", priority: 0.7, cluster: "compare" },
+  { path: "/compare/liquid-cooling-vs-air-cooling", changeFrequency: "monthly", priority: 0.7, cluster: "compare" },
   { path: "/resources/ai-infrastructure-glossary", changeFrequency: "monthly", priority: 0.7, cluster: "resources" },
+  /* Estimator */
+  { path: "/configure", changeFrequency: "monthly", priority: 0.9, cluster: "core" },
+  { path: "/resources/data-center-readiness-checklist", changeFrequency: "monthly", priority: 0.7, cluster: "resources" },
+  { path: "/compare/on-prem-ai-infrastructure-vs-cloud", changeFrequency: "monthly", priority: 0.7, cluster: "compare" },
 ];
 
 export const canonicalUrl = (path: string) =>
