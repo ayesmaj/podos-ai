@@ -80,7 +80,11 @@ const SEO_POD_IDS = [
   "deploy-commission-check", "usecase-campus", "usecase-factory", "usecase-hospital",
   "usecase-edge-site", "compare-split-frame",
 ];
-for (const id of SEO_POD_IDS) REFS[id] = [POD];
+/* Use the CLEAN pod crop (no spec panel / title / dimension callouts) —
+ * the full pod.png card made the model echo its text furniture into
+ * scenes, baking ungated claims into pixels. */
+const POD_CLEAN = "public/products/pod-clean.png";
+for (const id of SEO_POD_IDS) REFS[id] = [POD_CLEAN];
 
 const wanted = WANTED_IDS.length
   ? entries.filter((e) => WANTED_IDS.includes(e.id))
