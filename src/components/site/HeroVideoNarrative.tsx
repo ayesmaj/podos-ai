@@ -151,26 +151,41 @@ export default function HeroVideoNarrative() {
     const eagerCount = 12;
     for (let i = 0; i < eagerCount; i++) loadFrame(i);
 
-    // Lazy load: rest of the frames during idle time. requestIdleCallback
-    // is supported in Chrome/Edge/Firefox; Safari falls back to a
-    // setTimeout chain. Either way, frames trickle in without
-    // blocking the main thread or saturating the connection budget.
-    type IdleSchedule = (cb: () => void) => number;
-    const ric = (window as unknown as { requestIdleCallback?: IdleSchedule })
-      .requestIdleCallback;
-    let lazyIdx = eagerCount;
-    const scheduleLazy = () => {
-      if (lazyIdx >= INTRO_FRAME_COUNT) return;
-      const next = () => {
-        if (lazyIdx >= INTRO_FRAME_COUNT) return;
-        loadFrame(lazyIdx);
-        lazyIdx += 1;
-        scheduleLazy();
-      };
-      if (typeof ric === "function") ric(next);
-      else window.setTimeout(next, 16);
+    // Background load: the remaining frames with bounded concurrency.
+    //
+    // PREVIOUSLY this was a serial requestIdleCallback chain — ONE frame
+    // per idle callback, each scheduling the next. Two failure modes made
+    // the hero stutter in the real world (invisible on localhost, where
+    // everything is instant):
+    //   1. Scrolling starves idle. rIC only fires when the main thread is
+    //      quiet, but a user scrolling the hero keeps it busy — so frame
+    //      loading stalled at exactly the moment frames were needed.
+    //   2. Serial loading is slow. 197 frames one-at-a-time over a real
+    //      connection leaves most of the sequence missing for a long time;
+    //      drawFrame() then no-ops and the canvas holds a stale frame,
+    //      which reads as freezing/juddering rather than scrubbing.
+    //
+    // Now: a small pool of workers pulls from a queue and keeps going
+    // regardless of idle. Concurrency 6 matches typical per-host limits
+    // and saturates HTTP/2 without starving other page requests.
+    const LOAD_CONCURRENCY = 6;
+    let queueIdx = eagerCount;
+    let cancelled = false;
+    const pump = () => {
+      if (cancelled || queueIdx >= INTRO_FRAME_COUNT) return;
+      const i = queueIdx;
+      queueIdx += 1;
+      const img = loadFrame(i);
+      // Advance this worker when the frame settles, either way — a single
+      // failed frame must never stall the rest of the sequence.
+      const advance = () => pump();
+      if (img.complete) advance();
+      else {
+        img.addEventListener("load", advance, { once: true });
+        img.addEventListener("error", advance, { once: true });
+      }
     };
-    scheduleLazy();
+    for (let w = 0; w < LOAD_CONCURRENCY; w++) pump();
 
     // Draw a frame to canvas if it's loaded. If the frame hasn't
     // loaded yet, skip — canvas retains the previous frame, so the
@@ -204,7 +219,13 @@ export default function HeroVideoNarrative() {
     // The hero is position: sticky (CSS). Sticky handles the pin;
     // this useEffect just animates the image sequence + chapter text
     // as the user scrolls through the dwell zone (first 100vh).
-    const totalScroll = window.innerHeight;
+    // Scrub distance. 209 frames over ONE viewport height meant ~4px of
+    // scroll per frame at desktop sizes — a single 100px wheel tick blew
+    // through ~23 frames, which reads as lurching rather than scrubbing.
+    // 2x viewport gives ~9px/frame (~11 frames per tick): smooth.
+    // MUST stay in sync with .pageOverlay margin-top in globals.css.
+    const HERO_SCRUB_VH = 2;
+    const totalScroll = window.innerHeight * HERO_SCRUB_VH;
     const textFadeStart = totalScroll * 0.85;
     const textFadeEnd = totalScroll;
 
@@ -311,6 +332,9 @@ export default function HeroVideoNarrative() {
 
     return () => {
       stopped = true;
+      // stop the frame-loader pool so an unmounted hero stops issuing
+      // requests (matters on client-side nav away from the homepage)
+      cancelled = true;
       window.removeEventListener("scroll", scheduleScroll);
       window.clearInterval(lenisPoll);
       lenisHooked?.off("scroll", scheduleScroll);

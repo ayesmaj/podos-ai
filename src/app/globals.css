@@ -377,7 +377,20 @@ body {
        200vh+: main covers hero, normal scrolling
      The 100vh empty zone is invisible (body bg shows through —
      since hero is sticky at top, the user just sees hero). */
-  margin-top: 100vh;
+  /* 200vh (not 100vh): the desktop hero scrubs a 209-frame image
+     sequence across this gap. At 100vh each frame got ~4px of scroll,
+     so one wheel tick skipped ~23 frames and the sequence lurched.
+     200vh roughly doubles the sampling to ~9px/frame.
+     Keep in sync with HERO_SCRUB_VH in HeroVideoNarrative.tsx. */
+  margin-top: 200vh;
+}
+
+/* Mobile (<=768px) plays intro-mobile.mp4 on autoplay-loop instead of
+   scrubbing, so the extra dwell would just be dead scroll space. */
+@media (max-width: 768px) {
+  .pageOverlay {
+    margin-top: 100vh;
+  }
 }
 
 @media (max-width: 640px) {
