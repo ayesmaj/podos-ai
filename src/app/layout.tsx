@@ -5,6 +5,7 @@ import "./mobile.css";
 import "./perf.css";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import GlobalEnergyLayer from "@/components/site/GlobalEnergyLayer";
+import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/jsonld";
 
 /**
  * Industrial typography stack — engineered, not editorial.
@@ -50,12 +51,15 @@ export const metadata: Metadata = {
   title: "PODOS AI — The New Physical Layer for AI",
   description:
     "PODOS AI builds factory-built modular AI compute pods. 1-MW deployable infrastructure shipped in 90 days, ready to commission at your facility.",
-  metadataBase: new URL("https://podosai.com"),
+  // www is the canonical host — the apex redirects to it.
+  // NOTE: canonicals are set per-page (a layout-level canonical would
+  // cascade wrongly onto child routes).
+  metadataBase: new URL("https://www.podosai.com"),
   openGraph: {
     title: "PODOS AI",
     description: "The AI economy needs a new physical layer.",
     type: "website",
-    url: "https://podosai.com",
+    url: "https://www.podosai.com",
     siteName: "PODOS AI",
   },
   twitter: {
@@ -74,6 +78,8 @@ export default function RootLayout({
       className={`${geist.variable} ${interTight.variable} ${geistMono.variable}`}
     >
       <body>
+        <OrganizationJsonLd />
+        <WebSiteJsonLd />
         {/* GlobalEnergyLayer — site-wide ambient motion (scan beam,
             pulsing grid, brand sparks). Renders behind all content but
             above section backgrounds. Hidden under prefers-reduced-

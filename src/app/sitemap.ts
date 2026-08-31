@@ -1,21 +1,13 @@
 import type { MetadataRoute } from "next";
+import { INDEXABLE_ROUTES, canonicalUrl } from "@/lib/seo/site";
 
-// www is the canonical host (apex 307s to it)
-const BASE = "https://www.podosai.com";
-
+/* Derived from the indexable-route registry — add pages in
+ * src/lib/seo/site.ts, never here (verify-seo checks the same list). */
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: `${BASE}/`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${BASE}/invest`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-  ];
+  return INDEXABLE_ROUTES.map((r) => ({
+    url: canonicalUrl(r.path),
+    lastModified: new Date(),
+    changeFrequency: r.changeFrequency,
+    priority: r.priority,
+  }));
 }

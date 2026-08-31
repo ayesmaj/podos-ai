@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import HeroVideoNarrative from "@/components/site/HeroVideoNarrative";
 import ProblemDiagnosis from "@/components/site/ProblemDiagnosis";
 import SolutionCards from "@/components/site/SolutionCards";
@@ -11,6 +12,10 @@ import YossiVideoSection from "@/components/site/YossiVideoSection";
 import RequestAccessCTA from "@/components/site/RequestAccessCTA";
 import Footer from "@/components/site/Footer";
 import ScrollProgressRail from "@/components/site/ScrollProgressRail";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "https://www.podosai.com/" },
+};
 
 export default function Home() {
   return (

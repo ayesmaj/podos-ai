@@ -38,11 +38,20 @@ export const metadata: Metadata = {
   title: "Invest in PODOS — Turn Available Power into Deployable AI Compute",
   description:
     "PODOS builds factory-made modular units that integrate power, cooling, server racks, and communications — a faster path to AI capacity. Explore the investment opportunity.",
+  alternates: { canonical: "https://www.podosai.com/invest" },
   openGraph: {
     title: "Invest in PODOS",
     description:
       "Own a piece of the company building a faster path to AI capacity.",
-    url: "https://podosai.com/invest",
+    url: "https://www.podosai.com/invest",
+    images: [{ url: "https://www.podosai.com/visuals/invest/hero-pavilion.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Invest in PODOS",
+    description:
+      "Own a piece of the company building a faster path to AI capacity.",
+    images: ["https://www.podosai.com/visuals/invest/hero-pavilion.png"],
   },
 };
 
