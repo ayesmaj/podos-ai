@@ -14,6 +14,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import SeoImage from "@/components/seo/SeoImage";
 import { buildMetadata } from "@/lib/seo/metadata";
 
 const PATH = "/engineering/data-center-power-architecture";
@@ -180,6 +181,34 @@ function P({ children }: { children: ReactNode }) {
   );
 }
 
+function Figure({
+  id,
+  caption,
+  priority = false,
+}: {
+  id: string;
+  caption: string;
+  priority?: boolean;
+}) {
+  return (
+    <figure style={{ margin: "1.8rem 0 0", maxWidth: "56rem" }}>
+      <SeoImage id={id} priority={priority} sizes="(max-width: 768px) 100vw, 896px" />
+      <figcaption
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "0.68rem",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "var(--ink-faint)",
+          marginTop: "0.7rem",
+        }}
+      >
+        {caption}
+      </figcaption>
+    </figure>
+  );
+}
+
 export default function DataCenterPowerArchitecturePage() {
   const crumbs = [
     { name: "Home", path: "/" },
@@ -265,6 +294,11 @@ export default function DataCenterPowerArchitecturePage() {
             </Link>
             .
           </P>
+          <Figure
+            id="power-switchgear-bay"
+            priority
+            caption="Medium-voltage switchgear — the isolation and protection stage of the power chain"
+          />
         </section>
 
         {/* 02 — one-line walkthrough table */}
@@ -388,6 +422,10 @@ export default function DataCenterPowerArchitecturePage() {
             </Link>
             .
           </P>
+          <Figure
+            id="power-transformer-yard"
+            caption="Interconnection cabinet and pad-mounted transformer at the site boundary — stages PW-01 to PW-04"
+          />
         </section>
 
         {/* 04 — UPS and battery strategy */}
@@ -448,6 +486,10 @@ export default function DataCenterPowerArchitecturePage() {
             Inside, each unit is <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span> on
             a closed-loop liquid-cooling plant matched to the electrical envelope.
           </P>
+          <Figure
+            id="power-busway-run"
+            caption="Overhead busway with tap-off boxes feeding rack positions — stage PW-05 across the white space"
+          />
           <P>
             Compressing stages PW-02 to PW-08 into a manufactured product is why PODOS{" "}
             <span data-claim="deployment-window">

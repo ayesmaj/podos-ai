@@ -15,6 +15,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import SeoImage from "@/components/seo/SeoImage";
 
 export const metadata = buildMetadata({
   title: "Syntropic: AI Inference Memory Efficiency Software | PODOS",
@@ -218,6 +219,13 @@ export default function SyntropicPage() {
             problem space, what the layer is designed to do, and where development honestly stands.
           </p>
 
+          <figure style={{ marginTop: "2.6rem", maxWidth: 900 }}>
+            <SeoImage id="syntropic-memory-abstract" priority />
+            <figcaption style={{ ...microLabel, marginTop: "0.8rem" }}>
+              THE KV CACHE — ATTENTION STATE HELD IN GPU MEMORY DURING GENERATION
+            </figcaption>
+          </figure>
+
           <div style={{ marginTop: "1.8rem" }}>
             <LastVerified
               published="2026-08-31"
@@ -401,6 +409,13 @@ export default function SyntropicPage() {
             paid for. The layer is being developed around four design goals. These are goals for
             a system in development — not shipped capabilities, and not performance claims.
           </p>
+
+          <figure style={{ marginTop: "2.2rem", maxWidth: 900 }}>
+            <SeoImage id="syntropic-datapath" />
+            <figcaption style={{ ...microLabel, marginTop: "0.8rem" }}>
+              DESIGN GOALS SY-01 AND SY-03 — SMALLER CACHE FOOTPRINT, OBSERVABLE UTILIZATION
+            </figcaption>
+          </figure>
 
           <div
             style={{

@@ -4,6 +4,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import { FAQJsonLd, TechArticleJsonLd } from "@/components/seo/jsonld";
 import LastVerified from "@/components/seo/LastVerified";
+import SeoImage from "@/components/seo/SeoImage";
 import Footer from "@/components/site/Footer";
 import { buildMetadata } from "@/lib/seo/metadata";
 
@@ -163,6 +164,33 @@ const tdStyle: CSSProperties = {
   verticalAlign: "top",
 };
 
+const captionStyle: CSSProperties = {
+  ...mono,
+  fontSize: "0.74rem",
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: "var(--ink-faint)",
+};
+
+function Figure({
+  id,
+  caption,
+  priority = false,
+}: {
+  id: string;
+  caption: string;
+  priority?: boolean;
+}) {
+  return (
+    <figure style={{ margin: 0, maxWidth: "760px", width: "100%" }}>
+      <SeoImage id={id} priority={priority} sizes="(max-width: 768px) 100vw, 720px" />
+      <figcaption className="mt-3" style={captionStyle}>
+        {caption}
+      </figcaption>
+    </figure>
+  );
+}
+
 function StageSection({
   code,
   title,
@@ -275,6 +303,14 @@ export default function DeployPage() {
               and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, so the process
               repeats per unit rather than being re-engineered per project.
             </p>
+
+            <div className="mt-8">
+              <Figure
+                id="deploy-pad-prep"
+                priority
+                caption="Stage one — a prepared pad with anchor points and conduit stub-ups, before the unit arrives"
+              />
+            </div>
 
             <div className="mt-8">
               <LastVerified
@@ -414,6 +450,10 @@ export default function DeployPage() {
               to connections. The units are designed to be relocatable, so a later move follows
               the same steps in reverse.
             </p>
+            <Figure
+              id="deploy-crane-lift"
+              caption="DP-04 — the unit is rigged and set onto the prepared surface"
+            />
           </StageSection>
 
           {/* ---- DP-05 ---- */}
@@ -437,6 +477,10 @@ export default function DeployPage() {
               <Cite n={7} />. A factory-tested unit shortens commissioning; it does not replace it.
               The exit gate is a site acceptance test, after which the unit enters operations.
             </p>
+            <Figure
+              id="deploy-commission-check"
+              caption="DP-05 — systems checked at the open service bay on site power"
+            />
           </StageSection>
 
           {/* ---- DP-06 ---- */}

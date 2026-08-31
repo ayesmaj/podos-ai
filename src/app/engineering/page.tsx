@@ -27,6 +27,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import SeoImage from "@/components/seo/SeoImage";
 
 export const metadata = buildMetadata({
   title: "AI Data Center Engineering: Cooling, Power, Density | PODOS",
@@ -51,6 +52,14 @@ const SOURCES: Source[] = [
 /* ---------- small server-side style helpers ---------- */
 
 const mono = "var(--font-geist-mono), monospace";
+
+const caption: React.CSSProperties = {
+  fontFamily: mono,
+  fontSize: "0.66rem",
+  letterSpacing: "0.16em",
+  textTransform: "uppercase",
+  color: "var(--ink-dim)",
+};
 
 const linkStyle: React.CSSProperties = {
   color: "var(--brand-deep)",
@@ -214,6 +223,12 @@ export default function EngineeringHub() {
             author="Josef Elimelech"
             reviewer="PODOS AI Engineering"
           />
+          <figure className="flex flex-col gap-2" style={{ margin: 0, width: "100%" }}>
+            <SeoImage id="engineering-hub-cutaway" priority />
+            <figcaption style={caption}>
+              Cutaway view — the internal zones the seven domains below describe
+            </figcaption>
+          </figure>
         </div>
       </section>
 
@@ -569,6 +584,12 @@ export default function EngineeringHub() {
             </Link>
             .
           </p>
+          <figure className="flex flex-col gap-2" style={{ margin: 0, width: "100%", maxWidth: 760 }}>
+            <SeoImage id="engineering-systems-bench" sizes="(max-width: 768px) 100vw, 760px" />
+            <figcaption style={caption}>
+              Subsystem hardware across the cooling, power, and networking domains
+            </figcaption>
+          </figure>
         </div>
       </section>
 

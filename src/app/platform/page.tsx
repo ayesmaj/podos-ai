@@ -15,6 +15,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import SeoImage from "@/components/seo/SeoImage";
 
 export const metadata = buildMetadata({
   title: "Modular AI Data Center Platform: PODOS Pod + Syntropic",
@@ -126,6 +127,16 @@ const h3Style: CSSProperties = {
 
 const bodyStyle: CSSProperties = { color: "var(--ink-dim)", maxWidth: "68ch" };
 
+const figureStyle: CSSProperties = { maxWidth: "920px", width: "100%" };
+
+const figcaptionStyle: CSSProperties = {
+  ...mono,
+  fontSize: "0.66rem",
+  letterSpacing: "0.16em",
+  textTransform: "uppercase",
+  color: "var(--ink-dim)",
+};
+
 const linkStyle: CSSProperties = {
   color: "var(--brand-deep)",
   textDecoration: "underline",
@@ -206,6 +217,12 @@ export default function PlatformPage() {
           , and Syntropic, the compression software layer designed to raise how
           efficiently that hardware serves AI workloads.
         </p>
+        <figure className="mt-8" style={figureStyle}>
+          <SeoImage id="platform-overview" priority sizes="(max-width: 768px) 100vw, 920px" />
+          <figcaption className="mt-3" style={figcaptionStyle}>
+            The two layers: the factory-built Pod, and the software layer above it
+          </figcaption>
+        </figure>
         <div className="mt-7">
           <LastVerified
             published="2026-08-31"
@@ -458,6 +475,12 @@ export default function PlatformPage() {
             </tbody>
           </table>
         </div>
+        <figure className="mt-8" style={figureStyle}>
+          <SeoImage id="platform-integration" sizes="(max-width: 768px) 100vw, 920px" />
+          <figcaption className="mt-3" style={figcaptionStyle}>
+            Site interfaces on a unit pad: power feed, fiber route, cooling connection
+          </figcaption>
+        </figure>
       </section>
 
       {/* ---------------- LIMITATIONS ---------------- */}

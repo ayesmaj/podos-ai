@@ -14,6 +14,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import SeoImage from "@/components/seo/SeoImage";
 
 const PATH = "/engineering/direct-to-chip-liquid-cooling";
 const TITLE = "Direct-to-Chip Liquid Cooling: How Cold Plates Cool AI Racks";
@@ -148,6 +149,14 @@ const codePill: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
+const figCaption: CSSProperties = {
+  fontFamily: "var(--font-geist-mono), monospace",
+  fontSize: 11.5,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: "var(--ink-dim)",
+};
+
 const h2Style: CSSProperties = {
   fontFamily: "var(--font-display), ui-sans-serif, system-ui",
   fontWeight: 800,
@@ -251,6 +260,10 @@ export default function DirectToChipLiquidCoolingPage() {
         style={{ paddingBottom: "clamp(4rem, 8vh, 6rem)" }}
       >
         <div className="max-w-[76ch]">
+          <figure className="mb-14">
+            <SeoImage id="cooling-coldplate-macro" priority sizes="(max-width: 768px) 100vw, 76ch" />
+          </figure>
+
           {/* -------- what it is -------- */}
           <section id="definition" style={{ scrollMarginTop: 96 }}>
             <h2 style={h2Style}>Why the industry is moving heat into liquid</h2>
@@ -358,6 +371,13 @@ export default function DirectToChipLiquidCoolingPage() {
                 </tbody>
               </table>
             </div>
+
+            <figure className="mt-8">
+              <SeoImage id="cooling-cdu-row" sizes="(max-width: 768px) 100vw, 76ch" />
+              <figcaption className="mt-3" style={figCaption}>
+                LC-03 · CDU, manifolds, and the technology loop
+              </figcaption>
+            </figure>
           </section>
 
           {/* -------- coolant classes -------- */}
@@ -397,6 +417,13 @@ export default function DirectToChipLiquidCoolingPage() {
               site&apos;s water story — evaporative towers consume water to reach lower
               temperatures; dry coolers consume none but need warmer loops or more surface area.
             </p>
+
+            <figure className="mt-8">
+              <SeoImage id="cooling-heat-rejection" sizes="(max-width: 768px) 100vw, 76ch" />
+              <figcaption className="mt-3" style={figCaption}>
+                LC-06 · Dry-cooler heat rejection on the facility loop
+              </figcaption>
+            </figure>
           </section>
 
           {/* -------- closed loop -------- */}

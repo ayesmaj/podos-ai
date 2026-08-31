@@ -126,7 +126,7 @@ export const SEO_IMAGES: SeoImage[] = [
   {
     id: "cooling-cdu-row",
     page: "/engineering/direct-to-chip-liquid-cooling",
-    prompt: `A coolant distribution unit (CDU) cabinet with clear service panels beside a white rack row inside a bright technical corridor of the PODOS Pod interior: manifolds, flow meters, supply/return piping in orderly runs, cool daylight tones. ${POD_DNA} ${SEO_STYLE_DNA} ${NO_TEXT}`,
+    prompt: `INTERIOR-ONLY scene, no PODOS unit exterior in frame: a coolant distribution unit (CDU) cabinet with open service panels beside a white server rack row inside a bright technical equipment corridor — manifolds, flow meters, supply and return piping in orderly runs, cool neutral lighting, precision mechanical-room photography. Do NOT include any solar panels or rooftop array (this is indoors). ${SEO_STYLE_DNA} ${NO_TEXT}`,
     alt: "Coolant distribution unit and manifold piping inside a bright PODOS Pod corridor",
     src: "/visuals/seo/cooling-cdu-row.png", width: 1536, height: 1024, status: "ready", conceptual: true,
   },

@@ -13,6 +13,7 @@
 import Link from "next/link";
 import { buildMetadata } from "@/lib/seo/metadata";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import SeoImage from "@/components/seo/SeoImage";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
@@ -281,6 +282,22 @@ export default function ModularVsTraditionalPage() {
               reviewer="PODOS AI Engineering"
             />
           </div>
+
+          <figure style={{ marginTop: "2.4rem", maxWidth: 900 }}>
+            <SeoImage id="compare-split-frame" priority />
+            <figcaption
+              style={{
+                marginTop: "0.7rem",
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.68rem",
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: "var(--ink-dim)",
+              }}
+            >
+              Left: built in place. Right: factory-built, commissioned on a pad.
+            </figcaption>
+          </figure>
         </div>
       </section>
 

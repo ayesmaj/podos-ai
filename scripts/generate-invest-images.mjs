@@ -75,7 +75,7 @@ const REFS = {
 /* SEO batch: pod-bearing frames reference the real pod render */
 const SEO_POD_IDS = [
   "platform-overview", "platform-integration", "pod-hero-studio", "pod-scale-humans",
-  "pod-panel-detail", "pod-siting-pad", "engineering-hub-cutaway", "cooling-cdu-row",
+  "pod-panel-detail", "pod-siting-pad", "engineering-hub-cutaway", 
   "cooling-heat-rejection", "power-transformer-yard", "deploy-crane-lift",
   "deploy-commission-check", "usecase-campus", "usecase-factory", "usecase-hospital",
   "usecase-edge-site", "compare-split-frame",

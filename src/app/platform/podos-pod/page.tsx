@@ -7,14 +7,13 @@
  * a data-claim element with its required qualifier. Everything else stays
  * qualitative by design — no PUE, kV, sq ft, or $ figures (blocked ids).
  *
- * ponytail: no dedicated product render — Gemini free tier and fal.ai were
- * both unavailable at build time and AGENTS.md forbids hand-drawn fallbacks.
- * Add a generated image (public/visuals/, next/image static import) when
- * the pipeline is back.
+ * Visuals come from the registry (src/data/seo-page-images.ts) via SeoImage,
+ * which stamps every conceptual render with its CONCEPTUAL VISUALIZATION tag.
  */
 
 import Link from "next/link";
 import styles from "@/components/site/NewSections.module.css";
+import SeoImage from "@/components/seo/SeoImage";
 import { buildMetadata } from "@/lib/seo/metadata";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { ProductJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
@@ -100,6 +99,13 @@ export default function PodosPodPage() {
             <LastVerified published="2026-08-31" lastVerified="2026-08-31" author="Josef Elimelech" reviewer="PODOS AI Engineering" />
           </div>
 
+          <figure style={{ margin: "2.6rem 0 0", maxWidth: "980px" }}>
+            <SeoImage id="pod-hero-studio" priority sizes="(max-width: 768px) 100vw, 980px" />
+            <figcaption className="t-mono" style={{ fontSize: "0.66rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--ink-faint)", marginTop: "0.7rem" }}>
+              PODOS Pod — front three-quarter view of the current unit design
+            </figcaption>
+          </figure>
+
           {/* Verified-facts strip — the three publishable claims, nothing else */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" style={{ marginTop: "2.6rem" }}>
             <div className="panel card-lift" style={{ padding: "1.3rem 1.4rem" }} data-claim="unit-capacity-1mw">
@@ -151,6 +157,13 @@ export default function PodosPodPage() {
             </p>
           </div>
 
+          <figure style={{ margin: "2rem 0 0" }}>
+            <SeoImage id="pod-scale-humans" />
+            <figcaption className="t-mono" style={{ fontSize: "0.66rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--ink-faint)", marginTop: "0.7rem" }}>
+              The unit shown with engineers alongside it for scale
+            </figcaption>
+          </figure>
+
           <h2 className="t-headline" style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", marginTop: "3.2rem" }} data-claim="unit-capacity-1mw">What is designed into a 1 MW unit</h2>
           <p className="t-body" style={{ marginTop: "1rem", color: "var(--ink-dim)" }}>
             Six subsystems that a conventional build procures, engineers, and commissions
@@ -190,7 +203,15 @@ export default function PodosPodPage() {
             Subsystem descriptions reflect the current design specification. PODOS has not
             published measured performance data for these subsystems.
           </p>
-          <p className="t-body" style={{ marginTop: "1rem", color: "var(--ink-dim)" }}>
+
+          <figure style={{ margin: "1.8rem 0 0" }}>
+            <SeoImage id="pod-panel-detail" />
+            <figcaption className="t-mono" style={{ fontSize: "0.66rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--ink-faint)", marginTop: "0.7rem" }}>
+              PP-04 enclosure — panel seams, service latch, and solar roof edge
+            </figcaption>
+          </figure>
+
+          <p className="t-body" style={{ marginTop: "1.4rem", color: "var(--ink-dim)" }}>
             The cooling and electrical subsystems carry most of the engineering weight; they are
             documented in depth in{" "}
             <Link href="/engineering/direct-to-chip-liquid-cooling" style={{ color: "var(--brand)", textDecoration: "underline" }}>
@@ -245,6 +266,13 @@ export default function PodosPodPage() {
               <Link href="/deploy" style={{ color: "var(--brand)", textDecoration: "underline" }}>deployment page</Link>.
             </p>
           </div>
+
+          <figure style={{ margin: "2rem 0 0" }}>
+            <SeoImage id="pod-siting-pad" />
+            <figcaption className="t-mono" style={{ fontSize: "0.66rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--ink-faint)", marginTop: "0.7rem" }}>
+              A unit set on a prepared pad, with the site utility cabinet alongside
+            </figcaption>
+          </figure>
 
           <h2 className="t-headline" style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", marginTop: "3.2rem" }} data-claim="unit-capacity-1mw">Does the 1 MW unit design fit your problem?</h2>
           <p className="t-body" style={{ marginTop: "1rem", color: "var(--ink-dim)" }}>

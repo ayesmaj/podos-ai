@@ -16,6 +16,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import SeoImage from "@/components/seo/SeoImage";
 
 const PATH = "/resources/ai-infrastructure-glossary";
 const TITLE = "AI Infrastructure Glossary: 40 Data Center Terms Defined";
@@ -597,6 +598,11 @@ export default function GlossaryPage() {
               author="Josef Elimelech"
               reviewer="PODOS AI Engineering"
             />
+          </div>
+
+          {/* decorative header plate — registry alt is intentionally empty */}
+          <div style={{ marginTop: "clamp(2rem, 5vh, 3rem)", maxWidth: 900 }}>
+            <SeoImage id="glossary-abstract" priority />
           </div>
         </div>
       </section>

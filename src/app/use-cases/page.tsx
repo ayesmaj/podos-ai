@@ -15,6 +15,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import SeoImage from "@/components/seo/SeoImage";
 import { TechArticleJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
@@ -101,6 +102,27 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
         {children}
       </p>
     </div>
+  );
+}
+
+function Figure({
+  id,
+  caption,
+  sizes,
+  priority = false,
+}: {
+  id: string;
+  caption: string;
+  sizes?: string;
+  priority?: boolean;
+}) {
+  return (
+    <figure className="mt-6">
+      <SeoImage id={id} priority={priority} sizes={sizes} />
+      <figcaption className="mt-3" style={microLabel}>
+        {caption}
+      </figcaption>
+    </figure>
   );
 }
 
@@ -263,6 +285,13 @@ export default function UseCasesPage() {
             early-stage company, and no deployments, customers, or certifications are
             claimed on this page.
           </p>
+
+          <Figure
+            id="usecase-campus"
+            priority
+            sizes="(max-width: 768px) 100vw, 720px"
+            caption="Conceptual siting — a unit placed on institutional land near existing infrastructure (profile U-02)"
+          />
         </div>
       </section>
 
@@ -397,6 +426,11 @@ export default function UseCasesPage() {
                 single line whose inference fits in one rack. A megawatt is the wrong
                 granularity for a kilowatt problem.
               </Row>
+              <Figure
+                id="usecase-factory"
+                sizes="(max-width: 768px) 100vw, 560px"
+                caption="Conceptual siting — a unit on the industrial estate it serves"
+              />
             </ProfileCard>
 
             <ProfileCard code="U-04" title="Healthcare">
@@ -420,6 +454,11 @@ export default function UseCasesPage() {
                 run on their own clock; smaller inference loads may also fit hardware
                 the institution already owns.
               </Row>
+              <Figure
+                id="usecase-hospital"
+                sizes="(max-width: 768px) 100vw, 560px"
+                caption="Conceptual siting — a utility pad on institution-controlled property, outside clinical space"
+              />
             </ProfileCard>
 
             <ProfileCard code="U-05" title="Government & secure">
@@ -463,6 +502,11 @@ export default function UseCasesPage() {
                 latency benefit is workload-specific and should be measured before
                 committing; no general number honestly applies.
               </Row>
+              <Figure
+                id="usecase-edge-site"
+                sizes="(max-width: 768px) 100vw, 560px"
+                caption="Conceptual siting — a self-contained unit at a remote site with local generation nearby"
+              />
             </ProfileCard>
 
             <ProfileCard code="U-07" title="Supplemental capacity">
