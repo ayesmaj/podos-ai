@@ -8,9 +8,11 @@
  */
 
 import type { Metadata } from "next";
+import Image from "next/image";
 import { buildMetadata } from "@/lib/seo/metadata";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import ConfiguratorClient from "@/components/configurator/ConfiguratorClient";
+import { ESTIMATOR_HERO } from "@/data/configuratorOptionImages";
 
 export const metadata: Metadata = buildMetadata({
   title: "PODOS Estimator: Configure Modular AI Infrastructure",
@@ -49,6 +51,43 @@ export default function ConfigurePage() {
         >
           Size your AI infrastructure deployment.
         </h1>
+
+        {/* Dedicated configurator render (see docs/configurator/ASSETS.md).
+            Conceptual, and labelled as such below — never documentary proof. */}
+        <figure style={{ marginTop: "1.8rem" }}>
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              aspectRatio: "3 / 1",
+              borderRadius: 16,
+              overflow: "hidden",
+              border: "1px solid var(--edge)",
+              background: "var(--canvas)",
+            }}
+          >
+            <Image
+              src={ESTIMATOR_HERO.src}
+              alt={ESTIMATOR_HERO.alt}
+              fill
+              sizes="(max-width: 900px) 100vw, 1200px"
+              style={{ objectFit: "cover" }}
+              priority
+            />
+          </div>
+          <figcaption
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10.5,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--ink-faint)",
+              marginTop: "0.6rem",
+            }}
+          >
+            Conceptual visualization — final appearance subject to site engineering
+          </figcaption>
+        </figure>
 
         <p className="t-lede" style={{ marginTop: "1.1rem", maxWidth: "62ch" }}>
           Choose how much capacity you need and how the units should be

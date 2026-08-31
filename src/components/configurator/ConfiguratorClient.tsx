@@ -14,7 +14,16 @@
  */
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { usePricingOverride } from "@/lib/configurator/usePricingOverride";
+import {
+  COMPUTE_IMAGES,
+  COOLING_IMAGES,
+  NETWORK_IMAGES,
+  POWER_IMAGES,
+  SERVICE_IMAGES,
+  SUPPORT_IMAGES,
+} from "@/data/configuratorOptionImages";
 import {
   DEFAULT_SELECTION,
   estimate,
@@ -42,16 +51,43 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
 
 type Opt = { label: string; price?: number; pricePerYear?: number; note: string };
 
+/**
+ * Decorative option thumbnail. alt is empty on purpose — the card already
+ * carries a visible label, so announcing the picture too would just repeat it.
+ */
+function OptionThumb({ src }: { src?: string }) {
+  if (!src) return null;
+  return (
+    <span
+      style={{
+        position: "relative",
+        display: "block",
+        width: "100%",
+        aspectRatio: "16 / 9",
+        borderRadius: 7,
+        overflow: "hidden",
+        border: "1px solid var(--edge)",
+        background: "var(--canvas)",
+        marginBottom: "0.65rem",
+      }}
+    >
+      <Image src={src} alt="" fill sizes="(max-width: 1024px) 45vw, 240px" style={{ objectFit: "cover" }} />
+    </span>
+  );
+}
+
 function OptionCards({
   options,
   value,
   onChange,
   name,
+  images,
 }: {
   options: Record<string, Opt>;
   value: string;
   onChange: (v: string) => void;
   name: string;
+  images?: Record<string, string>;
 }) {
   return (
     <div
@@ -78,6 +114,7 @@ function OptionCards({
               transition: "border-color .2s, background .2s, box-shadow .2s",
             }}
           >
+            <OptionThumb src={images?.[id]} />
             <div style={{ fontWeight: 600, fontSize: 14.5, color: "var(--ink-strong)" }}>{o.label}</div>
             <div style={{ fontSize: 12.5, lineHeight: 1.5, color: "var(--ink-dim)", marginTop: 4 }}>{o.note}</div>
           </button>
@@ -197,8 +234,8 @@ export default function ConfiguratorClient() {
         <Group title="02 · Compute">
           <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
             {[
-              { v: true, label: "PODOS-supplied compute", note: "Designed for 128 GPUs per pod" },
-              { v: false, label: "Customer-furnished compute", note: "You supply accelerators; we supply the infrastructure" },
+              { v: true, label: "PODOS-supplied compute", note: "Designed for 128 GPUs per pod", img: COMPUTE_IMAGES.podos },
+              { v: false, label: "Customer-furnished compute", note: "You supply accelerators; we supply the infrastructure", img: COMPUTE_IMAGES.customer },
             ].map((o) => {
               const active = sel.includeCompute === o.v;
               return (
@@ -216,6 +253,7 @@ export default function ConfiguratorClient() {
                     border: "1px solid " + (active ? "var(--brand)" : "var(--edge)"),
                   }}
                 >
+                  <OptionThumb src={o.img} />
                   <div style={{ fontWeight: 600, fontSize: 14.5 }}>{o.label}</div>
                   <div style={{ fontSize: 12.5, color: "var(--ink-dim)", marginTop: 4 }}>{o.note}</div>
                 </button>
@@ -225,19 +263,19 @@ export default function ConfiguratorClient() {
         </Group>
 
         <Group title="03 · Cooling">
-          <OptionCards options={pricing.cooling} value={sel.cooling} onChange={(v) => set("cooling", v)} name="Cooling" />
+          <OptionCards options={pricing.cooling} value={sel.cooling} onChange={(v) => set("cooling", v)} name="Cooling" images={COOLING_IMAGES} />
         </Group>
 
         <Group title="04 · Power">
-          <OptionCards options={pricing.power} value={sel.power} onChange={(v) => set("power", v)} name="Power" />
+          <OptionCards options={pricing.power} value={sel.power} onChange={(v) => set("power", v)} name="Power" images={POWER_IMAGES} />
         </Group>
 
         <Group title="05 · Network">
-          <OptionCards options={pricing.network} value={sel.network} onChange={(v) => set("network", v)} name="Network" />
+          <OptionCards options={pricing.network} value={sel.network} onChange={(v) => set("network", v)} name="Network" images={NETWORK_IMAGES} />
         </Group>
 
         <Group title="06 · Support">
-          <OptionCards options={pricing.support} value={sel.support} onChange={(v) => set("support", v)} name="Support" />
+          <OptionCards options={pricing.support} value={sel.support} onChange={(v) => set("support", v)} name="Support" images={SUPPORT_IMAGES} />
         </Group>
 
         <Group title="07 · Deployment services">
@@ -264,7 +302,10 @@ export default function ConfiguratorClient() {
                     onChange={() => toggleService(id)}
                     style={{ marginTop: 3, accentColor: "var(--brand)" }}
                   />
-                  <span>
+                  <span style={{ minWidth: 0, flex: 1 }}>
+                    <span style={{ display: "block", maxWidth: 220 }}>
+                      <OptionThumb src={SERVICE_IMAGES[id]} />
+                    </span>
                     <span style={{ fontWeight: 600, fontSize: 14.5 }}>{s.label}</span>
                     <span style={{ display: "block", fontSize: 12.5, color: "var(--ink-dim)", marginTop: 2 }}>{s.note}</span>
                   </span>
