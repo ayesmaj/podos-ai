@@ -53,6 +53,7 @@ const SOURCES: Source[] = [
     name: "WP #29 — ERE: A Metric for Measuring the Benefit of Reuse Energy from a Data Center",
     publisher: "The Green Grid",
     url: "https://archive.thegreengrid.org/en/resources/library-and-tools/242-WP",
+    date: "2010",
   },
   {
     n: 5,

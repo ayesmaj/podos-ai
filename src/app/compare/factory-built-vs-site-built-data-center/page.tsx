@@ -8,7 +8,8 @@
  * customization limits, transport envelope, and where site-built wins.
  *
  * Server component: all copy in initial HTML, CSS-only hovers, no
- * client JS. MAIN light technical design system only (never .iv-*).
+ * client JS. MAIN light technical design system only (never the
+ * investor dark-theme utility classes).
  * Company claims render only from publishable claims.ts entries with
  * their required qualifier; external numbers cite the source rail.
  */
@@ -45,7 +46,7 @@ const SOURCES: Source[] = [
   },
   {
     n: 2,
-    name: "ICC/MBI 1205-2021, Standard for Off-Site Construction: Inspection and Regulatory Compliance",
+    name: "ICC/MBI 1205-2021, Standard for Inspection and Regulatory Compliance in Off-Site Construction",
     publisher: "International Code Council / Modular Building Institute",
     url: "https://codes.iccsafe.org/content/ICC12052021P1",
     date: "2021 ed.",
@@ -58,27 +59,20 @@ const SOURCES: Source[] = [
   },
   {
     n: 4,
-    name: "ISO 668:2020, Series 1 freight containers — Classification, dimensions and ratings",
-    publisher: "ISO",
-    url: "https://www.iso.org/standard/76912.html",
-    date: "2020",
-  },
-  {
-    n: 5,
     name: "Global Data Center Survey 2025",
     publisher: "Uptime Institute",
     url: "https://uptimeinstitute.com/resources/research-and-reports/uptime-institute-global-data-center-survey-results-2025",
     date: "Jul 2025",
   },
   {
-    n: 6,
+    n: 5,
     name: "Emergence and Expansion of Liquid Cooling in Mainstream Data Centers (white paper)",
     publisher: "ASHRAE TC 9.9",
     url: "https://www.ashrae.org/file%20library/technical%20resources/bookstore/emergence-and-expansion-of-liquid-cooling-in-mainstream-data-centers_wp.pdf",
     date: "c. 2021",
   },
   {
-    n: 7,
+    n: 6,
     name: "NFPA 75, Standard for the Fire Protection of Information Technology Equipment",
     publisher: "NFPA",
     url: "https://www.nfpa.org",
@@ -102,7 +96,7 @@ const FAQ = [
   },
   {
     q: "What limits how large a factory-built module can be?",
-    a: "The road, not the factory. Federal standards set 80,000 lb gross vehicle weight, 20,000 lb on a single axle and 34,000 lb on a tandem axle on the Interstate System, plus a 102-inch width states may not raise or lower on the National Network. Beyond those figures delivery becomes an oversize/overweight permit exercise.",
+    a: "The road, not the factory. Federal Highway Administration standards set 80,000 lb gross vehicle weight, 20,000 lb on a single axle and 34,000 lb on a tandem axle on the Interstate System, plus a 102-inch width no state may set above or below on the National Network. Beyond those figures delivery becomes an oversize/overweight permit exercise.",
   },
   {
     q: "When is site-built still the better choice?",
@@ -266,7 +260,7 @@ const PERMITS: { code: string; interfaceName: string; owner: string; note: strin
       interfaceName: "Fire protection and life safety",
       owner: "Fire code official / AHJ",
       note: "Detection and suppression for IT areas are reviewed locally under NFPA 75 wherever the enclosure was built.",
-      cite: 7,
+      cite: 6,
     },
     {
       code: "FB-P6",
@@ -426,8 +420,8 @@ export default function FactoryBuiltVsSiteBuiltPage() {
           <p className="t-body" style={{ marginTop: "0.9rem", maxWidth: "72ch", color: "var(--ink-dim)" }}>
             That matters more than it used to because of what goes inside. Uptime Institute&apos;s
             2025 survey puts typical rack densities in the 10–30 kW band with AI clusters above it
-            <Cite n={5} />, and ASHRAE documents liquid cooling moving into mainstream facilities as
-            densities climb<Cite n={6} />. Dense racks demand tight integration between{" "}
+            <Cite n={4} />, and ASHRAE documents liquid cooling moving into mainstream facilities as
+            densities climb<Cite n={5} />. Dense racks demand tight integration between{" "}
             <Link href="/engineering/data-center-power-architecture" style={linkStyle}>
               power distribution
             </Link>{" "}
@@ -539,10 +533,10 @@ export default function FactoryBuiltVsSiteBuiltPage() {
             authorities: an off-site path that reviews and inspects the unit where it is made, and
             the ordinary local path that permits the ground it lands on. The International Code
             Council and the Modular Building Institute published ICC/MBI 1200 and 1205 to
-            standardize that handoff — 1200 covering planning, design, fabrication, transportation,
-            and assembly; 1205 covering permitting, in-plant and on-site final inspection,
-            third-party inspection agencies, industrialized-building departments, state modular
-            programs, and the authority having jurisdiction.
+            standardize that handoff — 1200 covering planning, design, fabrication, and assembly in
+            off-site construction; 1205 covering permitting, in-plant and on-site final inspection,
+            third-party inspection, industrialized-building departments, state modular programs, and
+            the authority having jurisdiction.
             <Cite n={2} />
             <Cite n={3} />
           </p>
@@ -618,16 +612,16 @@ export default function FactoryBuiltVsSiteBuiltPage() {
           <h2 style={h2Style}>Transport constraints: the road designs the product</h2>
           <p className="t-body" style={{ marginTop: "1rem", maxWidth: "72ch", color: "var(--ink-dim)" }}>
             The hardest limit on factory-built infrastructure is not manufacturing capability. It is
-            the public road. Federal standards on the Interstate System set 80,000 lb gross vehicle
-            weight, 20,000 lb on a single axle, and 34,000 lb on a tandem axle; on the National
-            Network no state may impose a width limit above or below 102 inches, while height is set
-            by the states, generally 13.6–14.6 ft.<Cite n={1} /> Those figures are the real design
-            constraint behind every standardized unit on the market.
+            the public road. Federal Highway Administration standards on the Interstate System set
+            80,000 lb gross vehicle weight, 20,000 lb on a single axle, and 34,000 lb on a tandem
+            axle; on the National Network no state may impose a width limitation of more or less
+            than 102 inches, while height limits are left to the states.<Cite n={1} /> Those figures
+            are the real design constraint behind every standardized unit on the market.
           </p>
           <p className="t-body" style={{ marginTop: "0.9rem", maxWidth: "72ch", color: "var(--ink-dim)" }}>
-            Two strategies follow. The first stays inside the legal envelope — often at or near the
-            ISO series 1 freight-container form factor standardized in ISO 668<Cite n={4} />
-            {" "}— so delivery is ordinary freight on ordinary trailers. The second exceeds it and
+            Two strategies follow. The first stays inside the legal envelope — often at or near
+            standard intermodal freight-container proportions — so delivery is ordinary freight on
+            ordinary trailers. The second exceeds it and
             accepts oversize or overweight permitting: state-by-state routing, escorts, bridge
             analysis, curfews, and a date set by a permit office. Neither is wrong, but the second
             reintroduces on the highway the schedule variance factory production was meant to

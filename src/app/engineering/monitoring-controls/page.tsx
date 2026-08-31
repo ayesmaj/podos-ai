@@ -58,9 +58,10 @@ const SOURCES: Source[] = [
   },
   {
     n: 5,
-    name: "IEEE 519 — Harmonic Control in Electric Power Systems",
+    name: "IEEE 519-2022 — Standard for Harmonic Control in Electric Power Systems",
     publisher: "IEEE Standards Association",
     url: "https://standards.ieee.org/ieee/519/10677/",
+    date: "2022",
   },
   {
     n: 6,
@@ -228,7 +229,7 @@ const CHECKLIST: [string, string, string][] = [
   [
     "MC-B",
     "What is the measurement uncertainty, and when was the point last calibrated?",
-    "Every sensor has a tolerance band that widens as it drifts. A supply-water temperature quoted to two decimals from a ±0.5 °C probe is false precision, and an uncalibrated point produces confident, wrong numbers.",
+    "Every sensor has a tolerance band that widens as it drifts. A supply-water temperature quoted to two decimals from a probe whose tolerance is wider than that is false precision, and an uncalibrated point produces confident, wrong numbers.",
   ],
   [
     "MC-C",
@@ -261,7 +262,7 @@ export default function MonitoringControlsPage() {
   return (
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
-        headline="Monitoring and controls for AI compute infrastructure"
+        headline="Monitoring and controls, sensor to alarm"
         description={DESCRIPTION}
         path={PATH}
         datePublished="2026-08-31"

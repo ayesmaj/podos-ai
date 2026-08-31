@@ -123,7 +123,7 @@ const FAQ = [
   },
   {
     q: "How much power headroom should a readiness assessment require?",
-    a: "Enough for mechanical and electrical overhead above IT load plus the density trajectory of the hardware, not day-one nameplate. Uptime Institute survey data shows fleet rack densities climbing into the 10-30 kW band.",
+    a: "Enough for mechanical and electrical overhead above IT load plus the density trajectory of the hardware, not day-one nameplate. Operator survey data shows fleet rack densities still climbing, so headroom sized to today's racks ages badly.",
   },
   {
     q: "Does this replace a feasibility study or geotechnical report?",

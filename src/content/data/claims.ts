@@ -59,7 +59,7 @@ export const CLAIMS: Record<string, PublicClaim> = {
     requiredQualifier: "target",
     approvedBy: "Founder (chat)",
     approvedAt: "2026-08-31",
-    notes: "Founder resolved conflict C1 to 90 days; all site text updated. OUTSTANDING: public/products/pod.png artwork still renders '90–120 days' — regenerate the asset.",
+    notes: "Founder resolved conflict C1 to 90 days; all site text updated AND pod.png artwork patched to '90 days' (2026-08-31). No remaining variants.",
   },
   "compute-demand-10x": {
     id: "compute-demand-10x",

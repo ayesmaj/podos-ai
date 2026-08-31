@@ -90,10 +90,10 @@ const SOURCES: Source[] = [
   },
   {
     n: 9,
-    name: "ANSI/NEMA 250-2020 — Enclosures for Electrical Equipment (1000 Volts Maximum), contents and scope",
+    name: "NEMA 250 — Enclosures for Electrical Equipment (1000 Volts Maximum) (catalog)",
     publisher: "NEMA",
-    url: "https://www.nema.org/docs/default-source/standards-document-library/ansi_nema_250-2020-contents-and-scope76f809d7-afad-4aa1-80cd-e1d09b60f2e5.pdf",
-    date: "2020",
+    url: "https://www.nema.org",
+    date: "current ed.",
   },
   {
     n: 10,
@@ -162,8 +162,8 @@ const codePill: CSSProperties = {
   fontWeight: 600,
   letterSpacing: "0.18em",
   color: "var(--brand-deep)",
-  background: "rgba(37,99,235,0.07)",
-  border: "1px solid rgba(37,99,235,0.16)",
+  background: "var(--brand-trace)",
+  border: "1px solid var(--brand-glow)",
   borderRadius: 999,
   padding: "0.15rem 0.6rem",
   whiteSpace: "nowrap",
@@ -535,9 +535,10 @@ export default function SafetySecurityPage() {
               An outdoor enclosure has to keep weather, dust, and airborne contaminants away from
               electronics while still rejecting heat. Two standards measure that. IEC 60529 assigns
               an IP code whose first digit rates protection against solid ingress and second digit
-              against liquids.<Cite n={8} /> ANSI/NEMA 250 defines enclosure types for indoor,
-              outdoor, and hazardous locations, with an annex cross-referencing those types to IP
-              degrees.<Cite n={9} /> Both are ingress tests under defined conditions. Neither is a
+              against liquids.<Cite n={8} /> NEMA 250 defines enclosure types for indoor, outdoor,
+              and hazardous locations against its own test conditions, so a NEMA type and an IP code
+              are not interchangeable statements.<Cite n={9} /> Both are ingress tests under defined
+              conditions. Neither is a
               fire rating or a security rating, and a rating on the enclosure says nothing about the
               equipment inside it.
             </p>

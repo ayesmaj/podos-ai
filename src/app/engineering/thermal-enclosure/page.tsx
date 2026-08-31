@@ -65,10 +65,10 @@ const SOURCES: Source[] = [
   },
   {
     n: 6,
-    name: "Climatic design conditions / Weather Data Viewer (Handbook — Fundamentals)",
+    name: "Climatic design conditions — Weather Data Viewer (2025 Handbook — Fundamentals, RP-1923)",
     publisher: "ASHRAE",
     url: "https://weather.ashrae.org/",
-    date: "2025 update",
+    date: "2025 ed.",
   },
   {
     n: 7,
@@ -434,11 +434,10 @@ export default function ThermalEnclosurePage() {
             <h2 style={h2Style}>Climate exposure: design to conditions, not averages</h2>
             <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
               Annual averages design nothing. ASHRAE publishes climatic design conditions per weather
-              station — the 2025 update processed 12,424 stations for the Handbook — Fundamentals
-              <Cite n={6} /> — and four of those values drive four different parts of the enclosure: cooling
-              design dry bulb sizes skin gain, the 99.6% heating dry bulb sizes freeze protection, extreme
-              annual dew point sets the condensation case, coincident wet bulb governs heat rejection
-              outside the box. Exposure is a materials question too: salt attacks coatings and dissimilar-metal joints, UV
+              station rather than per region,<Cite n={6} /> and four of those values drive four different
+              parts of the enclosure: cooling design dry bulb sizes skin gain, heating design dry bulb sizes
+              freeze protection, extreme annual dew point sets the condensation case, coincident wet bulb
+              governs heat rejection outside the box. Exposure is a materials question too: salt attacks coatings and dissimilar-metal joints, UV
               degrades gaskets, altitude derates fans. A fleet-deployable enclosure is specified to the worst
               case across its intended sites, and that scope is a costed decision, not an assumption.
             </p>

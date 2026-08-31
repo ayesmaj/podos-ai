@@ -31,10 +31,10 @@ export const metadata = buildMetadata({
 const SOURCES: Source[] = [
   {
     n: 1,
-    name: "RDMA over Ethernet for Distributed AI Training at Meta Scale (ACM SIGCOMM 2024)",
-    publisher: "Meta / ACM SIGCOMM",
+    name: "RoCE networks for distributed AI training at scale (companion to the ACM SIGCOMM 2024 paper)",
+    publisher: "Meta Engineering",
     url: "https://engineering.fb.com/2024/08/05/data-center-engineering/roce-network-distributed-ai-training-at-scale/",
-    date: "Aug 2024",
+    date: "5 Aug 2024",
   },
   {
     n: 2,
@@ -59,10 +59,10 @@ const SOURCES: Source[] = [
   },
   {
     n: 5,
-    name: "ANSI/TIA-942 Telecommunications Infrastructure Standard for Data Centers (rev. C)",
+    name: "ANSI/TIA-942 Telecommunications Infrastructure Standard for Data Centers (revision C)",
     publisher: "Telecommunications Industry Association",
     url: "https://tiaonline.org/products-and-services/tia942certification/ansi-tia-942-standard/",
-    date: "May 2024",
+    date: "revision C, accessed 2026-08-31",
   },
   {
     n: 6,
@@ -99,7 +99,7 @@ const FAQ = [
   },
   {
     q: "Why is single-mode fiber used instead of copper inside AI clusters?",
-    a: "Copper direct-attach cables are cheaper and lower power, but at 100 Gb/s per lane their reach is a few metres, which confines them to intra-rack links. Anything crossing a rack or a row needs optics, and single-mode fiber carries those distances without the reach penalty multimode hits at high lane rates.",
+    a: "Copper direct-attach cables are cheaper and lower power, but at the lane rates current 400G and 800G optics run at, copper reach shrinks to a few metres, which confines it to intra-rack links. Anything crossing a rack or a row needs optics, and single-mode fiber carries those distances without the reach penalty multimode hits as lane rates climb.",
   },
   {
     q: "How much oversubscription is acceptable in an AI backend fabric?",
@@ -309,7 +309,7 @@ export default function NetworkingFiberPage() {
   return (
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
-        headline="AI data-center network architecture: fiber, leaf-spine, and east-west traffic"
+        headline="Networking and fiber in an AI data center"
         description={DESCRIPTION}
         path={PATH}
         datePublished="2026-08-31"
@@ -433,7 +433,7 @@ export default function NetworkingFiberPage() {
               Everything external begins at the entrance facility: outside-plant fiber terminating in
               an entrance room, transitioning to inside-plant cable, cross-connecting into the main
               distribution area. ANSI/TIA-942 — the data-center telecommunications infrastructure
-              standard, revised to rev. C in 2024 — defines those spaces, pathways, and redundancy
+              standard, currently at revision C — defines those spaces, pathways, and redundancy
               topologies.<Cite n={5} /> Two carrier paths sharing one conduit are one path with two
               invoices; real diversity means separate entry points, conduits, and routes off the
               property. Inside, media follows the lane rate rather than taste. IEEE Std 802.3df-2024
@@ -501,16 +501,17 @@ export default function NetworkingFiberPage() {
             </div>
 
             <p className={bodyP} style={bodyColor}>
-              This is where the scale-up boundary earns its keep. NVIDIA describes NVLink as the
-              scale-up fabric for GPU-to-GPU communication inside a node or rack, with Ethernet and
-              InfiniBand carrying traffic between racks<Cite n={6} />; a GB200 NVL72 rack presents 72
-              GPUs and 36 CPUs as a single NVLink domain.<Cite n={7} /> Parallelism that fits inside
-              that domain never touches the fiber plant; parallelism that does not crosses a bandwidth
-              cliff at the rack boundary, which makes scheduler placement a networking decision. The
-              transport underneath is meanwhile consolidating on Ethernet: the Ultra Ethernet
-              Consortium published Specification 1.0 in June 2025, defining a transport with
-              packet-level multipathing, tighter flow control, and open telemetry APIs across NICs,
-              switches, optics, and cables so multi-vendor fabrics interoperate.<Cite n={2} />
+              This is where the scale-up boundary earns its keep. NVIDIA describes NVLink as a direct
+              GPU-to-GPU interconnect that scales multi-GPU I/O within a server, with NVLink Switch
+              chips extending all-to-all GPU communication across the rack<Cite n={6} />; a GB200
+              NVL72 rack presents 72 GPUs and 36 CPUs as a single NVLink domain.<Cite n={7} /> Traffic
+              between racks falls to Ethernet or InfiniBand instead. Parallelism that fits inside the
+              scale-up domain never touches the fiber plant; parallelism that does not crosses a
+              bandwidth cliff at the rack boundary, which makes scheduler placement a networking
+              decision. The transport underneath is meanwhile consolidating on Ethernet: the Ultra
+              Ethernet Consortium launched Specification 1.0 in June 2025, an RDMA transport for
+              Ethernet and IP specified across NICs, switches, optics, and cables so multi-vendor
+              fabrics interoperate without lock-in.<Cite n={2} />
             </p>
           </section>
 

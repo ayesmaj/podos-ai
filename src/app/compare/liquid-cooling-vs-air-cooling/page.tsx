@@ -109,7 +109,7 @@ const SOURCES: Source[] = [
 const FAQ = [
   {
     q: "At what rack density does liquid cooling become necessary?",
-    a: "There is no universal threshold. Industry survey data shows fleet densities climbing into the 10-30 kW band, and rack-scale AI systems ship liquid-cooled because no air-cooled version is offered. For a given hall the crossover depends on inlet temperature, containment quality, floor pressure, and how much fan energy the operator will tolerate.",
+    a: "There is no universal threshold. Uptime Institute's Global Data Center Survey 2025 reports fleet densities climbing into the 10-30 kW band, and rack-scale AI systems such as NVIDIA's GB200 NVL72 ship liquid-cooled because no air-cooled version is offered. For a given hall the crossover depends on inlet temperature, containment quality, floor pressure, and how much fan energy the operator will tolerate.",
   },
   {
     q: "Is air cooling ever the better engineering choice?",
@@ -211,7 +211,7 @@ const ASSUMPTIONS = [
 ];
 
 const AIR_WINS = [
-  "Modest, stable density. General-purpose compute, storage, and network racks in the single-digit to low-teens kW range are designed for air.",
+  "Modest, stable density. General-purpose compute, storage, and network racks at conventional densities are designed for air, and the fan-power penalty stays small there.",
   "An existing hall with adequate containment and cooling capacity, where tuning the room is cheaper than plumbing it.",
   "Short remaining facility life. A lease with a few years left rarely justifies plant that pays back over a decade.",
   "Thin operations staffing, since coolant chemistry, filtration, and leak procedure need people and drills.",

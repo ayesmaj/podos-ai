@@ -3,7 +3,8 @@
  *
  * Comparison page (compare cluster). Server component — all copy in
  * initial HTML, CSS-only hovers, no client JS. Styled with the MAIN
- * site light technical system (design-language-lock.md), never .iv-*.
+ * site light technical system (design-language-lock.md). Global tokens
+ * and utilities from globals.css only — no investor-deck class family.
  *
  * Claims discipline: only publishable entries from
  * src/content/data/claims.ts render, each wrapped in data-claim with
@@ -239,7 +240,7 @@ const FAQ = [
   },
   {
     q: "Can existing server rooms host modern AI racks?",
-    a: "Usually not without significant work. Rack-scale AI systems such as NVIDIA's GB200 NVL72 — 72 GPUs and 36 CPUs behaving as one NVLink domain — ship liquid-cooled, and ASHRAE's TC 9.9 has documented why air cooling stops being economic at those densities. Power capacity, floor loading, and a liquid-cooling path are the three constraints that most often rule a legacy room out.",
+    a: "Usually not without significant work. Rack-scale AI systems such as NVIDIA's GB200 NVL72 ship liquid-cooled and behave as a single NVLink domain, and ASHRAE's TC 9.9 has documented why air cooling stops being economic at those densities. Power capacity, floor loading, and a liquid-cooling path are the constraints that most often rule a legacy room out. Both points are sourced in the reference list at the foot of this page.",
   },
 ];
 

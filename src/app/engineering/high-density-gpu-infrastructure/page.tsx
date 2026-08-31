@@ -309,7 +309,7 @@ export default function HighDensityGpuInfrastructurePage() {
   return (
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
-        headline="High-density GPU infrastructure: designing the rack"
+        headline="High-density GPU infrastructure, rack by rack"
         description={DESCRIPTION}
         path={PATH}
         datePublished="2026-08-31"
