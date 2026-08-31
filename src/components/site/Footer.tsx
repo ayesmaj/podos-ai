@@ -77,6 +77,19 @@ export default function Footer() {
           </ul>
         </div>
 
+        {/* ── Explore column — crawl paths into the SEO clusters ── */}
+        <div>
+          <div className={styles.footerColTitle}>Explore</div>
+          <ul className={styles.footerLinks}>
+            <li><a className={styles.footerLink} href="/platform">Platform</a></li>
+            <li><a className={styles.footerLink} href="/platform/podos-pod">PODOS Pod</a></li>
+            <li><a className={styles.footerLink} href="/engineering">Engineering</a></li>
+            <li><a className={styles.footerLink} href="/deploy">Deployment</a></li>
+            <li><a className={styles.footerLink} href="/use-cases">Use Cases by Industry</a></li>
+            <li><a className={styles.footerLink} href="/resources/ai-infrastructure-glossary">Glossary</a></li>
+          </ul>
+        </div>
+
         {/* ── Newsletter column ── */}
         <div className={styles.footerNewsletter}>
           <div className={styles.footerColTitle}>Stay informed</div>

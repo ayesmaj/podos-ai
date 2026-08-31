@@ -34,6 +34,17 @@ export interface IndexableRoute {
 export const INDEXABLE_ROUTES: IndexableRoute[] = [
   { path: "/", changeFrequency: "weekly", priority: 1, cluster: "core" },
   { path: "/invest", changeFrequency: "weekly", priority: 0.9, cluster: "invest" },
+  /* Sprint 2 pillar pages */
+  { path: "/platform", changeFrequency: "monthly", priority: 0.9, cluster: "platform" },
+  { path: "/platform/podos-pod", changeFrequency: "monthly", priority: 0.9, cluster: "platform" },
+  { path: "/platform/syntropic", changeFrequency: "monthly", priority: 0.8, cluster: "platform" },
+  { path: "/engineering", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
+  { path: "/engineering/direct-to-chip-liquid-cooling", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
+  { path: "/engineering/data-center-power-architecture", changeFrequency: "monthly", priority: 0.8, cluster: "engineering" },
+  { path: "/deploy", changeFrequency: "monthly", priority: 0.8, cluster: "deploy" },
+  { path: "/use-cases", changeFrequency: "monthly", priority: 0.8, cluster: "use-cases" },
+  { path: "/compare/modular-ai-data-center-vs-traditional-data-center", changeFrequency: "monthly", priority: 0.7, cluster: "compare" },
+  { path: "/resources/ai-infrastructure-glossary", changeFrequency: "monthly", priority: 0.7, cluster: "resources" },
 ];
 
 export const canonicalUrl = (path: string) =>

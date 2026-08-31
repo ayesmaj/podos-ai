@@ -14,8 +14,13 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = path.resolve(new URL(".", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"), "..");
-const DATA = path.join(ROOT, "src", "data", "invest-page-images.ts");
-const OUT = path.join(ROOT, "public", "visuals", "invest");
+
+/* --file=seo switches to the SEO-page registry; ids may follow (many). */
+const args = process.argv.slice(2);
+const FILE = args.find((a) => a.startsWith("--file="))?.slice(7) ?? "invest";
+const WANTED_IDS = args.filter((a) => !a.startsWith("--"));
+const DATA = path.join(ROOT, "src", "data", FILE === "seo" ? "seo-page-images.ts" : "invest-page-images.ts");
+const OUT = path.join(ROOT, "public", "visuals", FILE === "seo" ? "seo" : "invest");
 
 const KEY = process.env.OPENAI_API_KEY;
 if (!KEY) {
@@ -67,12 +72,22 @@ const REFS = {
   "evidence-industry": [POD],
 };
 
-const wanted = process.argv[2]
-  ? entries.filter((e) => e.id === process.argv[2])
+/* SEO batch: pod-bearing frames reference the real pod render */
+const SEO_POD_IDS = [
+  "platform-overview", "platform-integration", "pod-hero-studio", "pod-scale-humans",
+  "pod-panel-detail", "pod-siting-pad", "engineering-hub-cutaway", "cooling-cdu-row",
+  "cooling-heat-rejection", "power-transformer-yard", "deploy-crane-lift",
+  "deploy-commission-check", "usecase-campus", "usecase-factory", "usecase-hospital",
+  "usecase-edge-site", "compare-split-frame",
+];
+for (const id of SEO_POD_IDS) REFS[id] = [POD];
+
+const wanted = WANTED_IDS.length
+  ? entries.filter((e) => WANTED_IDS.includes(e.id))
   : entries.filter((e) => e.status !== "ready");
 
 if (!wanted.length) {
-  console.log(process.argv[2] ? `No entry with id "${process.argv[2]}"` : "All images already ready.");
+  console.log(WANTED_IDS.length ? `No entries for ids: ${WANTED_IDS.join(", ")}` : "All images already ready.");
   process.exit(0);
 }
 
@@ -122,4 +137,5 @@ for (const img of wanted) {
 }
 
 await writeFile(DATA, updated);
-console.log("Done. Statuses updated in src/data/invest-page-images.ts");
+console.log(`Done. Statuses updated in ${path.relative(ROOT, DATA)}`);
+console.log("NOTE: if batches ran in parallel, run `node scripts/sync-image-status.mjs` to reconcile statuses (each batch write clobbers siblings').");
