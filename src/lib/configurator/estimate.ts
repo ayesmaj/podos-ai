@@ -1,5 +1,5 @@
 /**
- * estimate.ts — pure estimate engine for /configure.
+ * estimate.ts — pure estimate engine for /estimate.
  *
  * Pure function over (selection, pricing) so it is trivially testable and
  * so the admin page can re-price a live preview without touching UI code.

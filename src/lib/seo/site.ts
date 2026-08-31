@@ -54,7 +54,7 @@ export const INDEXABLE_ROUTES: IndexableRoute[] = [
   { path: "/compare/liquid-cooling-vs-air-cooling", changeFrequency: "monthly", priority: 0.7, cluster: "compare" },
   { path: "/resources/ai-infrastructure-glossary", changeFrequency: "monthly", priority: 0.7, cluster: "resources" },
   /* Estimator */
-  { path: "/configure", changeFrequency: "monthly", priority: 0.9, cluster: "core" },
+  { path: "/estimate", changeFrequency: "monthly", priority: 0.9, cluster: "core" },
   { path: "/resources/data-center-readiness-checklist", changeFrequency: "monthly", priority: 0.7, cluster: "resources" },
   { path: "/compare/on-prem-ai-infrastructure-vs-cloud", changeFrequency: "monthly", priority: 0.7, cluster: "compare" },
 ];

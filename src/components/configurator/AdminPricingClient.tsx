@@ -121,7 +121,7 @@ export default function AdminPricingClient() {
         }}
       >
         <strong>Preview only.</strong> Edits are saved in this browser and
-        change what <em>you</em> see on <a href="/configure" style={{ color: "var(--brand)" }}>/configure</a>.
+        change what <em>you</em> see on <a href="/estimate" style={{ color: "var(--brand)" }}>/estimate</a>.
         Visitors keep seeing the committed prices until the exported JSON is
         merged into <code>src/data/configuratorPricing.ts</code>.
         {saved && <span style={{ marginLeft: 8, color: "var(--brand)" }}>Saved ✓</span>}

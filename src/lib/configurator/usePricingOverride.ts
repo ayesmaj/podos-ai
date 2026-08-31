@@ -7,7 +7,7 @@
  * useSyncExternalStore rather than an effect + setState: localStorage is
  * an external store, the server snapshot is null (so SSR renders the
  * committed prices and hydration matches), and cross-tab "storage"
- * events keep an open /configure tab in sync while the founder edits in
+ * events keep an open /estimate tab in sync while the founder edits in
  * /admin/pricing.
  */
 
