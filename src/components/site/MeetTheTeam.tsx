@@ -29,22 +29,6 @@ const TEAM: Member[] = [
   },
   {
     idx: "T-02",
-    name: "Greg McNulty",
-    role: "Chief Executive Officer",
-    bio: "Former Microsoft executive. Enterprise-scale operational leadership and institutional investor relationships taking PODOS AI from invention to global market.",
-    monogram: "GM",
-    photo: "/team/greg.jpg",
-  },
-  {
-    idx: "T-03",
-    name: "Mike Sherman",
-    role: "Chief Technology Officer",
-    bio: "Built the Syntropic GPU benchmark suite — validated 99.6% quality preservation on Mistral-7B across 3 GPU platforms. Engineering lead for Optimus and Syntropic.",
-    monogram: "MS",
-    photo: "/team/mike.jpg",
-  },
-  {
-    idx: "T-04",
     name: "Jesse Ramirez",
     role: "Real Estate Consultant",
     bio: "Site strategy and real estate partnerships for PODOS pod deployments. Sources industrial-grade locations with power, grid access, and permitting clearance for customer installations.",
@@ -52,7 +36,7 @@ const TEAM: Member[] = [
     photo: "/team/jesse.png",
   },
   {
-    idx: "T-05",
+    idx: "T-03",
     name: "Rafael Smadja",
     role: "Graphic Designer & Web",
     bio: "Brand identity, thesyntropic.com, and PODOS AI web presence. Translates the technical platform into investor-grade visual communications.",

@@ -1729,11 +1729,14 @@
 
 .teamGrid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  /* one column per member — keeps the row full instead of leaving
+     empty cells; cap the width so cards don't stretch on wide screens */
+  grid-template-columns: repeat(3, 1fr);
   gap: clamp(20px, 2.4vw, 40px);
+  max-width: 1080px;
+  margin-inline: auto;
 }
 
-@media (max-width: 1280px) { .teamGrid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 760px)  { .teamGrid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 460px)  { .teamGrid { grid-template-columns: 1fr; } }
 
