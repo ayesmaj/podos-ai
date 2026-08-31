@@ -103,16 +103,36 @@ export async function POST(req: NextRequest) {
     }),
   });
 
-  if (!res.ok) {
+  const stored = res.ok;
+  if (!stored) {
     const detail = await res.text().catch(() => "");
+    // Most likely cause: the free-tier Supabase project auto-paused after
+    // inactivity, which previously returned 502 here and DROPPED the lead
+    // entirely (the email notification came after this early return).
     console.error("investor-interest insert failed:", res.status, detail.slice(0, 300));
+  }
+
+  // Always notify — the email is the durable backstop. A database outage
+  // must never cost a real investor lead; flag it so the row can be
+  // reconciled into Supabase by hand.
+  const notified = await notifyTeam({
+    fullName,
+    email,
+    phone: body.phone?.trim(),
+    amount,
+    investorType: body.investorType,
+    accredited: body.accredited,
+    storageFailed: !stored,
+  });
+
+  if (!stored && !notified) {
+    // Both paths failed — only now is the submission genuinely lost, so
+    // tell the user honestly instead of showing a false success.
     return NextResponse.json(
-      { ok: false, error: "Could not record your interest — please try again or email info@podosai.com" },
+      { ok: false, error: "Could not record your interest — please email info@podosai.com directly." },
       { status: 502 }
     );
   }
-
-  await notifyTeam({ fullName, email, phone: body.phone?.trim(), amount, investorType: body.investorType, accredited: body.accredited });
 
   return NextResponse.json({ ok: true });
 }
@@ -128,9 +148,11 @@ async function notifyTeam(lead: {
   amount: number;
   investorType?: string;
   accredited?: string;
-}) {
+  storageFailed?: boolean;
+}): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
   const to = process.env.NOTIFY_EMAIL ?? "info@podosai.com";
+  const alert = lead.storageFailed ? "[DB WRITE FAILED — SAVE THIS LEAD MANUALLY] " : "";
   if (!key) {
     try {
       const res = await fetch(`https://formsubmit.co/ajax/${to}`, {
@@ -144,7 +166,7 @@ async function notifyTeam(lead: {
           Referer: "https://www.podosai.com/invest",
         },
         body: JSON.stringify({
-          _subject: `New investor interest — ${lead.fullName} · $${lead.amount.toLocaleString("en-US")}`,
+          _subject: `${alert}New investor interest — ${lead.fullName} · $${lead.amount.toLocaleString("en-US")}`,
           _template: "table",
           _captcha: "false",
           _replyto: lead.email,
@@ -160,11 +182,13 @@ async function notifyTeam(lead: {
       const json = (await res.json().catch(() => null)) as { success?: string; message?: string } | null;
       if (!res.ok || json?.success !== "true") {
         console.error("formsubmit notify failed:", res.status, json?.message ?? "no body");
+        return false;
       }
+      return true;
     } catch (e) {
       console.error("formsubmit notify error:", e);
+      return false;
     }
-    return;
   }
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -174,7 +198,7 @@ async function notifyTeam(lead: {
         from: process.env.NOTIFY_FROM ?? "PODOS Invest <onboarding@resend.dev>",
         to: [process.env.NOTIFY_EMAIL ?? "info@podosai.com"],
         reply_to: lead.email,
-        subject: `New investor interest — ${lead.fullName} · $${lead.amount.toLocaleString("en-US")}`,
+        subject: `${alert}New investor interest — ${lead.fullName} · $${lead.amount.toLocaleString("en-US")}`,
         text: [
           "New indication of investor interest from podosai.com/invest:",
           "",
@@ -189,8 +213,13 @@ async function notifyTeam(lead: {
         ].join("\n"),
       }),
     });
-    if (!res.ok) console.error("notify email failed:", res.status, (await res.text()).slice(0, 200));
+    if (!res.ok) {
+      console.error("notify email failed:", res.status, (await res.text()).slice(0, 200));
+      return false;
+    }
+    return true;
   } catch (e) {
     console.error("notify email error:", e);
+    return false;
   }
 }
