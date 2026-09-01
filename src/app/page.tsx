@@ -10,7 +10,6 @@ import DesignTechEnvironment from "@/components/site/DesignTechEnvironment";
 import MeetTheTeam from "@/components/site/MeetTheTeam";
 import YossiVideoSection from "@/components/site/YossiVideoSection";
 import RequestAccessCTA from "@/components/site/RequestAccessCTA";
-import Footer from "@/components/site/Footer";
 import ScrollProgressRail from "@/components/site/ScrollProgressRail";
 
 export const metadata: Metadata = {
@@ -44,7 +43,6 @@ export default function Home() {
         <MeetTheTeam />
         <RequestAccessCTA />
       </main>
-      <Footer />
       <ScrollProgressRail />
     </>
   );

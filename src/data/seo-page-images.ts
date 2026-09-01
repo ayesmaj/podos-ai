@@ -138,6 +138,37 @@ export const SEO_IMAGES: SeoImage[] = [
     src: "/visuals/seo/cooling-heat-rejection.png", width: 1536, height: 1024, status: "ready", conceptual: true,
   },
 
+  {
+    id: "cooling-loop-schematic",
+    page: "/engineering/direct-to-chip-liquid-cooling",
+    prompt: `Wide cinematic cutaway visualization of a complete two-loop direct-to-chip liquid cooling system, read left to right: server cold plates, rack manifolds with quick disconnects, a coolant distribution unit, a plate heat exchanger, the facility water loop, and exterior dry coolers. Rendered as a bright architectural cross-section on a clean white technical background with thin blueprint-blue and cyan piping runs showing supply and return flow. Precise engineering illustration crossed with photoreal product rendering, soft neutral daylight, generous empty space. ${SEO_STYLE_DNA} ${NO_TEXT}`,
+    alt: "Cutaway of a two-loop direct-to-chip cooling system from cold plates through the CDU to exterior dry coolers",
+    src: "/visuals/seo/cooling-loop-schematic.png", width: 1536, height: 1024, status: "ready", conceptual: true,
+  },
+  {
+    id: "cooling-service-detail",
+    page: "/engineering/direct-to-chip-liquid-cooling",
+    prompt: `Tall vertical composition: a technician's-eye view of a rack-level coolant manifold with a row of dripless quick-disconnect couplings, braided supply and return hoses in blue and grey, a flow meter and isolation valve, inside a bright white equipment aisle. Shallow depth of field, cool neutral light, premium industrial-catalog photography, extreme mechanical clarity. ${SEO_STYLE_DNA} ${NO_TEXT}`,
+    alt: "Rack-level coolant manifold with dripless quick-disconnect couplings and flow instrumentation",
+    src: "/visuals/seo/cooling-service-detail.png", width: 1024, height: 1536, status: "ready", conceptual: true,
+  },
+
+  /* ---------------- /use-cases/enterprise-ai ---------------- */
+  {
+    id: "usecase-enterprise-hero",
+    page: "/use-cases/enterprise-ai",
+    prompt: `Wide establishing photograph of two PODOS Pods sited on a clean light-concrete pad directly beside a modern corporate headquarters building with pale stone and glass facades, manicured landscaping, bright overcast daylight, a thin marked utility corridor running between building and units. Calm, corporate, expensive. Editorial architectural photography, plenty of sky. ${POD_DNA} ${SEO_STYLE_DNA} ${NO_TEXT}`,
+    alt: "Two PODOS Pods sited on a pad beside a modern corporate headquarters building",
+    src: "/visuals/seo/usecase-enterprise-hero.png", width: 1536, height: 1024, status: "ready", conceptual: true,
+  },
+  {
+    id: "usecase-enterprise-interior",
+    page: "/use-cases/enterprise-ai",
+    prompt: `INTERIOR-ONLY scene, no unit exterior in frame: the inside of a PODOS Pod configured for enterprise workloads — a compact double row of white GPU server racks with tidy fiber trunking overhead, liquid cooling manifolds along the rack faces, a clean light-grey floor, cool even lighting, no people. Precision mechanical-room photography, spotless and orderly. ${SEO_STYLE_DNA} ${NO_TEXT}`,
+    alt: "Interior of a PODOS Pod showing GPU racks, overhead fiber trunking, and liquid cooling manifolds",
+    src: "/visuals/seo/usecase-enterprise-interior.png", width: 1536, height: 1024, status: "ready", conceptual: true,
+  },
+
   /* ---------------- /engineering/data-center-power-architecture ---------------- */
   {
     id: "power-switchgear-bay",

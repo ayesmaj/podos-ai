@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { PRICING } from "@/data/configuratorPricing";
 import styles from "./NewSections.module.css";
 
 /**
@@ -20,7 +22,7 @@ export default function Footer() {
       <div className={styles.footerInner}>
         {/* ── Brand block ── */}
         <div className={styles.footerBrandBlock}>
-          <a href="#top" className={styles.footerLockup} aria-label="PODOS AI — home">
+          <Link href="/#top" className={styles.footerLockup} aria-label="PODOS AI — home">
             <Image
               src="/podos-logo-lockup.png"
               alt="PODOS AI"
@@ -29,7 +31,7 @@ export default function Footer() {
               priority={false}
               className={styles.footerLockupImg}
             />
-          </a>
+          </Link>
           <p className={styles.footerTagline}>
             Factory-built modular AI compute pods. Deployable at the
             facilities that need serious compute capacity, without waiting
@@ -58,10 +60,10 @@ export default function Footer() {
         <div>
           <div className={styles.footerColTitle}>Product</div>
           <ul className={styles.footerLinks}>
-            <li><a className={styles.footerLink} href="#podos">The Pod</a></li>
-            <li><a className={styles.footerLink} href="#solution">Solution</a></li>
-            <li><a className={styles.footerLink} href="#design">Engineering</a></li>
-            <li><a className={styles.footerLink} href="#problem">The Problem</a></li>
+            <li><Link className={styles.footerLink} href="/#podos">The Pod</Link></li>
+            <li><Link className={styles.footerLink} href="/#solution">Solution</Link></li>
+            <li><Link className={styles.footerLink} href="/#design">Engineering</Link></li>
+            <li><Link className={styles.footerLink} href="/#problem">The Problem</Link></li>
           </ul>
         </div>
 
@@ -69,11 +71,11 @@ export default function Footer() {
         <div>
           <div className={styles.footerColTitle}>Deployment</div>
           <ul className={styles.footerLinks}>
-            <li><a className={styles.footerLink} href="#deployment">Process</a></li>
-            <li><a className={styles.footerLink} href="#manufacturing">Manufacturing</a></li>
-            <li><a className={styles.footerLink} href="#use-cases">Use Cases</a></li>
+            <li><Link className={styles.footerLink} href="/#deployment">Process</Link></li>
+            <li><Link className={styles.footerLink} href="/#manufacturing">Manufacturing</Link></li>
+            <li><Link className={styles.footerLink} href="/#use-cases">Use Cases</Link></li>
             <li><a className={styles.footerLink} href="/invest">Invest</a></li>
-            <li><a className={styles.footerLink} href="#access">Get in Touch</a></li>
+            <li><Link className={styles.footerLink} href="/#access">Get in Touch</Link></li>
           </ul>
         </div>
 
@@ -81,7 +83,9 @@ export default function Footer() {
         <div>
           <div className={styles.footerColTitle}>Explore</div>
           <ul className={styles.footerLinks}>
-            <li><a className={styles.footerLink} href="/configure">Estimator</a></li>
+            {PRICING.approved && (
+              <li><a className={styles.footerLink} href="/configure">Estimator</a></li>
+            )}
             <li><a className={styles.footerLink} href="/platform">Platform</a></li>
             <li><a className={styles.footerLink} href="/platform/podos-pod">PODOS Pod</a></li>
             <li><a className={styles.footerLink} href="/engineering">Engineering</a></li>

@@ -19,14 +19,17 @@ export default function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
             fontFamily: "var(--font-geist-mono), monospace",
             fontSize: 12,
             letterSpacing: "0.08em",
-            color: "var(--graphite)",
+            /* Surface-overridable: a dark section redefines these (see
+               .sec--ink in seo-sections.css) so the trail stays legible.
+               Without them the current crumb was ink-on-ink, contrast 1.0. */
+            color: "var(--crumb-fg, var(--graphite))",
           }}
         >
           {crumbs.map((c, i) => (
             <li key={c.path} style={{ display: "flex", gap: "0.45rem", alignItems: "center" }}>
               {i > 0 && <span aria-hidden>/</span>}
               {i === crumbs.length - 1 ? (
-                <span aria-current="page" style={{ color: "var(--ink)" }}>
+                <span aria-current="page" style={{ color: "var(--crumb-current, var(--ink))" }}>
                   {c.name}
                 </span>
               ) : (

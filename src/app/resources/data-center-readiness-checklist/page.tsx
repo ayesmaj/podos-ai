@@ -1,10 +1,19 @@
 /**
- * /resources/data-center-readiness-checklist — site readiness checklist.
+ * /resources/data-center-readiness-checklist — HUB, composed from the
+ * PODOS SEO section library. See docs/design/PAGE_ARCHETYPES.md.
  *
  * Server component. Keyword-map cluster ("data center readiness
  * checklist", informational). All external numbers cite the source
  * register; company claims render only from claims.ts publishable
  * entries with their required qualifiers.
+ *
+ * This page has NO images of its own, so it uses the image-free hero
+ * (HeroEditorial) and image-free body sections only.
+ *
+ * As a hub it carries the inbound internal links for its two children:
+ * /deploy/site-power-readiness and /resources/ai-infrastructure-glossary
+ * are each linked twice — once from the child CardGrid, once from the
+ * RelatedRail.
  */
 
 import Link from "next/link";
@@ -14,6 +23,20 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import {
+  HeroEditorial,
+  SummaryBand,
+  ProseWithRail,
+  CardGrid,
+  MatrixTable,
+  QuoteMetric,
+  LimitsBlock,
+  FAQBlock,
+  RelatedRail,
+  CTABand,
+  Section,
+  SectionHead,
+} from "@/components/seo/sections";
 
 const PATH = "/resources/data-center-readiness-checklist";
 const TITLE = "Data Center Readiness Checklist: Site Pass/Flag Criteria";
@@ -335,69 +358,39 @@ const DOMAINS: { code: string; title: string; intro: string; rows: Row[] }[] = [
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/* small shared styles (server component — CSS-only hovers)            */
-/* ------------------------------------------------------------------ */
-const th: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
-  fontSize: 11.5,
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  color: "var(--ink-dim)",
-  textAlign: "left",
-  padding: "0.65rem 0.9rem",
-  borderBottom: "1px solid var(--edge-bright)",
-  whiteSpace: "nowrap",
-};
+/** Flatten a run of domains into MatrixTable rows, keeping every check verbatim. */
+function checkRows(codes: string[]) {
+  return DOMAINS.filter((d) => codes.includes(d.code)).flatMap((d) =>
+    d.rows.map(([item, pass, flag, cite]) => [
+      <span key={`${d.code}-${item}-c`} className="pill">
+        {d.code}
+      </span>,
+      item,
+      pass,
+      <span key={`${d.code}-${item}-f`}>
+        {flag}
+        {cite ? <Cite n={cite} /> : null}
+      </span>,
+    ]),
+  );
+}
 
-const td: CSSProperties = {
-  fontSize: 14.5,
-  lineHeight: 1.55,
-  color: "var(--ink-dim)",
-  padding: "0.65rem 0.9rem",
-  borderBottom: "1px solid var(--edge-faint)",
-  verticalAlign: "top",
-  minWidth: "13rem",
-};
+const link: CSSProperties = { color: "var(--brand-deep)", textDecoration: "underline" };
 
-const codePill: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
-  fontSize: "0.72rem",
-  fontWeight: 600,
-  letterSpacing: "0.18em",
-  color: "var(--brand-deep)",
-  background: "rgba(37,99,235,0.07)",
-  border: "1px solid rgba(37,99,235,0.16)",
-  borderRadius: 999,
-  padding: "0.15rem 0.6rem",
-  whiteSpace: "nowrap",
-};
-
-const h2Style: CSSProperties = {
-  fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-  fontWeight: 800,
-  letterSpacing: "-0.03em",
-  lineHeight: 1.1,
-  color: "var(--ink-strong)",
-  fontSize: "clamp(1.5rem, 2.6vw, 2.1rem)",
-};
-
-const h3Style: CSSProperties = {
-  fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-  fontWeight: 700,
-  letterSpacing: "-0.02em",
-  color: "var(--ink-strong)",
-  fontSize: "1.1rem",
-};
-
-const linkStyle: CSSProperties = {
-  color: "var(--brand-deep)",
-  textDecoration: "underline",
-};
+const TOC: [string, string][] = [
+  ["#scoring", "How to score it"],
+  ["#continue", "Where each domain continues"],
+  ["#domains", "The eight domains"],
+  ["#sr-01-04", "SR-01 – SR-04 checks"],
+  ["#sr-05-08", "SR-05 – SR-08 checks"],
+  ["#modular", "When the compute is modular"],
+  ["#limitations", "When this is not the right fit"],
+  ["#faq", "Questions"],
+];
 
 export default function DataCenterReadinessChecklistPage() {
   return (
-    <main style={{ background: "var(--paper)" }}>
+    <main>
       <TechArticleJsonLd
         headline="Data center readiness checklist"
         description={DESCRIPTION}
@@ -409,232 +402,310 @@ export default function DataCenterReadinessChecklistPage() {
       />
       <FAQJsonLd items={FAQ} />
 
-      {/* ---------------- compact hero ---------------- */}
-      <header
-        className="container-site"
-        style={{ paddingTop: "clamp(6.5rem, 12vh, 9rem)", paddingBottom: "clamp(2.5rem, 5vh, 4rem)" }}
-      >
-        <Breadcrumbs
-          crumbs={[
-            { name: "Home", path: "/" },
-            { name: "Data center readiness checklist", path: PATH },
-          ]}
-        />
-
-        <p
-          className="mt-8 inline-flex items-center gap-2"
-          style={{
-            fontFamily: "var(--font-geist-mono), monospace",
-            fontSize: "0.78rem",
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: "var(--brand-deep)",
-            background: "var(--glass-bg-strong)",
-            border: "1px solid var(--edge-bright)",
-            borderRadius: 999,
-            padding: "0.35rem 0.9rem",
-          }}
-        >
-          <span style={{ fontWeight: 800, color: "var(--cyan-deep)" }}>R-02</span>
-          <span aria-hidden style={{ opacity: 0.4 }}>
-            ·
-          </span>
-          Resources
-        </p>
-
-        <h1
-          className="mt-5 max-w-4xl"
-          style={{
-            fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-            fontWeight: 800,
-            letterSpacing: "-0.038em",
-            lineHeight: 1.05,
-            fontSize: "clamp(2.2rem, 4.6vw, 3.9rem)",
-            color: "var(--ink-strong)",
-          }}
-        >
-          Data center readiness <span className="t-sweep-brand">checklist</span>
-        </h1>
-
-        <p className="t-lede mt-5 max-w-[62ch]" style={{ color: "var(--ink-dim)" }}>
-          A data center readiness checklist tests whether a specific site can host and energize
-          compute, across eight domains: power and interconnection, space and pad, structural,
-          network, water and heat rejection, permitting, logistics, and security. The 25 checks
-          below each carry a pass criterion and the condition that should raise a flag.
-        </p>
-
-        <div className="mt-6">
+      {/* 1 · HERO — paper. No product shot on this page, so a stat hero. */}
+      <HeroEditorial
+        code="R-02"
+        category="Resources · Site readiness"
+        field="deploy"
+        title="Data center readiness"
+        accent="checklist"
+        lede="A data center readiness checklist tests whether a specific site can host and energize compute, across eight domains: power and interconnection, space and pad, structural, network, water and heat rejection, permitting, logistics, and security. The 25 checks below each carry a pass criterion and the condition that should raise a flag."
+        crumbs={
+          <Breadcrumbs
+            crumbs={[
+              { name: "Home", path: "/" },
+              { name: "Data center readiness checklist", path: PATH },
+            ]}
+          />
+        }
+        meta={
           <LastVerified
             published="2026-08-31"
             lastVerified="2026-08-31"
             author="Josef Elimelech"
             reviewer="PODOS AI Engineering"
           />
-        </div>
-      </header>
+        }
+        stats={[
+          { value: "8", label: "Readiness domains" },
+          { value: "25", label: "Pass / flag checks" },
+          { value: String(SOURCES.length), label: "Cited sources" },
+        ]}
+      />
 
-      {/* ---------------- article body ---------------- */}
-      <article className="container-site" style={{ paddingBottom: "clamp(4rem, 8vh, 6rem)" }}>
-        <div className="max-w-[76ch]">
-          {/* -------- how to score -------- */}
-          <section id="scoring" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>How to score it</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              A flag is not a rejection but an unpriced item, and the discipline is converting every
-              flag into a number and a date. A parcel with four priced flags beats one with no flags
-              and an unanswered interconnection question. Three answers decide the schedule before
-              the rest matter: the written energization date, the heat-rejection method, and the
-              transport route survey.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Score each check as pass (met, and evidenced by a document rather than a
-              conversation), flag (not met, with an owner, a cost, and a date), or unknown — the
-              most dangerous state, because tired reviewers quietly score unknowns as passes. Walk
-              the domains in order: power first, because it eliminates sites outright; security
-              last, because it rarely does. LBNL put US data-center electricity near 4.4% of
-              national consumption in 2023, with a 2028 range of 6.7% to 12%.<Cite n={3} /> The IEA
-              projects data-centre demand rising from about 1.5% of global electricity in 2025
-              toward roughly 3% by 2030.<Cite n={1} />
-            </p>
-          </section>
+      {/* 2 · SCORING RULES AT A GLANCE — canvas */}
+      <SummaryBand
+        title="How the scoring works"
+        items={[
+          {
+            code: "01",
+            title: "Eight domains, 25 checks",
+            body: "Power and interconnection, space and pad, structural, network, water and heat rejection, permitting, logistics, and security — each check with a pass criterion and a flag condition.",
+          },
+          {
+            code: "02",
+            title: "A flag is a price, not a rejection",
+            body: "Every flag becomes a cost and a date. A parcel with four priced flags beats one with no flags and an unanswered interconnection question.",
+          },
+          {
+            code: "03",
+            title: "Unknown is the dangerous score",
+            body: "Pass, flag, or unknown — and unknown is the state that hurts, because tired reviewers quietly score unknowns as passes.",
+          },
+          {
+            code: "04",
+            title: "Three answers set the schedule",
+            body: "The written energization date, the heat-rejection method, and the transport route survey decide the timeline before the rest matter.",
+          },
+        ]}
+      />
 
-          {/* -------- the eight domains -------- */}
-          {DOMAINS.map((d) => (
-            <section
-              key={d.code}
-              id={d.code.toLowerCase()}
-              className="mt-14"
-              style={{ scrollMarginTop: 96 }}
-            >
-              <h2 style={h2Style}>
-                <span style={{ ...codePill, marginRight: "0.7rem", verticalAlign: "middle" }}>
-                  {d.code}
-                </span>
-                {d.title}
-              </h2>
-              <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-                {d.intro}
-              </p>
-
-              <div className="overflow-x-auto mt-6 panel" style={{ borderRadius: 12 }}>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr>
-                      <th style={th}>Check</th>
-                      <th style={th}>Pass when</th>
-                      <th style={th}>Flag when</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {d.rows.map(([item, pass, flag, cite]) => (
-                      <tr key={item}>
-                        <td style={{ ...td, color: "var(--ink-strong)", fontWeight: 500 }}>{item}</td>
-                        <td style={td}>{pass}</td>
-                        <td style={td}>
-                          {flag}
-                          {cite ? <Cite n={cite} /> : null}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          ))}
-
-          {/* -------- limitations -------- */}
-          <section id="limitations" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>When this checklist is not the right fit</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              This is a screening instrument for siting megawatt-scale AI compute. It is the wrong
-              tool in five common situations.
-            </p>
-            <ul className="mt-4 grid gap-3 list-disc pl-5">
-              {[
-                "It does not replace engineering. Geotechnical borings, system-impact studies, arc-flash analysis, environmental review, and stamped calculations sit downstream of it.",
-                "It assumes a greenfield or light-retrofit pad. Deep retrofits add hazardous-material surveys, tenant coordination, and riser capacity that this list does not model.",
-                "It is jurisdiction-blind. Permitting sequence, noise ordinances, water rights, and tariffs vary enough that those domains must be re-specified locally.",
-                "It prices nothing and scores one site at a time. Two sites with identical flags can differ by an order of magnitude in remedy cost.",
-                "Colocation changes the list: leased capacity turns most of these physical questions into contractual ones — SLA definitions, remote-hands terms, per-cabinet density.",
-              ].map((t) => (
-                <li key={t.slice(0, 24)} className="t-body" style={{ color: "var(--ink-dim)" }}>
-                  {t}
+      {/* 3 · HOW TO SCORE IT — paper, prose with a navigation rail */}
+      <ProseWithRail
+        id="scoring"
+        surface="paper"
+        rail={
+          <div style={{ borderTop: "1px solid var(--edge-bright)", paddingTop: "1.25rem" }}>
+            <p className="eyebrow">On this page</p>
+            <ul style={{ listStyle: "none", marginTop: "1rem", display: "grid", gap: "0.6rem" }}>
+              {TOC.map(([href, label]) => (
+                <li key={href}>
+                  <a href={href} style={{ ...link, fontSize: "0.9rem", textDecoration: "none" }}>
+                    {label}
+                  </a>
                 </li>
               ))}
             </ul>
-          </section>
-
-          {/* -------- modular application -------- */}
-          <section id="modular" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>What changes when the compute is modular</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              A factory-built unit removes no domain from this list, but it moves work off the site
-              into a controlled environment. Cooling, power distribution, and enclosure integration
-              are tested before delivery, narrowing the site question to interfaces: a pad, a
-              service point, a fiber entry, a heat-rejection connection. Each{" "}
-              <Link href="/platform/podos-pod" style={linkStyle}>
-                PODOS Pod
-              </Link>{" "}
-              is <span data-claim="unit-capacity-1mw">designed as a standardized 1 MW building block</span>{" "}
-              and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, so SR-01 is
-              scored against a known unit load rather than a moving estimate.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              That shifts weight onto SR-07: transport, laydown, and rigging become primary, because
-              the delivery is the construction. It is also why interconnection dominates the
-              timeline — PODOS{" "}
-              <span data-claim="deployment-window">
-                targets a 90-day window from order to commissioning
-              </span>{" "}
-              for a standard unit, which only helps on a site whose energization date can meet it.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              See the{" "}
-              <Link href="/engineering/data-center-power-architecture" style={linkStyle}>
-                power architecture
-              </Link>{" "}
-              behind SR-01 and{" "}
-              <Link href="/engineering/direct-to-chip-liquid-cooling" style={linkStyle}>
-                direct-to-chip liquid cooling
-              </Link>{" "}
-              behind SR-05. The{" "}
-              <Link href="/deploy" style={linkStyle}>
-                deployment model
-              </Link>{" "}
-              covers moving from a scored checklist to an operating unit;{" "}
-              <Link href="/use-cases" style={linkStyle}>
-                use cases
-              </Link>{" "}
-              show which workloads justify which compromises; and{" "}
-              <Link href="/compare/modular-ai-data-center-vs-traditional-data-center" style={linkStyle}>
-                modular vs traditional AI data centers
-              </Link>{" "}
-              covers the build decision. Terms sit in the{" "}
-              <Link href="/resources/ai-infrastructure-glossary" style={linkStyle}>
-                AI infrastructure glossary
-              </Link>
-              .
-            </p>
-          </section>
-
-          {/* -------- FAQ -------- */}
-          <section id="faq" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Frequently asked questions</h2>
-            <div className="mt-6 grid gap-6">
-              {FAQ.map((f) => (
-                <div key={f.q}>
-                  <h3 style={h3Style}>{f.q}</h3>
-                  <p className="t-body mt-2" style={{ color: "var(--ink-dim)" }}>
-                    {f.a}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <EvidenceSourceRail sources={SOURCES} />
+          </div>
+        }
+      >
+        <SectionHead eyebrow="Method" title="How to score it" />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            A flag is not a rejection but an unpriced item, and the discipline is converting every
+            flag into a number and a date. A parcel with four priced flags beats one with no flags
+            and an unanswered interconnection question. Three answers decide the schedule before the
+            rest matter: the written energization date, the heat-rejection method, and the transport
+            route survey.
+          </p>
+          <p>
+            Score each check as pass (met, and evidenced by a document rather than a conversation),
+            flag (not met, with an owner, a cost, and a date), or unknown — the most dangerous
+            state, because tired reviewers quietly score unknowns as passes. Walk the domains in
+            order: power first, because it eliminates sites outright; security last, because it
+            rarely does. LBNL put US data-center electricity near 4.4% of national consumption in
+            2023, with a 2028 range of 6.7% to 12%.<Cite n={3} /> The IEA projects data-centre
+            demand rising from about 1.5% of global electricity in 2025 toward roughly 3% by 2030.
+            <Cite n={1} />
+          </p>
         </div>
-      </article>
+      </ProseWithRail>
+
+      {/* 4 · CHILD PAGES — canvas. The hub's job: real links, not promises. */}
+      <CardGrid
+        id="continue"
+        surface="canvas"
+        field="deploy"
+        columns={2}
+        eyebrow="Where each domain continues"
+        title="Two pages carry this checklist further"
+        lede="Screening ends where paid engineering begins. SR-01 and SR-02 continue into the deployment sequence; the vocabulary the checks use is defined term by term in the glossary."
+        items={[
+          {
+            code: "DEPLOY · STAGE 01",
+            title: "Site and power readiness",
+            body: (
+              <>
+                Stage one of a modular AI deployment takes SR-01 and SR-02 out of screening and into
+                engineering: how to assess site power, network, access, pad and permitting — and the
+                conditions that disqualify a site early.{" "}
+                <Link href="/deploy/site-power-readiness" style={link}>
+                  Site and power readiness
+                </Link>
+              </>
+            ),
+          },
+          {
+            code: "RESOURCE",
+            title: "AI infrastructure glossary",
+            body: (
+              <>
+                Plain-language definitions of 40 AI infrastructure terms used across these checks —
+                PUE, direct-to-chip cooling, CDU, KV cache, interconnection queue, rack density, and
+                more.{" "}
+                <Link href="/resources/ai-infrastructure-glossary" style={link}>
+                  AI infrastructure glossary
+                </Link>
+              </>
+            ),
+          },
+        ]}
+      />
+
+      {/* 5 · THE EIGHT DOMAINS — paper. Every domain intro preserved. */}
+      <CardGrid
+        id="domains"
+        surface="paper"
+        columns={4}
+        eyebrow="SR-01 – SR-08"
+        title="The eight domains, in scoring order"
+        lede="Walk them in order: power first, because it eliminates sites outright; security last, because it rarely does."
+        items={DOMAINS.map((d) => ({ code: d.code, title: d.title, body: d.intro }))}
+      />
+
+      {/* 6 · CHECKS SR-01 – SR-04 — canvas */}
+      <MatrixTable
+        id="sr-01-04"
+        surface="canvas"
+        field="deploy"
+        eyebrow="Checks 01 – 13"
+        title="Power, space, structure, network"
+        lede="The four domains that eliminate a site. Each row is one check: what a pass looks like, and the condition that should raise a flag."
+        head={["Domain", "Check", "Pass when", "Flag when"]}
+        rows={checkRows(["SR-01", "SR-02", "SR-03", "SR-04"])}
+      />
+
+      {/* 7 · CHECKS SR-05 – SR-08 — paper */}
+      <MatrixTable
+        id="sr-05-08"
+        surface="paper"
+        eyebrow="Checks 14 – 25"
+        title="Water, permitting, logistics, security"
+        lede="The four domains that price a site. Flags here rarely kill a project outright, but they are where unbudgeted cost accumulates."
+        head={["Domain", "Check", "Pass when", "Flag when"]}
+        rows={checkRows(["SR-05", "SR-06", "SR-07", "SR-08"])}
+      />
+
+      {/* 8 · INK BEAT */}
+      <QuoteMetric
+        quote="A flag is not a rejection but an unpriced item. A parcel with four priced flags beats one with no flags and an unanswered interconnection question."
+        attribution="Method · How to score it"
+        metric="25"
+        label="Checks across eight domains"
+        field="deploy"
+      />
+
+      {/* 9 · MODULAR APPLICATION — paper, prose */}
+      <ProseWithRail id="modular" surface="paper">
+        <SectionHead
+          eyebrow="In the product"
+          title="What changes when the compute is modular"
+        />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            A factory-built unit removes no domain from this list, but it moves work off the site
+            into a controlled environment. Cooling, power distribution, and enclosure integration
+            are tested before delivery, narrowing the site question to interfaces: a pad, a service
+            point, a fiber entry, a heat-rejection connection. Each{" "}
+            <Link href="/platform/podos-pod" style={link}>
+              PODOS Pod
+            </Link>{" "}
+            is{" "}
+            <span data-claim="unit-capacity-1mw">designed as a standardized 1 MW building block</span>{" "}
+            and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, so SR-01 is scored
+            against a known unit load rather than a moving estimate.
+          </p>
+          <p>
+            That shifts weight onto SR-07: transport, laydown, and rigging become primary, because
+            the delivery is the construction. It is also why interconnection dominates the timeline
+            — PODOS{" "}
+            <span data-claim="deployment-window">
+              targets a 90-day window from order to commissioning
+            </span>{" "}
+            for a standard unit, which only helps on a site whose energization date can meet it.
+          </p>
+          <p>
+            See the{" "}
+            <Link href="/engineering/data-center-power-architecture" style={link}>
+              power architecture
+            </Link>{" "}
+            behind SR-01 and{" "}
+            <Link href="/engineering/direct-to-chip-liquid-cooling" style={link}>
+              direct-to-chip liquid cooling
+            </Link>{" "}
+            behind SR-05. The{" "}
+            <Link href="/deploy" style={link}>
+              deployment model
+            </Link>{" "}
+            covers moving from a scored checklist to an operating unit, and{" "}
+            <Link href="/deploy/site-power-readiness" style={link}>
+              site and power readiness
+            </Link>{" "}
+            is the stage that picks SR-01 up;{" "}
+            <Link href="/use-cases" style={link}>
+              use cases
+            </Link>{" "}
+            show which workloads justify which compromises; and{" "}
+            <Link href="/compare/modular-ai-data-center-vs-traditional-data-center" style={link}>
+              modular vs traditional AI data centers
+            </Link>{" "}
+            covers the build decision. Terms sit in the{" "}
+            <Link href="/resources/ai-infrastructure-glossary" style={link}>
+              AI infrastructure glossary
+            </Link>
+            .
+          </p>
+        </div>
+      </ProseWithRail>
+
+      {/* 10 · LIMITS — canvas, mandatory */}
+      <LimitsBlock
+        title="When this checklist is not the right fit"
+        lede="This is a screening instrument for siting megawatt-scale AI compute. It is the wrong tool in five common situations."
+        items={[
+          "It does not replace engineering. Geotechnical borings, system-impact studies, arc-flash analysis, environmental review, and stamped calculations sit downstream of it.",
+          "It assumes a greenfield or light-retrofit pad. Deep retrofits add hazardous-material surveys, tenant coordination, and riser capacity that this list does not model.",
+          "It is jurisdiction-blind. Permitting sequence, noise ordinances, water rights, and tariffs vary enough that those domains must be re-specified locally.",
+          "It prices nothing and scores one site at a time. Two sites with identical flags can differ by an order of magnitude in remedy cost.",
+          "Colocation changes the list: leased capacity turns most of these physical questions into contractual ones — SLA definitions, remote-hands terms, per-cabinet density.",
+        ]}
+      />
+
+      {/* 11 · FAQ — paper */}
+      <FAQBlock items={FAQ} surface="paper" />
+
+      {/* 12 · SOURCES — canvas */}
+      <Section surface="canvas" width="content" pad="flow">
+        <EvidenceSourceRail sources={SOURCES} />
+      </Section>
+
+      {/* 13 · RELATED — paper. Second inbound link for each child page. */}
+      <RelatedRail
+        title="Related reading"
+        surface="paper"
+        items={[
+          {
+            href: "/deploy/site-power-readiness",
+            label: "DEPLOY",
+            title: "Site and power readiness",
+          },
+          {
+            href: "/resources/ai-infrastructure-glossary",
+            label: "RESOURCE",
+            title: "AI infrastructure glossary",
+          },
+          {
+            href: "/engineering/data-center-power-architecture",
+            label: "ENGINEERING",
+            title: "Data center power architecture",
+          },
+          {
+            href: "/compare/modular-ai-data-center-vs-traditional-data-center",
+            label: "COMPARE",
+            title: "Modular vs traditional AI data centers",
+          },
+        ]}
+      />
+
+      {/* 14 · CTA */}
+      <CTABand
+        title="Score a site against"
+        accent="a known unit load"
+        body="Bring the energization date, the heat-rejection method, and the transport route survey. The configurator walks the same variables an engineering review would."
+        primary={{ href: "/configure", label: "Configure a build" }}
+        secondary={{ href: "/deploy", label: "Deployment model" }}
+        field="deploy"
+      />
     </main>
   );
 }

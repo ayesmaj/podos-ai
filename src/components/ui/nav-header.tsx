@@ -83,6 +83,13 @@ export interface NavHeaderProps {
    * pass a logo are unaffected.
    */
   logo?: React.ReactNode;
+  /**
+   * Controlled active tab. Pass this on ROUTE-based navs (inner pages),
+   * where there are no in-page anchors for the IntersectionObserver to
+   * watch — without it the pill would sit on items[0] forever. Omit on
+   * the homepage so the observer drives it from scroll position.
+   */
+  activeHref?: string;
 }
 
 const DEFAULT_ITEMS: NavItem[] = [
@@ -103,11 +110,14 @@ function NavHeader({
   items = DEFAULT_ITEMS,
   ariaLabel = "Site sections",
   logo,
+  activeHref: controlledActiveHref,
 }: NavHeaderProps) {
   // Active section — set by the IntersectionObserver. Defaults to
   // items[0] so the pill has a sensible docking target on first paint
   // (before the observer has fired).
-  const [activeHref, setActiveHref] = useState<string>(items[0]?.href ?? "");
+  const [observedHref, setObservedHref] = useState<string>(items[0]?.href ?? "");
+  // A controlled activeHref (route navs) wins over the scroll observer.
+  const activeHref = controlledActiveHref ?? observedHref;
 
   // Hover state. `currentHref` resolves to hoveredHref if set, else
   // activeHref — this gives the pill two modes: follow cursor while
@@ -163,7 +173,7 @@ function NavHeader({
           e.boundingClientRect.top < best.boundingClientRect.top ? e : best,
         );
         const href = hrefById.get(topmost.target.id);
-        if (href) setActiveHref(href);
+        if (href) setObservedHref(href);
       },
       {
         // Reading band: top 10%–40% of the viewport. A section is

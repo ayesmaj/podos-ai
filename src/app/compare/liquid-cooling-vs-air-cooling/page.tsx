@@ -1,9 +1,14 @@
 /**
  * /compare/liquid-cooling-vs-air-cooling
+ * Archetype D, compare. See docs/design/PAGE_ARCHETYPES.md.
  *
- * Comparison page (compare cluster). Server component — all copy in the
- * initial HTML, CSS-only hovers, no client JS. Styled with the MAIN site
- * light technical system (docs/seo/design-language-lock.md), never .iv-*.
+ * Comparison page. Server component — all copy in the initial HTML,
+ * CSS-only hovers, no client JS. Composed from the section library in
+ * src/components/seo/sections.tsx.
+ *
+ * The page carries no photography of its own (founder rule: one image =
+ * one placement), so the hero is editorial and the visual rhythm comes
+ * from the matrices, the two win-condition grids, and the ink beat.
  *
  * Neutral by construction: the page publishes its assumptions, gives air
  * cooling its genuine wins, and refuses to state a single universal kW
@@ -19,6 +24,20 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import {
+  HeroEditorial,
+  ExecutiveAnswer,
+  MatrixTable,
+  CardGrid,
+  ProseWithRail,
+  QuoteMetric,
+  LimitsBlock,
+  FAQBlock,
+  RelatedRail,
+  CTABand,
+  Section,
+  SectionHead,
+} from "@/components/seo/sections";
 
 const PATH = "/compare/liquid-cooling-vs-air-cooling";
 const TITLE = "Liquid Cooling vs Air Cooling: Data Center Comparison";
@@ -105,7 +124,7 @@ const SOURCES: Source[] = [
   },
 ];
 
-/* FAQ — the SAME array feeds the visible markup and FAQJsonLd. */
+/* FAQ — the SAME array feeds FAQJsonLd and the visible FAQBlock. */
 const FAQ = [
   {
     q: "At what rack density does liquid cooling become necessary?",
@@ -210,22 +229,71 @@ const ASSUMPTIONS = [
   "Retrofit and greenfield are treated as different problems; the same criterion often resolves in opposite directions.",
 ];
 
-const AIR_WINS = [
-  "Modest, stable density. General-purpose compute, storage, and network racks at conventional densities are designed for air, and the fan-power penalty stays small there.",
-  "An existing hall with adequate containment and cooling capacity, where tuning the room is cheaper than plumbing it.",
-  "Short remaining facility life. A lease with a few years left rarely justifies plant that pays back over a decade.",
-  "Thin operations staffing, since coolant chemistry, filtration, and leak procedure need people and drills.",
-  "Heterogeneous, frequently refreshed hardware. Cold plates are package-specific, so mixed fleets keep re-qualifying interfaces.",
-  "Cool climates with long economiser seasons, where the energy argument for liquid is weakest.",
+/* Card titles are new framing labels; every body string is verbatim page copy. */
+const AIR_WINS: { code: string; title: string; body: string }[] = [
+  {
+    code: "01",
+    title: "Modest, stable density",
+    body: "General-purpose compute, storage, and network racks at conventional densities are designed for air, and the fan-power penalty stays small there.",
+  },
+  {
+    code: "02",
+    title: "A hall that already works",
+    body: "An existing hall with adequate containment and cooling capacity, where tuning the room is cheaper than plumbing it.",
+  },
+  {
+    code: "03",
+    title: "Short remaining facility life",
+    body: "A lease with a few years left rarely justifies plant that pays back over a decade.",
+  },
+  {
+    code: "04",
+    title: "Staffing depth",
+    body: "Thin operations staffing, since coolant chemistry, filtration, and leak procedure need people and drills.",
+  },
+  {
+    code: "05",
+    title: "Heterogeneous, frequently refreshed hardware",
+    body: "Cold plates are package-specific, so mixed fleets keep re-qualifying interfaces.",
+  },
+  {
+    code: "06",
+    title: "Long economiser seasons",
+    body: "Cool climates with long economiser seasons, where the energy argument for liquid is weakest.",
+  },
 ];
 
-const LIQUID_WINS = [
-  "The hardware ships liquid-cooled, so the question is not whether to plumb but where the CDU sits.",
-  "Density is the binding constraint. Liquid converts an airflow problem into a plumbing problem — usually the cheaper of the two.",
-  "Warm climates where free cooling matters, because warm water classes allow dry rejection across more of the year.",
-  "Scarce water or contested permits: a closed loop rejected through dry coolers consumes no water in operation.",
-  "A nearby heat consumer, since higher return-water temperature is what makes recovery worthwhile.",
-  "Expensive floor area, because removing airflow volume lets the same load occupy far less space.",
+const LIQUID_WINS: { code: string; title: string; body: string }[] = [
+  {
+    code: "01",
+    title: "The hardware decides",
+    body: "The hardware ships liquid-cooled, so the question is not whether to plumb but where the CDU sits.",
+  },
+  {
+    code: "02",
+    title: "Density is the binding constraint",
+    body: "Liquid converts an airflow problem into a plumbing problem — usually the cheaper of the two.",
+  },
+  {
+    code: "03",
+    title: "Warm climates",
+    body: "Warm climates where free cooling matters, because warm water classes allow dry rejection across more of the year.",
+  },
+  {
+    code: "04",
+    title: "Water rights",
+    body: "Scarce water or contested permits: a closed loop rejected through dry coolers consumes no water in operation.",
+  },
+  {
+    code: "05",
+    title: "Heat with somewhere to go",
+    body: "A nearby heat consumer, since higher return-water temperature is what makes recovery worthwhile.",
+  },
+  {
+    code: "06",
+    title: "Expensive real estate",
+    body: "Expensive floor area, because removing airflow volume lets the same load occupy far less space.",
+  },
 ];
 
 const LIMITS = [
@@ -236,69 +304,21 @@ const LIMITS = [
   "Standards are still converging: water classes and component requirements are published, but cross-generation interoperability is not guaranteed.",
 ];
 
-/* ------------------------------------------------------------------ */
-/* Shared inline styles (server component — CSS-only hovers)           */
-/* ------------------------------------------------------------------ */
-const th: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
-  fontSize: 11.5,
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  color: "var(--ink-dim)",
-  textAlign: "left",
-  padding: "0.65rem 0.9rem",
-  borderBottom: "1px solid var(--edge-bright)",
-  whiteSpace: "nowrap",
-};
+const TOC: [string, string][] = [
+  ["#answer", "The short answer"],
+  ["#criteria", "Criteria matrix"],
+  ["#air-wins", "When air wins"],
+  ["#liquid-wins", "When liquid wins"],
+  ["#assumptions", "Assumptions"],
+  ["#limitations", "What this does not settle"],
+  ["#faq", "Questions"],
+];
 
-const td: CSSProperties = {
-  fontSize: 14.5,
-  lineHeight: 1.55,
-  color: "var(--ink-dim)",
-  padding: "0.65rem 0.9rem",
-  borderBottom: "1px solid var(--edge-faint)",
-  verticalAlign: "top",
-  minWidth: "12rem",
-};
-
-const codePill: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
-  fontSize: "0.72rem",
-  fontWeight: 600,
-  letterSpacing: "0.18em",
-  color: "var(--brand-deep)",
-  background: "rgba(37,99,235,0.07)",
-  border: "1px solid rgba(37,99,235,0.16)",
-  borderRadius: 999,
-  padding: "0.15rem 0.6rem",
-  whiteSpace: "nowrap",
-};
-
-const h2Style: CSSProperties = {
-  fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-  fontWeight: 800,
-  letterSpacing: "-0.03em",
-  lineHeight: 1.1,
-  color: "var(--ink-strong)",
-  fontSize: "clamp(1.5rem, 2.6vw, 2.1rem)",
-};
-
-const h3Style: CSSProperties = {
-  fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-  fontWeight: 700,
-  letterSpacing: "-0.02em",
-  color: "var(--ink-strong)",
-  fontSize: "1.1rem",
-};
-
-const linkStyle: CSSProperties = {
-  color: "var(--brand-deep)",
-  textDecoration: "underline",
-};
+const linkStyle: CSSProperties = { color: "var(--brand-deep)", textDecoration: "underline" };
 
 export default function LiquidVsAirCoolingPage() {
   return (
-    <main style={{ background: "var(--paper)" }}>
+    <main>
       <TechArticleJsonLd
         headline="Liquid cooling vs air cooling for AI data centers"
         description={DESCRIPTION}
@@ -310,294 +330,271 @@ export default function LiquidVsAirCoolingPage() {
       />
       <FAQJsonLd items={FAQ} />
 
-      {/* ---------------- compact hero ---------------- */}
-      <header
-        className="container-site"
-        style={{ paddingTop: "clamp(6.5rem, 12vh, 9rem)", paddingBottom: "clamp(2.5rem, 5vh, 4rem)" }}
-      >
-        <Breadcrumbs
-          crumbs={[
-            { name: "Home", path: "/" },
-            { name: "Liquid cooling vs air cooling", path: PATH },
-          ]}
-        />
-
-        <p
-          className="mt-8 inline-flex items-center gap-2"
-          style={{
-            fontFamily: "var(--font-geist-mono), monospace",
-            fontSize: "0.78rem",
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: "var(--brand-deep)",
-            background: "var(--glass-bg-strong)",
-            border: "1px solid var(--edge-bright)",
-            borderRadius: 999,
-            padding: "0.35rem 0.9rem",
-          }}
-        >
-          <span style={{ fontWeight: 800, color: "var(--cyan-deep)" }}>CMP-02</span>
-          <span aria-hidden style={{ opacity: 0.4 }}>
-            ·
-          </span>
-          COMPARE
-        </p>
-
-        <h1
-          className="mt-5 max-w-4xl"
-          style={{
-            fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-            fontWeight: 800,
-            letterSpacing: "-0.038em",
-            lineHeight: 1.05,
-            fontSize: "clamp(2.2rem, 4.6vw, 3.9rem)",
-            color: "var(--ink-strong)",
-          }}
-        >
-          Liquid cooling vs <span className="t-sweep-brand">air cooling</span>
-        </h1>
-
-        <p className="t-lede mt-5 max-w-[62ch]" style={{ color: "var(--ink-dim)" }}>
-          Air cooling moves server heat with fans and room airflow; liquid cooling moves it through
-          a fluid circulating in a cold plate on the processor itself. Density decides between them:
-          air stays the simpler and cheaper choice for conventional racks, while rack-scale AI
-          systems are sold liquid-cooled because no air-cooled equivalent is offered.<Cite n={4} />{" "}
-          This page sets out the criteria, the assumptions behind them, and where each side wins.
-        </p>
-
-        <div className="mt-6">
+      {/* 1 · HERO — editorial (paper). This page owns no photography. */}
+      <HeroEditorial
+        category="COMPARE"
+        code="CMP-02"
+        field="compare"
+        title="Liquid cooling vs"
+        accent="air cooling"
+        lede="Air cooling moves server heat with fans and room airflow; liquid cooling moves it through a fluid circulating in a cold plate on the processor itself. This page sets out the criteria, the assumptions behind them, and where each side wins."
+        crumbs={
+          <Breadcrumbs
+            crumbs={[
+              { name: "Home", path: "/" },
+              { name: "Liquid cooling vs air cooling", path: PATH },
+            ]}
+          />
+        }
+        meta={
           <LastVerified
             published="2026-08-31"
             lastVerified="2026-08-31"
             author="Josef Elimelech"
             reviewer="PODOS AI Engineering"
           />
+        }
+      />
+
+      {/* 2 · VERDICT — canvas glass panel, up front */}
+      <ExecutiveAnswer>
+        Density decides between them: air stays the simpler and cheaper choice for conventional
+        racks, while rack-scale AI systems are sold liquid-cooled because no air-cooled equivalent
+        is offered.<Cite n={4} /> Air is a poor coolant that happens to be free: low density, low
+        heat capacity, so removing more heat means moving more air, and fan power rises steeply with
+        flow. That trade stays comfortable at conventional densities and becomes punishing as racks
+        fill with accelerators — which is why ASHRAE&apos;s TC 9.9 committee, which defines the
+        thermal envelopes IT vendors design to, published a white paper on liquid cooling moving
+        into mainstream facilities,<Cite n={2} /> and why its guidelines now name liquid-cooling
+        facility water classes alongside the A1–A4 air classes.<Cite n={1} />
+      </ExecutiveAnswer>
+
+      {/* 3 · CRITERIA MATRIX — paper, the comparison itself */}
+      <MatrixTable
+        id="criteria"
+        eyebrow="The comparison"
+        title="Criteria matrix"
+        lede="Ten criteria, each with the input that decides it. The fourth column is the useful one: most disagreements about cooling are really disagreements about which input is binding."
+        surface="paper"
+        field="compare"
+        head={["#", "Criterion", "Air cooling", "Liquid (direct-to-chip)", "What decides it"]}
+        rows={CRITERIA.map((r) => [
+          <span key={r.code} className="pill">
+            {r.code}
+          </span>,
+          r.criterion,
+          r.air,
+          r.liquid,
+          r.decides,
+        ])}
+      />
+
+      {/* 4 · WHEN AIR WINS — canvas */}
+      <CardGrid
+        id="air-wins"
+        eyebrow="Side A"
+        title="When air cooling genuinely wins"
+        lede="Air cooling is not a legacy technology to apologise for. Each case below is one where adding liquid buys risk rather than performance."
+        surface="canvas"
+        columns={2}
+        items={AIR_WINS}
+      />
+
+      {/* 5 · WHEN LIQUID WINS — paper. Same weight, same count, same format. */}
+      <CardGrid
+        id="liquid-wins"
+        eyebrow="Side B"
+        title="When liquid cooling wins"
+        lede="Six conditions, matched one for one against the six above. Where none of them holds, the loop is an expense without an argument."
+        surface="paper"
+        field="cooling"
+        columns={2}
+        items={LIQUID_WINS}
+      />
+
+      {/* 6 · THE REASONING — canvas prose with a TOC rail */}
+      <ProseWithRail
+        id="energy-water"
+        surface="canvas"
+        rail={
+          <div style={{ borderTop: "1px solid var(--edge-bright)", paddingTop: "1.25rem" }}>
+            <p className="eyebrow">On this page</p>
+            <ul style={{ listStyle: "none", marginTop: "1rem", display: "grid", gap: "0.6rem" }}>
+              {TOC.map(([href, label]) => (
+                <li key={href}>
+                  <a href={href} style={{ ...linkStyle, fontSize: "0.9rem", textDecoration: "none" }}>
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        }
+      >
+        <SectionHead
+          eyebrow="Reading the matrix"
+          title="Energy, water, and the ladder most operators are actually on"
+        />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            The market is mid-transition, not post-transition. Uptime Institute&apos;s 2025 survey of
+            more than 800 operators shows rack densities climbing into the 10–30 kW band while
+            industry-average PUE has been flat for roughly six years: air-side tuning has run out of
+            headroom, yet most halls remain air-cooled.<Cite n={3} /> A site running both is the
+            normal outcome, not a compromise.
+          </p>
+          <p>
+            Liquid cooling does not transform facility efficiency by itself. The published ceiling
+            for excellent conventional plants is already high — Google reports a fleet-wide
+            trailing-twelve-month PUE of 1.09, and Microsoft publishes a design PUE of 1.12 with
+            water-use effectiveness of 0.30 L/kWh.<Cite n={8} />
+            <Cite n={9} /> Against numbers like those, the overhead liquid can remove is real but
+            bounded. What it changes decisively is the density at which those numbers stay achievable
+            at all.
+          </p>
+          <p>
+            Water is the other misread. A closed loop consumes nothing; consumption belongs to the
+            rejection stage, where evaporative towers trade water for lower temperatures and dry
+            coolers trade temperature for zero water — in either architecture. Liquid loops tolerate
+            warmer supply water, so the dry option stays viable in more climates,
+            <Cite n={1} />
+            <Cite n={7} /> and that same warm return water is what makes heat recovery economic.
+            <Cite n={10} />
+          </p>
+          <p>
+            Most operators are not choosing an architecture; they are choosing how far up a ladder to
+            climb inside a building they already own. Rung one is air-side tuning. Rung two is
+            rear-door heat exchangers, capturing rack exhaust into water without touching the
+            servers. Rung three is in-rack or in-row CDUs, which carry direct-to-chip racks with no
+            facility water plant. Rung four is a facility loop with plant-scale CDUs — a construction
+            project. Federal-lab guidance covers piping and integration for the middle rungs,
+            <Cite n={7} /> and the Open Compute Project publishes vendor-neutral cold-plate and
+            disconnect requirements that keep a loop open to more than one vendor.
+            <Cite n={5} />
+            <Cite n={6} />
+          </p>
         </div>
-      </header>
+      </ProseWithRail>
 
-      {/* ---------------- article body ---------------- */}
-      <article className="container-site" style={{ paddingBottom: "clamp(4rem, 8vh, 6rem)" }}>
-        <div className="max-w-[76ch]">
-          {/* -------- the short answer -------- */}
-          <section id="short-answer" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>The short answer</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Air is a poor coolant that happens to be free: low density, low heat capacity, so
-              removing more heat means moving more air, and fan power rises steeply with flow. That
-              trade stays comfortable at conventional densities and becomes punishing as racks fill
-              with accelerators — which is why ASHRAE&apos;s TC 9.9 committee, which defines the
-              thermal envelopes IT vendors design to, published a white paper on liquid cooling
-              moving into mainstream facilities,<Cite n={2} /> and why its guidelines now name
-              liquid-cooling facility water classes alongside the A1–A4 air classes.<Cite n={1} />
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              The market is mid-transition, not post-transition. Uptime Institute&apos;s 2025 survey
-              of more than 800 operators shows rack densities climbing into the 10–30 kW band while
-              industry-average PUE has been flat for roughly six years: air-side tuning has run out
-              of headroom, yet most halls remain air-cooled.<Cite n={3} /> A site running both is
-              the normal outcome, not a compromise.
-            </p>
-          </section>
+      {/* 7 · INK BEAT */}
+      <QuoteMetric
+        quote="A site running both is the normal outcome, not a compromise."
+        attribution="Cold plates capture heat only from the components they touch"
+        metric="10"
+        label="Criteria, and the input that decides each"
+        field="compare"
+      />
 
-          {/* -------- assumptions -------- */}
-          <section id="assumptions" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Assumptions behind this comparison</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Cooling comparisons go wrong when the assumptions stay hidden. These are ours; change
-              one and rows in the matrix move.
-            </p>
-            <ol className="mt-4 grid gap-3 list-decimal pl-5">
-              {ASSUMPTIONS.map((t) => (
-                <li key={t.slice(0, 24)} className="t-body" style={{ color: "var(--ink-dim)" }}>
-                  {t}
-                </li>
-              ))}
-            </ol>
-          </section>
+      {/* 8 · ASSUMPTIONS — paper, back to a light surface after the ink beat */}
+      <MatrixTable
+        id="assumptions"
+        eyebrow="Method"
+        title="Assumptions behind this comparison"
+        lede="Cooling comparisons go wrong when the assumptions stay hidden. These are ours; change one and rows in the matrix move."
+        surface="paper"
+        head={["#", "What the comparison assumes"]}
+        rows={ASSUMPTIONS.map((t, i) => [
+          <span key={t.slice(0, 24)} className="pill">
+            {String(i + 1).padStart(2, "0")}
+          </span>,
+          t,
+        ])}
+      />
 
-          {/* -------- criteria matrix -------- */}
-          <section id="criteria" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Criteria matrix</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Ten criteria, each with the input that decides it. The fourth column is the useful
-              one: most disagreements about cooling are really disagreements about which input is
-              binding.
-            </p>
+      {/* 9 · LIMITS — canvas, mandatory */}
+      <LimitsBlock
+        title="What this comparison does not settle"
+        eyebrow="Honest limits"
+        items={LIMITS}
+      />
 
-            <div className="overflow-x-auto mt-6 panel" style={{ borderRadius: 12 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={th}>#</th>
-                    <th style={th}>Criterion</th>
-                    <th style={th}>Air cooling</th>
-                    <th style={th}>Liquid (direct-to-chip)</th>
-                    <th style={th}>What decides it</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {CRITERIA.map((r) => (
-                    <tr key={r.code}>
-                      <td style={td}>
-                        <span style={codePill}>{r.code}</span>
-                      </td>
-                      <td style={{ ...td, color: "var(--ink-strong)", fontWeight: 500 }}>
-                        {r.criterion}
-                      </td>
-                      <td style={td}>{r.air}</td>
-                      <td style={td}>{r.liquid}</td>
-                      <td style={td}>{r.decides}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* -------- when air wins -------- */}
-          <section id="air-wins" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>When air cooling genuinely wins</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Air cooling is not a legacy technology to apologise for. Each case below is one where
-              adding liquid buys risk rather than performance.
-            </p>
-            <ul className="mt-4 grid gap-3 list-disc pl-5">
-              {AIR_WINS.map((t) => (
-                <li key={t.slice(0, 24)} className="t-body" style={{ color: "var(--ink-dim)" }}>
-                  {t}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* -------- when liquid wins -------- */}
-          <section id="liquid-wins" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>When liquid cooling wins</h2>
-            <ul className="mt-4 grid gap-3 list-disc pl-5">
-              {LIQUID_WINS.map((t) => (
-                <li key={t.slice(0, 24)} className="t-body" style={{ color: "var(--ink-dim)" }}>
-                  {t}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* -------- energy and water -------- */}
-          <section id="energy-water" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Energy and water: what actually changes</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Liquid cooling does not transform facility efficiency by itself. The published ceiling
-              for excellent conventional plants is already high — Google reports a fleet-wide
-              trailing-twelve-month PUE of 1.09, and Microsoft publishes a design PUE of 1.12 with
-              water-use effectiveness of 0.30 L/kWh.<Cite n={8} />
-              <Cite n={9} /> Against numbers like those, the overhead liquid can remove is real but
-              bounded. What it changes decisively is the density at which those numbers stay
-              achievable at all.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Water is the other misread. A closed loop consumes nothing; consumption belongs to the
-              rejection stage, where evaporative towers trade water for lower temperatures and dry
-              coolers trade temperature for zero water — in either architecture. Liquid loops
-              tolerate warmer supply water, so the dry option stays viable in more climates,
-              <Cite n={1} />
-              <Cite n={7} /> and that same warm return water is what makes heat recovery economic.
-              <Cite n={10} />
-            </p>
-          </section>
-
-          {/* -------- retrofit -------- */}
-          <section id="retrofit" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>The retrofit ladder</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Most operators are not choosing an architecture; they are choosing how far up a ladder
-              to climb inside a building they already own. Rung one is air-side tuning. Rung two is
-              rear-door heat exchangers, capturing rack exhaust into water without touching the
-              servers. Rung three is in-rack or in-row CDUs, which carry direct-to-chip racks with
-              no facility water plant. Rung four is a facility loop with plant-scale CDUs — a
-              construction project. Federal-lab guidance covers piping and integration for the
-              middle rungs,<Cite n={7} /> and the Open Compute Project publishes vendor-neutral
-              cold-plate and disconnect requirements that keep a loop open to more than one vendor.
-              <Cite n={5} />
-              <Cite n={6} />
-            </p>
-          </section>
-
-          {/* -------- limitations -------- */}
-          <section id="limitations" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>What this comparison does not settle</h2>
-            <ul className="mt-4 grid gap-3 list-disc pl-5">
-              {LIMITS.map((t) => (
-                <li key={t.slice(0, 24)} className="t-body" style={{ color: "var(--ink-dim)" }}>
-                  {t}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* -------- PODOS position -------- */}
-          <section id="podos" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Where PODOS sits on this question</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              PODOS resolves the tradeoff at the factory rather than on the floor. Each{" "}
-              <Link href="/platform/podos-pod" style={linkStyle}>
-                PODOS Pod
-              </Link>{" "}
-              is{" "}
-              <span data-claim="unit-capacity-1mw">
-                designed as a standardized 1 MW building block
-              </span>{" "}
-              and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, with closed-loop{" "}
-              <Link href="/engineering/direct-to-chip-liquid-cooling" style={linkStyle}>
-                direct-to-chip liquid cooling
-              </Link>{" "}
-              specified as part of the enclosure instead of added to a room. Density, loop,{" "}
-              <Link href="/engineering/data-center-power-architecture" style={linkStyle}>
-                power architecture
-              </Link>
-              , and heat-rejection interface are designed together and tested before shipment — one
-              reason PODOS{" "}
-              <span data-claim="deployment-window">
-                targets a 90-day window from order to commissioning
-              </span>{" "}
-              for a standard unit.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              That is a constraint as much as an advantage: a factory-integrated thermal design is
-              the wrong answer for an operator who needs more capacity out of an existing
-              air-cooled hall. The wider build-versus-manufacture question is covered in{" "}
-              <Link href="/compare/modular-ai-data-center-vs-traditional-data-center" style={linkStyle}>
-                modular vs traditional AI data centers
-              </Link>
-              , the delivery model under{" "}
-              <Link href="/deploy" style={linkStyle}>
-                deployment
-              </Link>
-              , and unfamiliar terms in the{" "}
-              <Link href="/resources/ai-infrastructure-glossary" style={linkStyle}>
-                AI infrastructure glossary
-              </Link>
-              .
-            </p>
-          </section>
-
-          {/* -------- FAQ -------- */}
-          <section id="faq" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Frequently asked questions</h2>
-            <div className="mt-6 grid gap-6">
-              {FAQ.map((f) => (
-                <div key={f.q}>
-                  <h3 style={h3Style}>{f.q}</h3>
-                  <p className="t-body mt-2" style={{ color: "var(--ink-dim)" }}>
-                    {f.a}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <EvidenceSourceRail sources={SOURCES} />
+      {/* 10 · PODOS POSITION — paper prose */}
+      <ProseWithRail id="podos" surface="paper">
+        <SectionHead eyebrow="In the product" title="Where PODOS sits on this question" />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            PODOS resolves the tradeoff at the factory rather than on the floor. Each{" "}
+            <Link href="/platform/podos-pod" style={linkStyle}>
+              PODOS Pod
+            </Link>{" "}
+            is{" "}
+            <span data-claim="unit-capacity-1mw">designed as a standardized 1 MW building block</span>{" "}
+            and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, with closed-loop{" "}
+            <Link href="/engineering/direct-to-chip-liquid-cooling" style={linkStyle}>
+              direct-to-chip liquid cooling
+            </Link>{" "}
+            specified as part of the enclosure instead of added to a room. Density, loop,{" "}
+            <Link href="/engineering/data-center-power-architecture" style={linkStyle}>
+              power architecture
+            </Link>
+            , and heat-rejection interface are designed together and tested before shipment — one
+            reason PODOS{" "}
+            <span data-claim="deployment-window">
+              targets a 90-day window from order to commissioning
+            </span>{" "}
+            for a standard unit.
+          </p>
+          <p>
+            That is a constraint as much as an advantage: a factory-integrated thermal design is the
+            wrong answer for an operator who needs more capacity out of an existing air-cooled hall.
+            The wider build-versus-manufacture question is covered in{" "}
+            <Link href="/compare/modular-ai-data-center-vs-traditional-data-center" style={linkStyle}>
+              modular vs traditional AI data centers
+            </Link>
+            , the delivery model under{" "}
+            <Link href="/deploy" style={linkStyle}>
+              deployment
+            </Link>
+            , and unfamiliar terms in the{" "}
+            <Link href="/resources/ai-infrastructure-glossary" style={linkStyle}>
+              AI infrastructure glossary
+            </Link>
+            .
+          </p>
         </div>
-      </article>
+      </ProseWithRail>
+
+      {/* 11 · FAQ — canvas. Same array as FAQJsonLd. */}
+      <FAQBlock items={FAQ} surface="canvas" />
+
+      {/* 12 · SOURCES — paper */}
+      <Section surface="paper" width="content" pad="flow">
+        <EvidenceSourceRail sources={SOURCES} />
+      </Section>
+
+      {/* 13 · RELATED — canvas */}
+      <RelatedRail
+        title="Related reading"
+        surface="canvas"
+        items={[
+          {
+            href: "/compare/modular-ai-data-center-vs-traditional-data-center",
+            label: "COMPARE",
+            title: "Modular vs traditional AI data centers",
+          },
+          {
+            href: "/engineering/direct-to-chip-liquid-cooling",
+            label: "ENGINEERING",
+            title: "Direct-to-chip liquid cooling, explained",
+          },
+          { href: "/deploy", label: "DEPLOY", title: "How a pod reaches commissioning" },
+          {
+            href: "/resources/ai-infrastructure-glossary",
+            label: "RESOURCES",
+            title: "AI infrastructure glossary",
+          },
+        ]}
+      />
+
+      {/* 14 · CTA — ink */}
+      <CTABand
+        title="Bring your density target and"
+        accent="we will tell you which side wins"
+        body="Rack load, hall condition, climate, and remaining lease. Engineering will say where the crossover sits for your site — including when it does not sit anywhere yet."
+        primary={{ href: "/configure", label: "Configure a build" }}
+        secondary={{ href: "/engineering", label: "Engineering index" }}
+        field="compare"
+      />
     </main>
   );
 }

@@ -1,10 +1,11 @@
 /**
  * /compare/on-prem-ai-infrastructure-vs-cloud
+ * Archetype D, compare. See docs/design/PAGE_ARCHETYPES.md.
  *
  * Comparison page (compare cluster). Server component — all copy in
- * initial HTML, CSS-only hovers, no client JS. Styled with the MAIN
- * site light technical system (design-language-lock.md). Global tokens
- * and utilities from globals.css only — no investor-deck class family.
+ * initial HTML, CSS-only hovers, no client JS. Composed from the SEO
+ * section library; the page carries no photography of its own, so the
+ * hero is editorial and the matrices are the visual centre.
  *
  * Claims discipline: only publishable entries from
  * src/content/data/claims.ts render, each wrapped in data-claim with
@@ -18,6 +19,20 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import {
+  HeroEditorial,
+  ExecutiveAnswer,
+  ProseWithRail,
+  MatrixTable,
+  CardGrid,
+  QuoteMetric,
+  LimitsBlock,
+  FAQBlock,
+  RelatedRail,
+  CTABand,
+  Section,
+  SectionHead,
+} from "@/components/seo/sections";
 
 const PATH = "/compare/on-prem-ai-infrastructure-vs-cloud";
 const TITLE = "On-Prem AI Infrastructure vs Cloud GPUs: How to Decide";
@@ -244,66 +259,11 @@ const FAQ = [
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/* shared styles (server component — CSS-only hovers)                  */
-/* ------------------------------------------------------------------ */
-const th: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
-  fontSize: 11.5,
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  color: "var(--ink-dim)",
-  textAlign: "left",
-  padding: "0.65rem 0.9rem",
-  borderBottom: "1px solid var(--edge-bright)",
-  whiteSpace: "nowrap",
-};
-
-const td: CSSProperties = {
-  fontSize: 14.5,
-  lineHeight: 1.55,
-  color: "var(--ink-dim)",
-  padding: "0.65rem 0.9rem",
-  borderBottom: "1px solid var(--edge-faint)",
-  verticalAlign: "top",
-  minWidth: "11rem",
-};
-
-const codePill: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
-  fontSize: "0.72rem",
-  fontWeight: 600,
-  letterSpacing: "0.18em",
-  color: "var(--brand-deep)",
-  background: "rgba(37,99,235,0.07)",
-  border: "1px solid rgba(37,99,235,0.16)",
-  borderRadius: 999,
-  padding: "0.15rem 0.6rem",
-  whiteSpace: "nowrap",
-};
-
-const h2Style: CSSProperties = {
-  fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-  fontWeight: 800,
-  letterSpacing: "-0.03em",
-  lineHeight: 1.1,
-  color: "var(--ink-strong)",
-  fontSize: "clamp(1.5rem, 2.6vw, 2.1rem)",
-};
-
-const h3Style: CSSProperties = {
-  fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-  fontWeight: 700,
-  letterSpacing: "-0.02em",
-  color: "var(--ink-strong)",
-  fontSize: "1.1rem",
-};
-
 const link: CSSProperties = { color: "var(--brand-deep)", textDecoration: "underline" };
 
 export default function OnPremVsCloudPage() {
   return (
-    <main style={{ background: "var(--paper)" }}>
+    <main>
       <TechArticleJsonLd
         headline="On-prem AI infrastructure vs cloud"
         description={DESCRIPTION}
@@ -315,398 +275,416 @@ export default function OnPremVsCloudPage() {
       />
       <FAQJsonLd items={FAQ} />
 
-      {/* ---------------- compact hero ---------------- */}
-      <header
-        className="container-site"
-        style={{ paddingTop: "clamp(6.5rem, 12vh, 9rem)", paddingBottom: "clamp(2.5rem, 5vh, 4rem)" }}
-      >
-        <Breadcrumbs
-          crumbs={[
-            { name: "Home", path: "/" },
-            { name: "On-prem AI infrastructure vs cloud", path: PATH },
-          ]}
-        />
-
-        <p
-          className="mt-8 inline-flex items-center gap-2"
-          style={{
-            fontFamily: "var(--font-geist-mono), monospace",
-            fontSize: "0.78rem",
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: "var(--brand-deep)",
-            background: "var(--glass-bg-strong)",
-            border: "1px solid var(--edge-bright)",
-            borderRadius: 999,
-            padding: "0.35rem 0.9rem",
-          }}
-        >
-          <span style={{ fontWeight: 800, color: "var(--cyan-deep)" }}>CMP-02</span>
-          <span aria-hidden style={{ opacity: 0.4 }}>
-            ·
-          </span>
-          COMPARE
-        </p>
-
-        <h1
-          className="mt-5 max-w-4xl"
-          style={{
-            fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-            fontWeight: 800,
-            letterSpacing: "-0.038em",
-            lineHeight: 1.05,
-            fontSize: "clamp(2.2rem, 4.6vw, 3.9rem)",
-            color: "var(--ink-strong)",
-          }}
-        >
-          On-prem AI infrastructure <span className="t-sweep-brand">vs</span> cloud
-        </h1>
-
-        <p className="t-lede mt-5 max-w-[62ch]" style={{ color: "var(--ink-dim)" }}>
-          On-premises AI infrastructure means owning the accelerators and the facility that powers
-          and cools them; cloud AI infrastructure means renting that capacity by the hour inside
-          someone else&apos;s facility. The choice is decided mostly by one number — sustained
-          utilization — with data residency, latency, and burst profile acting as overrides that can
-          flip the answer regardless of what the economics say.
-        </p>
-
-        <div className="mt-6">
+      {/* 1 · HERO — editorial. The page carries no product shot; the
+          structure of the decision carries it instead. */}
+      <HeroEditorial
+        code="CMP-02"
+        category="Compare · Infrastructure economics"
+        field="compare"
+        title="On-prem AI infrastructure"
+        accent="vs cloud"
+        lede="On-premises AI infrastructure means owning the accelerators and the facility that powers and cools them; cloud AI infrastructure means renting that capacity by the hour inside someone else's facility. The choice is decided mostly by one number — sustained utilization — with data residency, latency, and burst profile acting as overrides that can flip the answer regardless of what the economics say."
+        crumbs={
+          <Breadcrumbs
+            crumbs={[
+              { name: "Home", path: "/" },
+              { name: "On-prem AI infrastructure vs cloud", path: PATH },
+            ]}
+          />
+        }
+        meta={
           <LastVerified
             published="2026-08-31"
             lastVerified="2026-08-31"
             author="Josef Elimelech"
             reviewer="PODOS AI Engineering"
           />
-        </div>
-      </header>
+        }
+        stats={[
+          { value: "01", label: "Variable that decides most of it" },
+          { value: "07", label: "Break-even inputs to measure first" },
+          { value: "09", label: "Dimensions scored in both directions" },
+        ]}
+      />
 
-      {/* ---------------- article body ---------------- */}
-      <article className="container-site" style={{ paddingBottom: "clamp(4rem, 8vh, 6rem)" }}>
-        <div className="max-w-[76ch]">
-          {/* -------- utilization -------- */}
-          <section id="utilization" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>The variable that decides it: sustained utilization</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Buying accelerators converts a variable cost into a fixed one. A rented GPU costs
-              nothing at 3am on a Sunday; an owned GPU costs exactly the same whether it is running a
-              training job or sitting dark. Every other argument in this comparison is a modifier on
-              that single fact. The figure that matters is not peak utilization during a launch week
-              but the sustained duty cycle across the whole competitive life of the hardware —
-              through model rewrites, dataset regressions, hiring gaps, and the quarters where the
-              research direction changes.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Measuring that number honestly is harder than it looks, because allocated capacity is
-              not consumed capacity. The PagedAttention work behind vLLM found that serving systems
-              without paged memory management used roughly 20–38% of allocated KV-cache memory for
-              actual token state (2023 measurements).<Cite n={8} /> A cluster whose dashboards report
-              full allocation can still be doing a fraction of the work its memory footprint
-              implies. Size an ownership decision against measured throughput, not against an
-              allocation graph.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              The macro backdrop pushes in the same direction. The IEA projects data-centre
-              electricity demand roughly doubling as a share of global consumption — from about 1.5%
-              in 2025 toward about 3% by 2030 — with AI the dominant driver (Apr 2025).
-              <Cite n={1} /> LBNL put US data centers at 4.4% of national electricity in 2023 and
-              projected 6.7–12% by 2028 (Dec 2024).<Cite n={2} /> That growth is what makes
-              accelerator capacity scarce and priced accordingly in both models; it does not by
-              itself favour either one.
-            </p>
-          </section>
+      {/* 2 · THE VERDICT, UP FRONT — canvas glass panel */}
+      <ExecutiveAnswer label="The honest verdict">
+        Buying accelerators converts a variable cost into a fixed one. A rented GPU costs nothing at
+        3am on a Sunday; an owned GPU costs exactly the same whether it is running a training job or
+        sitting dark. Every other argument in this comparison is a modifier on that single fact. The
+        figure that matters is not peak utilization during a launch week but the sustained duty cycle
+        across the whole competitive life of the hardware — through model rewrites, dataset
+        regressions, hiring gaps, and the quarters where the research direction changes.
+      </ExecutiveAnswer>
 
-          {/* -------- break-even worksheet -------- */}
-          <section id="break-even" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>The break-even worksheet</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Published cost comparisons rarely survive contact with a real workload because they
-              omit one of these seven inputs. Fill them in with your own numbers before reading any
-              vendor&apos;s. The right-hand column is the error we see most often in each row.
-            </p>
-
-            <div className="overflow-x-auto mt-6 panel" style={{ borderRadius: 12 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={th}>#</th>
-                    <th style={th}>Input</th>
-                    <th style={th}>How to measure it honestly</th>
-                    <th style={th}>Common error</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {WORKSHEET.map((r) => (
-                    <tr key={r.code}>
-                      <td style={td}>
-                        <span style={codePill}>{r.code}</span>
-                      </td>
-                      <td style={{ ...td, color: "var(--ink-strong)", fontWeight: 500 }}>{r.input}</td>
-                      <td style={td}>{r.measure}</td>
-                      <td style={td}>{r.error}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* -------- matrix -------- */}
-          <section id="matrix" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Nine dimensions, and who actually wins each</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Cloud wins more rows than infrastructure vendors usually admit. The rows on-prem wins
-              are the ones that tend to be non-negotiable when they apply.
-            </p>
-
-            <div className="overflow-x-auto mt-6 panel" style={{ borderRadius: 12 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={th}>#</th>
-                    <th style={th}>Dimension</th>
-                    <th style={th}>Cloud</th>
-                    <th style={th}>On-prem</th>
-                    <th style={th}>Structural advantage</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {MATRIX.map((r) => (
-                    <tr key={r.code}>
-                      <td style={td}>
-                        <span style={codePill}>{r.code}</span>
-                      </td>
-                      <td style={{ ...td, color: "var(--ink-strong)", fontWeight: 500 }}>
-                        {r.dimension}
-                      </td>
-                      <td style={td}>
-                        {r.cloud}
-                        {r.code === "OC-07" ? (
-                          <>
-                            <Cite n={5} />
-                            <Cite n={6} />
-                          </>
-                        ) : null}
-                      </td>
-                      <td style={td}>
-                        {r.onprem}
-                        {r.code === "OC-07" ? <Cite n={3} /> : null}
-                      </td>
-                      <td style={td}>{r.edge}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* -------- cloud wins -------- */}
-          <section id="cloud-wins" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Where cloud is simply the better answer</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Variable and bursty workloads are the clearest case. If demand swings by an order of
-              magnitude between a quiet week and an evaluation sweep, owned capacity is either idle
-              most of the time or too small when it matters — and cloud absorbs that swing in
-              minutes. Small scale is the second case: below roughly a rack of accelerators, the
-              fixed overheads of power, cooling, spares, and staffing dominate the hardware cost, and
-              no utilization rate rescues the arithmetic.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Cloud also wins on optionality and on facility efficiency. Teams still deciding which
-              accelerator generation suits their models should not be holding a depreciating asset
-              while they find out. And a hyperscale plant runs at overheads a typical enterprise room
-              does not reach: Google reports a fleet-wide trailing-twelve-month PUE of 1.09 and
-              Microsoft a design PUE of 1.12 with a water-use effectiveness of 0.30 L/kWh, while
-              Uptime&apos;s 2025 survey of more than 800 operators found industry-average PUE
-              essentially flat for about six years.<Cite n={5} />
-              <Cite n={6} />
-              <Cite n={3} /> If the on-prem option is a converted server room, the efficiency
-              comparison is not close.
-            </p>
-          </section>
-
-          {/* -------- residency + latency -------- */}
-          <section id="residency" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Residency, custody, latency, and data gravity</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Data residency is two requirements wearing one name. Jurisdictional residency — data
-              must remain inside a legal boundary — is solved by choosing a cloud region. Custody —
-              the equipment, the physical access, and the operators must be yours — is not. Defence
-              work, some clinical and biometric data, certain industrial process data, and contracts
-              that forbid third-party physical access all fall in the second category, and no region
-              selector satisfies them. Read the obligation carefully before assuming it forces an
-              on-prem build; read it just as carefully before assuming a region satisfies it.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Latency splits the same way. For most inference, a network round trip is irrelevant
-              next to model execution time. It stops being irrelevant when the model sits inside a
-              control loop — a production line, a robot, a diagnostic instrument, a trading path —
-              where the round trip is a hard budget rather than a nuisance. Data gravity is the
-              quieter constraint: when a dataset is large enough, or regenerated often enough, moving
-              compute to the data is cheaper than moving the data to the compute, and that
-              calculation lands on-prem more often as datasets grow. The{" "}
-              <Link href="/use-cases" style={link}>
-                use-case breakdown
-              </Link>{" "}
-              walks through which workloads sit on which side of that line.
-            </p>
-          </section>
-
-          {/* -------- capex/opex -------- */}
-          <section id="capex-opex" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Capex vs opex, honestly accounted</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              The capex-versus-opex framing flatters both sides when it is done loosely. On-prem
-              comparisons understate cost by pricing hardware and forgetting the facility layer
-              underneath it — power, cooling, floor space, spares, and staff — which is why BE-03 and
-              BE-04 exist in the worksheet above. Cloud comparisons understate cost by pricing on-demand rates while ignoring
-              egress, storage, idle reservations, and the committed-use contracts most large
-              consumers sign. A three-year committed spend is not elastic. It is a fixed obligation
-              recorded in a different place on the income statement, and it should be compared
-              against owned capacity as such.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              The second honest adjustment is on the utilization side. Software that raises the work
-              extracted per accelerator changes the break-even point for both models at once —
-              memory-efficient serving, batching, and compression each move the same lever, which is
-              why{" "}
-              <Link href="/platform/syntropic" style={link}>
-                Syntropic
-              </Link>{" "}
-              sits alongside the hardware rather than after it.
-            </p>
-          </section>
-
-          {/* -------- team -------- */}
-          <section id="team" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Team requirements: the line item that gets skipped</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Cloud outsources the facility, not the platform. Someone on your side still owns
-              scheduling, images, drivers, networking, observability, and cost control. On-prem adds
-              a second discipline on top: electrical and mechanical systems, hardware RMA cycles,
-              spares inventory, and a maintenance calendar. Both models need enough depth that no
-              single person is the only one who understands the system — Uptime&apos;s 2025 survey
-              reports staffing and skills among operators&apos; standing concerns alongside outage
-              experience, with roughly half of respondents reporting an impactful outage within
-              three years.<Cite n={3} /> Resilience is bought deliberately in either model; neither
-              includes it for free.
-            </p>
-          </section>
-
-          {/* -------- limitations -------- */}
-          <section id="limitations" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>When on-prem is not the right fit</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              If any of these describe your situation, the honest recommendation is cloud — or a
-              hybrid that keeps the owned footprint small.
-            </p>
-            <ul className="mt-4 grid gap-3 list-disc pl-5">
+      {/* 3 · THE DECIDING VARIABLE — prose with a navigation rail, paper */}
+      <ProseWithRail
+        id="utilization"
+        surface="paper"
+        rail={
+          <div style={{ borderTop: "1px solid var(--edge-bright)", paddingTop: "1.25rem" }}>
+            <p className="eyebrow">On this page</p>
+            <ul style={{ listStyle: "none", marginTop: "1rem", display: "grid", gap: "0.6rem" }}>
               {[
-                "Demand is genuinely unpredictable. If you cannot state a median duty cycle with confidence, you cannot compute a break-even, and buying against a guess is the most expensive outcome in this comparison.",
-                "The requirement is below rack scale. A handful of accelerators does not amortize a facility, and consumer-grade workarounds create an operations burden that outlives the savings.",
-                "There is no power path. Interconnection queues and grid-connection bottlenecks are now a first-order constraint on new capacity, and no procurement schedule outruns a utility timeline.",
-                "The existing room cannot host the hardware. Rack-scale AI systems such as NVIDIA's GB200 NVL72 ship liquid-cooled, and ASHRAE's TC 9.9 has documented why air cooling stops being economic at those densities; power capacity, floor loading, and a liquid path rule out most legacy rooms.",
-                "The workload is still being defined. Hardware bought against a model architecture that changes in six months carries refresh risk that a rented instance simply does not.",
-                "Nobody owns the facility. Without staffing for the electrical and mechanical layer, an on-prem cluster degrades quietly until it fails loudly.",
-              ].map((t) => (
-                <li key={t.slice(0, 24)} className="t-body" style={{ color: "var(--ink-dim)" }}>
-                  {t}
+                ["#utilization", "The deciding variable"],
+                ["#matrix", "Nine dimensions"],
+                ["#when-each-wins", "When each wins"],
+                ["#capex-opex", "Capex vs opex"],
+                ["#break-even", "Break-even worksheet"],
+                ["#limitations", "When on-prem is wrong"],
+                ["#hybrid", "Hybrid, and where PODOS sits"],
+              ].map(([href, label]) => (
+                <li key={href}>
+                  <a href={href} style={{ ...link, fontSize: "0.9rem", textDecoration: "none" }}>
+                    {label}
+                  </a>
                 </li>
               ))}
             </ul>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Two of those constraints have external evidence worth reading directly: the IEA&apos;s
-              reporting on grid-connection bottlenecks driving the current scramble for capacity
-              (2025)<Cite n={4} />, and ASHRAE TC 9.9&apos;s white paper on why liquid cooling is
-              displacing air at high rack densities<Cite n={9} />, alongside NVIDIA&apos;s own
-              specification for a 72-GPU liquid-cooled rack acting as one NVLink domain.
-              <Cite n={7} /> Our{" "}
-              <Link href="/engineering/direct-to-chip-liquid-cooling" style={link}>
-                direct-to-chip liquid cooling explainer
-              </Link>{" "}
-              covers the second constraint end to end, and the{" "}
-              <Link href="/engineering/data-center-power-architecture" style={link}>
-                power architecture page
-              </Link>{" "}
-              covers the first.
-            </p>
-          </section>
-
-          {/* -------- hybrid -------- */}
-          <section id="hybrid" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Hybrid is the usual answer, not a compromise</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              Most organisations past the experimentation stage end up owning the predictable
-              baseline and renting the peaks. Size owned capacity to sustained median demand, keep a
-              cloud path for burst training runs, evaluation sweeps, and unexpected inference spikes,
-              and re-measure the split whenever the workload or the hardware generation changes. That
-              structure captures the utilization advantage of ownership without paying for capacity
-              that exists only to survive a peak — and it keeps the residency-sensitive fraction of
-              the data inside a perimeter you control while everything else stays elastic.
-            </p>
-          </section>
-
-          {/* -------- PODOS -------- */}
-          <section id="podos" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Where PODOS sits in this comparison</h2>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              PODOS is on the on-prem side of the line, aimed specifically at the objections above
-              that are about facilities rather than economics. Each{" "}
-              <Link href="/platform/podos-pod" style={link}>
-                PODOS Pod
-              </Link>{" "}
-              is <span data-claim="unit-capacity-1mw">designed as a standardized 1 MW building block</span>{" "}
-              and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, with power and
-              closed-loop liquid cooling integrated in the factory rather than built on site — so the
-              &quot;the room cannot host it&quot; and &quot;nobody owns the facility&quot;
-              constraints are answered by the product instead of by a construction project. PODOS{" "}
-              <span data-claim="deployment-window">
-                targets a 90-day window from order to commissioning
-              </span>{" "}
-              for a standard unit, which is the lever that matters against OC-04: shortening
-              time-to-capacity is how owned infrastructure stops conceding that row by default.
-            </p>
-            <p className="t-body mt-4" style={{ color: "var(--ink-dim)" }}>
-              It does not change the arithmetic in BE-01. If sustained utilization is low, renting is
-              still the right call, and we would rather say so than sell a unit that runs idle. For
-              the adjacent comparison — owning capacity through factory-built units versus a
-              conventional facility — see{" "}
-              <Link href="/compare/modular-ai-data-center-vs-traditional-data-center" style={link}>
-                modular vs traditional AI data centers
-              </Link>
-              . The{" "}
-              <Link href="/deploy" style={link}>
-                deployment model
-              </Link>{" "}
-              explains how a unit reaches a site, the{" "}
-              <Link href="/platform" style={link}>
-                platform overview
-              </Link>{" "}
-              shows how units compose, and unfamiliar terms are defined in the{" "}
-              <Link href="/resources/ai-infrastructure-glossary" style={link}>
-                AI infrastructure glossary
-              </Link>
-              .
-            </p>
-          </section>
-
-          {/* -------- FAQ -------- */}
-          <section id="faq" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Frequently asked questions</h2>
-            <div className="mt-6 grid gap-6">
-              {FAQ.map((f) => (
-                <div key={f.q}>
-                  <h3 style={h3Style}>{f.q}</h3>
-                  <p className="t-body mt-2" style={{ color: "var(--ink-dim)" }}>
-                    {f.a}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <EvidenceSourceRail sources={SOURCES} />
+          </div>
+        }
+      >
+        <SectionHead
+          eyebrow="The deciding variable"
+          title="Sustained utilization, measured honestly"
+        />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            Measuring that number honestly is harder than it looks, because allocated capacity is not
+            consumed capacity. The PagedAttention work behind vLLM found that serving systems without
+            paged memory management used roughly 20–38% of allocated KV-cache memory for actual token
+            state (2023 measurements).<Cite n={8} /> A cluster whose dashboards report full
+            allocation can still be doing a fraction of the work its memory footprint implies. Size
+            an ownership decision against measured throughput, not against an allocation graph.
+          </p>
+          <p>
+            The macro backdrop pushes in the same direction. The IEA projects data-centre electricity
+            demand roughly doubling as a share of global consumption — from about 1.5% in 2025 toward
+            about 3% by 2030 — with AI the dominant driver (Apr 2025).
+            <Cite n={1} /> LBNL put US data centers at 4.4% of national electricity in 2023 and
+            projected 6.7–12% by 2028 (Dec 2024).<Cite n={2} /> That growth is what makes accelerator
+            capacity scarce and priced accordingly in both models; it does not by itself favour
+            either one.
+          </p>
         </div>
-      </article>
+      </ProseWithRail>
+
+      {/* 4 · THE MATRIX — wide comparison table, canvas */}
+      <MatrixTable
+        id="matrix"
+        eyebrow="Table 1 · The comparison matrix"
+        title="Nine dimensions, and who actually wins each"
+        lede="Cloud wins more rows than infrastructure vendors usually admit. The rows on-prem wins are the ones that tend to be non-negotiable when they apply."
+        surface="canvas"
+        field="compare"
+        head={["#", "Dimension", "Cloud", "On-prem", "Structural advantage"]}
+        rows={MATRIX.map((r) => [
+          <span key={r.code} className="pill">
+            {r.code}
+          </span>,
+          r.dimension,
+          r.code === "OC-07" ? (
+            <span key="cloud">
+              {r.cloud}
+              <Cite n={5} />
+              <Cite n={6} />
+            </span>
+          ) : (
+            r.cloud
+          ),
+          r.code === "OC-07" ? (
+            <span key="onprem">
+              {r.onprem}
+              <Cite n={3} />
+            </span>
+          ) : (
+            r.onprem
+          ),
+          r.edge,
+        ])}
+      />
+
+      {/* 5 · WHEN EACH WINS — two balanced columns, paper */}
+      <CardGrid
+        id="when-each-wins"
+        eyebrow="Both directions"
+        title="Where cloud is simply the better answer — and where on-prem is the only one"
+        lede="Read down each column before running any arithmetic. Two of these four cards decide the question on their own, whatever the break-even says."
+        surface="paper"
+        columns={2}
+        items={[
+          {
+            code: "CLOUD · 01",
+            title: "Variable and bursty demand",
+            body: (
+              <>
+                Variable and bursty workloads are the clearest case. If demand swings by an order of
+                magnitude between a quiet week and an evaluation sweep, owned capacity is either idle
+                most of the time or too small when it matters — and cloud absorbs that swing in
+                minutes.
+              </>
+            ),
+          },
+          {
+            code: "ON-PREM · 01",
+            title: "Custody, not jurisdiction",
+            body: (
+              <>
+                Data residency is two requirements wearing one name. Jurisdictional residency — data
+                must remain inside a legal boundary — is solved by choosing a cloud region. Custody —
+                the equipment, the physical access, and the operators must be yours — is not. Defence
+                work, some clinical and biometric data, certain industrial process data, and
+                contracts that forbid third-party physical access all fall in the second category,
+                and no region selector satisfies them. Read the obligation carefully before assuming
+                it forces an on-prem build; read it just as carefully before assuming a region
+                satisfies it.
+              </>
+            ),
+          },
+          {
+            code: "CLOUD · 02",
+            title: "Small scale, optionality, and facility efficiency",
+            body: (
+              <>
+                Small scale is the second case: below roughly a rack of accelerators, the fixed
+                overheads of power, cooling, spares, and staffing dominate the hardware cost, and no
+                utilization rate rescues the arithmetic. Cloud also wins on optionality and on
+                facility efficiency. Teams still deciding which accelerator generation suits their
+                models should not be holding a depreciating asset while they find out. And a
+                hyperscale plant runs at overheads a typical enterprise room does not reach: Google
+                reports a fleet-wide trailing-twelve-month PUE of 1.09 and Microsoft a design PUE of
+                1.12 with a water-use effectiveness of 0.30 L/kWh, while Uptime&apos;s 2025 survey of
+                more than 800 operators found industry-average PUE essentially flat for about six
+                years.<Cite n={5} />
+                <Cite n={6} />
+                <Cite n={3} /> If the on-prem option is a converted server room, the efficiency
+                comparison is not close.
+              </>
+            ),
+          },
+          {
+            code: "ON-PREM · 02",
+            title: "Control loops and data gravity",
+            body: (
+              <>
+                Latency splits the same way. For most inference, a network round trip is irrelevant
+                next to model execution time. It stops being irrelevant when the model sits inside a
+                control loop — a production line, a robot, a diagnostic instrument, a trading path —
+                where the round trip is a hard budget rather than a nuisance. Data gravity is the
+                quieter constraint: when a dataset is large enough, or regenerated often enough,
+                moving compute to the data is cheaper than moving the data to the compute, and that
+                calculation lands on-prem more often as datasets grow. The{" "}
+                <Link href="/use-cases" style={link}>
+                  use-case breakdown
+                </Link>{" "}
+                walks through which workloads sit on which side of that line.
+              </>
+            ),
+          },
+        ]}
+      />
+
+      {/* 6 · THE ACCOUNTING AND THE STAFFING — prose, canvas */}
+      <ProseWithRail id="capex-opex" surface="canvas">
+        <SectionHead eyebrow="The reasoning" title="Capex vs opex, honestly accounted" />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            The capex-versus-opex framing flatters both sides when it is done loosely. On-prem
+            comparisons understate cost by pricing hardware and forgetting the facility layer
+            underneath it — power, cooling, floor space, spares, and staff — which is why BE-03 and
+            BE-04 exist in the worksheet below. Cloud comparisons understate cost by pricing
+            on-demand rates while ignoring egress, storage, idle reservations, and the committed-use
+            contracts most large consumers sign.
+          </p>
+          <p>
+            The second honest adjustment is on the utilization side. Software that raises the work
+            extracted per accelerator changes the break-even point for both models at once —
+            memory-efficient serving, batching, and compression each move the same lever, which is
+            why{" "}
+            <Link href="/platform/syntropic" style={link}>
+              Syntropic
+            </Link>{" "}
+            sits alongside the hardware rather than after it.
+          </p>
+          <h3 className="h3" style={{ marginTop: "2.5rem" }} id="team">
+            Team requirements: the line item that gets skipped
+          </h3>
+          <p style={{ marginTop: "1rem" }}>
+            Cloud outsources the facility, not the platform. Someone on your side still owns
+            scheduling, images, drivers, networking, observability, and cost control. On-prem adds a
+            second discipline on top: electrical and mechanical systems, hardware RMA cycles, spares
+            inventory, and a maintenance calendar. Both models need enough depth that no single
+            person is the only one who understands the system — Uptime&apos;s 2025 survey reports
+            staffing and skills among operators&apos; standing concerns alongside outage experience,
+            with roughly half of respondents reporting an impactful outage within three years.
+            <Cite n={3} /> Resilience is bought deliberately in either model; neither includes it for
+            free.
+          </p>
+        </div>
+      </ProseWithRail>
+
+      {/* 7 · INK BEAT */}
+      <QuoteMetric
+        quote="A three-year committed spend is not elastic. It is a fixed obligation recorded in a different place on the income statement, and it should be compared against owned capacity as such."
+        attribution="Capex vs opex, honestly accounted"
+        field="compare"
+      />
+
+      {/* 8 · WHAT THE COMPARISON ASSUMES — the break-even worksheet, paper */}
+      <MatrixTable
+        id="break-even"
+        eyebrow="Table 2 · What this comparison assumes"
+        title="The break-even worksheet"
+        lede="Published cost comparisons rarely survive contact with a real workload because they omit one of these seven inputs. Fill them in with your own numbers before reading any vendor's. The right-hand column is the error we see most often in each row."
+        surface="paper"
+        head={["#", "Input", "How to measure it honestly", "Common error"]}
+        rows={WORKSHEET.map((r) => [
+          <span key={r.code} className="pill">
+            {r.code}
+          </span>,
+          r.input,
+          r.measure,
+          r.error,
+        ])}
+      />
+
+      {/* 9 · LIMITS — canvas, mandatory */}
+      <LimitsBlock
+        title="When on-prem is not the right fit"
+        eyebrow="Honest limits"
+        lede="If any of these describe your situation, the honest recommendation is cloud — or a hybrid that keeps the owned footprint small."
+        items={[
+          "Demand is genuinely unpredictable. If you cannot state a median duty cycle with confidence, you cannot compute a break-even, and buying against a guess is the most expensive outcome in this comparison.",
+          "The requirement is below rack scale. A handful of accelerators does not amortize a facility, and consumer-grade workarounds create an operations burden that outlives the savings.",
+          "There is no power path. Interconnection queues and grid-connection bottlenecks are now a first-order constraint on new capacity, and no procurement schedule outruns a utility timeline.",
+          "The existing room cannot host the hardware. Rack-scale AI systems such as NVIDIA's GB200 NVL72 ship liquid-cooled, and ASHRAE's TC 9.9 has documented why air cooling stops being economic at those densities; power capacity, floor loading, and a liquid path rule out most legacy rooms.",
+          "The workload is still being defined. Hardware bought against a model architecture that changes in six months carries refresh risk that a rented instance simply does not.",
+          "Nobody owns the facility. Without staffing for the electrical and mechanical layer, an on-prem cluster degrades quietly until it fails loudly.",
+        ]}
+      />
+
+      {/* 10 · HYBRID + WHERE PODOS SITS — prose, paper */}
+      <ProseWithRail id="hybrid" surface="paper">
+        <SectionHead
+          eyebrow="The usual answer"
+          title="Hybrid is the usual answer, not a compromise"
+        />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            Most organisations past the experimentation stage end up owning the predictable baseline
+            and renting the peaks. Size owned capacity to sustained median demand, keep a cloud path
+            for burst training runs, evaluation sweeps, and unexpected inference spikes, and
+            re-measure the split whenever the workload or the hardware generation changes. That
+            structure captures the utilization advantage of ownership without paying for capacity
+            that exists only to survive a peak — and it keeps the residency-sensitive fraction of the
+            data inside a perimeter you control while everything else stays elastic.
+          </p>
+          <p>
+            Two of those constraints have external evidence worth reading directly: the IEA&apos;s
+            reporting on grid-connection bottlenecks driving the current scramble for capacity (2025)
+            <Cite n={4} />, and ASHRAE TC 9.9&apos;s white paper on why liquid cooling is displacing
+            air at high rack densities<Cite n={9} />, alongside NVIDIA&apos;s own specification for a
+            72-GPU liquid-cooled rack acting as one NVLink domain.
+            <Cite n={7} /> Our{" "}
+            <Link href="/engineering/direct-to-chip-liquid-cooling" style={link}>
+              direct-to-chip liquid cooling explainer
+            </Link>{" "}
+            covers the second constraint end to end, and the{" "}
+            <Link href="/engineering/data-center-power-architecture" style={link}>
+              power architecture page
+            </Link>{" "}
+            covers the first.
+          </p>
+          <h3 className="h3" style={{ marginTop: "2.5rem" }} id="podos">
+            Where PODOS sits in this comparison
+          </h3>
+          <p style={{ marginTop: "1rem" }}>
+            PODOS is on the on-prem side of the line, aimed specifically at the objections above that
+            are about facilities rather than economics. Each{" "}
+            <Link href="/platform/podos-pod" style={link}>
+              PODOS Pod
+            </Link>{" "}
+            is <span data-claim="unit-capacity-1mw">designed as a standardized 1 MW building block</span>{" "}
+            and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, with power and
+            closed-loop liquid cooling integrated in the factory rather than built on site — so the
+            &quot;the room cannot host it&quot; and &quot;nobody owns the facility&quot; constraints
+            are answered by the product instead of by a construction project. PODOS{" "}
+            <span data-claim="deployment-window">
+              targets a 90-day window from order to commissioning
+            </span>{" "}
+            for a standard unit, which is the lever that matters against OC-04: shortening
+            time-to-capacity is how owned infrastructure stops conceding that row by default.
+          </p>
+          <p>
+            It does not change the arithmetic in BE-01. If sustained utilization is low, renting is
+            still the right call, and we would rather say so than sell a unit that runs idle. For the
+            adjacent comparison — owning capacity through factory-built units versus a conventional
+            facility — see{" "}
+            <Link href="/compare/modular-ai-data-center-vs-traditional-data-center" style={link}>
+              modular vs traditional AI data centers
+            </Link>
+            . The{" "}
+            <Link href="/deploy" style={link}>
+              deployment model
+            </Link>{" "}
+            explains how a unit reaches a site, the{" "}
+            <Link href="/platform" style={link}>
+              platform overview
+            </Link>{" "}
+            shows how units compose, and unfamiliar terms are defined in the{" "}
+            <Link href="/resources/ai-infrastructure-glossary" style={link}>
+              AI infrastructure glossary
+            </Link>
+            .
+          </p>
+        </div>
+      </ProseWithRail>
+
+      {/* 11 · FAQ — canvas */}
+      <FAQBlock items={FAQ} surface="canvas" />
+
+      {/* 12 · SOURCES — paper */}
+      <Section surface="paper" width="content" pad="flow">
+        <EvidenceSourceRail sources={SOURCES} />
+      </Section>
+
+      {/* 13 · RELATED — canvas */}
+      <RelatedRail
+        title="Continue"
+        surface="canvas"
+        items={[
+          {
+            href: "/compare/modular-ai-data-center-vs-traditional-data-center",
+            label: "COMPARE",
+            title: "Modular vs traditional AI data centers",
+          },
+          {
+            href: "/engineering/direct-to-chip-liquid-cooling",
+            label: "ENGINEERING",
+            title: "Direct-to-chip liquid cooling, explained",
+          },
+          {
+            href: "/engineering/data-center-power-architecture",
+            label: "ENGINEERING",
+            title: "Data center power architecture",
+          },
+          {
+            href: "/resources/ai-infrastructure-glossary",
+            label: "RESOURCES",
+            title: "AI infrastructure glossary",
+          },
+        ]}
+      />
+
+      {/* 14 · CTA */}
+      <CTABand
+        title="Bring your duty cycle."
+        accent="We will tell you which side you are on."
+        body="If sustained utilization does not clear the break-even, the honest answer is cloud — and you will hear it from us."
+        primary={{ href: "/configure", label: "Configure a build" }}
+        secondary={{ href: "/platform", label: "Platform overview" }}
+        field="compare"
+      />
     </main>
   );
 }

@@ -1,21 +1,39 @@
 /**
- * /engineering/networking-fiber — engineering explainer (ENG-05).
+ * /engineering/networking-fiber — Archetype A, engineering deep dive
+ * (ENG-05). See docs/design/PAGE_ARCHETYPES.md.
  *
- * Server component. Keyword cluster: "AI data center network
- * architecture" / "leaf spine fiber" (informational/TOFU). All external
- * numbers cite the source register or primary sources verified
- * 2026-08-31; company claims render only from claims.ts publishable
- * entries with their required qualifiers. Non-confidential level — no
- * PODOS-specific port counts, topologies, or vendor detail.
+ * Server component, zero client JS. Composed entirely from the section
+ * library (src/components/seo/sections.tsx). The page carries no
+ * dedicated imagery, so the hero is editorial and every visual moment is
+ * typographic — tables, cards, and one ink beat. All external numbers
+ * cite the source register or primary sources verified 2026-08-31;
+ * company claims render only from claims.ts publishable entries with
+ * their required qualifiers, carried through as data-claim.
+ * Non-confidential level — no PODOS-specific port counts, topologies, or
+ * vendor detail.
  */
 
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import type { ReactNode } from "react";
 import { buildMetadata } from "@/lib/seo/metadata";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import {
+  HeroEditorial,
+  SummaryBand,
+  ProseWithRail,
+  MatrixTable,
+  QuoteMetric,
+  CardGrid,
+  LimitsBlock,
+  FAQBlock,
+  RelatedRail,
+  CTABand,
+  Section,
+  SectionHead,
+} from "@/components/seo/sections";
 
 const PATH = "/engineering/networking-fiber";
 const TITLE = "AI Data Center Network Architecture: Fiber and Leaf-Spine";
@@ -27,6 +45,8 @@ export const metadata = buildMetadata({
   description: DESCRIPTION,
   path: PATH,
 });
+
+const link = { color: "var(--brand-deep)", textDecoration: "underline" } as const;
 
 const SOURCES: Source[] = [
   {
@@ -106,68 +126,6 @@ const FAQ = [
     a: "For the backend fabric carrying collectives the target is normally non-blocking, because a collective runs at the speed of its slowest path and oversubscription becomes a tax on every training step. Frontend, storage, and management networks are routinely oversubscribed, because their traffic tolerates queueing.",
   },
 ];
-
-/* ------------------------------------------------------------------ */
-/* small shared styles (server component — CSS-only hovers)            */
-/* ------------------------------------------------------------------ */
-const th: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
-  fontSize: 11.5,
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  color: "var(--ink-dim)",
-  textAlign: "left",
-  padding: "0.65rem 0.9rem",
-  borderBottom: "1px solid var(--edge-bright)",
-  whiteSpace: "nowrap",
-};
-
-const td: CSSProperties = {
-  fontSize: 14.5,
-  lineHeight: 1.55,
-  color: "var(--ink-dim)",
-  padding: "0.65rem 0.9rem",
-  borderBottom: "1px solid var(--edge-faint)",
-  verticalAlign: "top",
-  minWidth: "10rem",
-};
-
-const tdStrong: CSSProperties = { ...td, color: "var(--ink-strong)", fontWeight: 500 };
-
-const codePill: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
-  fontSize: "0.72rem",
-  fontWeight: 600,
-  letterSpacing: "0.18em",
-  color: "var(--brand-deep)",
-  background: "rgba(37,99,235,0.07)",
-  border: "1px solid rgba(37,99,235,0.16)",
-  borderRadius: 999,
-  padding: "0.15rem 0.6rem",
-  whiteSpace: "nowrap",
-};
-
-const h2Style: CSSProperties = {
-  fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-  fontWeight: 800,
-  letterSpacing: "-0.03em",
-  lineHeight: 1.1,
-  color: "var(--ink-strong)",
-  fontSize: "clamp(1.5rem, 2.6vw, 2.1rem)",
-};
-
-const h3Style: CSSProperties = {
-  fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-  fontWeight: 700,
-  letterSpacing: "-0.02em",
-  color: "var(--ink-strong)",
-  fontSize: "1.1rem",
-};
-
-const linkStyle: CSSProperties = { color: "var(--brand-deep)", textDecoration: "underline" };
-
-const bodyP = "t-body mt-4";
-const bodyColor: CSSProperties = { color: "var(--ink-dim)" };
 
 /* Network planes: [code, plane, carries, if it degrades] */
 const PLANES: [string, string, string, string][] = [
@@ -305,9 +263,43 @@ const LIMITATIONS = [
   "Standards are still moving. Ultra Ethernet 1.0 is recent; multi-vendor interoperability is something to test on real hardware rather than assume.",
 ];
 
+const TOC: [string, string][] = [
+  ["#planes", "The planes"],
+  ["#fabric-planes", "Plane reference"],
+  ["#east-west", "East-west traffic"],
+  ["#operations", "In operation"],
+  ["#checklist", "Design checklist"],
+  ["#limitations", "Honest limits"],
+  ["#podos", "In the product"],
+  ["#faq", "FAQ"],
+];
+
+const PLANE_ROWS: ReactNode[][] = PLANES.map(([code, plane, carries, degrades]) => [
+  <span key={code} className="pill">
+    {code}
+  </span>,
+  plane,
+  carries,
+  degrades,
+]);
+
+const TRAFFIC_ROWS: ReactNode[][] = TRAFFIC.map(([dim, train, infer]) => [dim, train, infer]);
+
+const CHECKLIST_ROWS: ReactNode[][] = CHECKLIST.map(([n, criterion, evaluate, consequence, cite]) => [
+  <span key={n} className="pill">
+    {n}
+  </span>,
+  criterion,
+  evaluate,
+  <>
+    {consequence}
+    {cite ? <Cite n={cite} /> : null}
+  </>,
+]);
+
 export default function NetworkingFiberPage() {
   return (
-    <main style={{ background: "var(--paper)" }}>
+    <main>
       <TechArticleJsonLd
         headline="Networking and fiber in an AI data center"
         description={DESCRIPTION}
@@ -319,117 +311,101 @@ export default function NetworkingFiberPage() {
       />
       <FAQJsonLd items={FAQ} />
 
-      {/* ---------------- compact hero ---------------- */}
-      <header
-        className="container-site"
-        style={{ paddingTop: "clamp(6.5rem, 12vh, 9rem)", paddingBottom: "clamp(2.5rem, 5vh, 4rem)" }}
-      >
-        <Breadcrumbs
-          crumbs={[
-            { name: "Home", path: "/" },
-            { name: "Engineering", path: "/engineering" },
-            { name: "Networking and fiber", path: PATH },
-          ]}
-        />
-
-        <p
-          className="mt-8 inline-flex items-center gap-2"
-          style={{
-            fontFamily: "var(--font-geist-mono), monospace",
-            fontSize: "0.78rem",
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: "var(--brand-deep)",
-            background: "var(--glass-bg-strong)",
-            border: "1px solid var(--edge-bright)",
-            borderRadius: 999,
-            padding: "0.35rem 0.9rem",
-          }}
-        >
-          <span style={{ fontWeight: 800, color: "var(--cyan-deep)" }}>ENG-05</span>
-          <span aria-hidden style={{ opacity: 0.4 }}>
-            ·
-          </span>
-          ENGINEERING
-        </p>
-
-        <h1
-          className="mt-5 max-w-4xl"
-          style={{
-            fontFamily: "var(--font-display), ui-sans-serif, system-ui",
-            fontWeight: 800,
-            letterSpacing: "-0.038em",
-            lineHeight: 1.05,
-            fontSize: "clamp(2.2rem, 4.6vw, 3.9rem)",
-            color: "var(--ink-strong)",
-          }}
-        >
-          Networking and fiber in an <span className="t-sweep-brand">AI data center</span>
-        </h1>
-
-        <p className="t-lede mt-5 max-w-[62ch]" style={bodyColor}>
-          An AI data center runs several networks at once, not one. A scale-up fabric binds
-          accelerators inside a rack into a single compute domain, a scale-out backend fabric carries
-          collective traffic between racks, and a separate frontend network handles storage,
-          management, and the outside world. Fiber enters the building at one controlled point and
-          fans out through a leaf-spine fabric — but almost all of the traffic that decides whether
-          GPUs stay busy never leaves the building.
-        </p>
-
-        <div className="mt-6">
+      {/* 1 · HERO — editorial (this page carries no dedicated imagery) */}
+      <HeroEditorial
+        category="Engineering · Networking and fiber"
+        title="Networking and fiber in an"
+        accent="AI data center"
+        lede="An AI data center runs several networks at once, not one. A scale-up fabric binds accelerators inside a rack into a single compute domain, a scale-out backend fabric carries collective traffic between racks, and a separate frontend network handles storage, management, and the outside world. Fiber enters the building at one controlled point and fans out through a leaf-spine fabric — but almost all of the traffic that decides whether GPUs stay busy never leaves the building."
+        crumbs={
+          <Breadcrumbs
+            crumbs={[
+              { name: "Home", path: "/" },
+              { name: "Engineering", path: "/engineering" },
+              { name: "Networking and fiber", path: PATH },
+            ]}
+          />
+        }
+        meta={
           <LastVerified
             published="2026-08-31"
             lastVerified="2026-08-31"
             author="Josef Elimelech"
             reviewer="PODOS AI Engineering"
           />
+        }
+        stats={[
+          { value: "5", label: "Traffic planes, one building" },
+          { value: "800G", label: "Ethernet defined by IEEE 802.3df-2024" },
+          { value: "72", label: "GPUs in one NVLink domain (NVL72)" },
+        ]}
+      />
+
+      {/* 2 · SUMMARY — canvas */}
+      <SummaryBand
+        title="What you need to know"
+        items={[
+          {
+            code: "01",
+            title: "Several networks, not one",
+            body: "Scale-up inside the rack, scale-out between racks, frontend and storage, out-of-band management, and external uplinks each carry different traffic and fail differently.",
+          },
+          {
+            code: "02",
+            title: "Fiber enters at one point",
+            body: "Outside-plant fiber terminates in an entrance room and cross-connects into the main distribution area. Two carrier paths in one conduit are one path with two invoices.",
+          },
+          {
+            code: "03",
+            title: "Training and inference are opposites",
+            body: "Training is synchronous bursts of elephant flows paced by the slowest path; inference is many small flows judged on tail latency. One fabric tuned for both is mediocre at each.",
+          },
+          {
+            code: "04",
+            title: "The failure is rarely a link going down",
+            body: "It is one optic degrading quietly and slowing every iteration of a job spanning thousands of GPUs — which only telemetry correlated with job metrics can find.",
+          },
+        ]}
+      />
+
+      {/* 3 · CORE EXPLANATION — prose with a sticky TOC rail */}
+      <ProseWithRail
+        id="planes"
+        surface="paper"
+        rail={
+          <div style={{ borderTop: "1px solid var(--edge-bright)", paddingTop: "1.25rem" }}>
+            <p className="eyebrow">On this page</p>
+            <ul style={{ listStyle: "none", marginTop: "1rem", display: "grid", gap: "0.6rem" }}>
+              {TOC.map(([href, label]) => (
+                <li key={href}>
+                  <a href={href} style={{ ...link, fontSize: "0.9rem", textDecoration: "none" }}>
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        }
+      >
+        <SectionHead
+          eyebrow="Engineering"
+          code="ENG-05"
+          title="Four networks in one building"
+        />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            Enterprise data centers converge onto one general-purpose fabric. AI sites deliberately do
+            not. Meta&apos;s published account of its training clusters describes separating GPU
+            training onto its own dedicated backend network, because its traffic — bursty,
+            load-imbalanced, coordinated across tens of thousands of GPUs for weeks at a time — is
+            hostile to anything sharing a fabric with it.<Cite n={1} />
+          </p>
         </div>
-      </header>
 
-      {/* ---------------- article body ---------------- */}
-      <article className="container-site" style={{ paddingBottom: "clamp(4rem, 8vh, 6rem)" }}>
-        <div className="max-w-[76ch]">
-          {/* -------- planes -------- */}
-          <section id="planes" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Four networks in one building</h2>
-            <p className={bodyP} style={bodyColor}>
-              Enterprise data centers converge onto one general-purpose fabric. AI sites deliberately
-              do not. Meta&apos;s published account of its training clusters describes separating GPU
-              training onto its own dedicated backend network, because its traffic — bursty,
-              load-imbalanced, coordinated across tens of thousands of GPUs for weeks at a time — is
-              hostile to anything sharing a fabric with it.<Cite n={1} />
-            </p>
-
-            <div className="overflow-x-auto mt-6 panel" style={{ borderRadius: 12 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={th} scope="col">Plane</th>
-                    <th style={th} scope="col">Scope</th>
-                    <th style={th} scope="col">What it carries</th>
-                    <th style={th} scope="col">If it degrades</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {PLANES.map(([code, plane, carries, degrades]) => (
-                    <tr key={code}>
-                      <td style={td}>
-                        <span style={codePill}>{code}</span>
-                      </td>
-                      <td style={tdStrong}>{plane}</td>
-                      <td style={td}>{carries}</td>
-                      <td style={td}>{degrades}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* -------- fiber entry -------- */}
-          <section id="fiber-entry" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Fiber entry and the physical plant</h2>
-            <p className={bodyP} style={bodyColor}>
+        <div id="fiber-entry" style={{ marginTop: "3rem", scrollMarginTop: 96 }}>
+          <SectionHead title="Fiber entry and the physical plant" />
+          <div style={{ marginTop: "1.5rem" }}>
+            <p>
               Everything external begins at the entrance facility: outside-plant fiber terminating in
               an entrance room, transitioning to inside-plant cable, cross-connecting into the main
               distribution area. ANSI/TIA-942 — the data-center telecommunications infrastructure
@@ -443,12 +419,13 @@ export default function NetworkingFiberPage() {
               the rack; anything crossing a row runs on fiber, and single-mode dominates because its
               reach does not collapse as lane rates climb.
             </p>
-          </section>
+          </div>
+        </div>
 
-          {/* -------- leaf spine -------- */}
-          <section id="leaf-spine" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Leaf-spine: why the fabric looks the way it does</h2>
-            <p className={bodyP} style={bodyColor}>
+        <div id="leaf-spine" style={{ marginTop: "3rem", scrollMarginTop: 96 }}>
+          <SectionHead title="Leaf-spine: why the fabric looks the way it does" />
+          <div style={{ marginTop: "1.5rem" }}>
+            <p>
               A leaf-spine fabric is a two-tier Clos topology: every leaf connects to every spine, and
               nothing connects leaf to leaf. Path length is uniform, so any server is the same number
               of hops from any other — which matters when a collective completes only as fast as its
@@ -459,7 +436,7 @@ export default function NetworkingFiberPage() {
               paid on every training step for the life of the cluster; frontend and storage planes are
               routinely oversubscribed, because their traffic tolerates queueing.
             </p>
-            <p className={bodyP} style={bodyColor}>
+            <p>
               Hyperscale practice has already moved past the flat two-tier picture. Google&apos;s
               Jupiter work replaced a static spine layer with optical circuit switches under
               software-defined control, reporting 5× higher speed and capacity, a 30% capex reduction,
@@ -468,196 +445,221 @@ export default function NetworkingFiberPage() {
               is that topology has to be incrementally extensible, because the next hardware generation
               arrives before the building is full.
             </p>
-          </section>
-
-          {/* -------- east-west -------- */}
-          <section id="east-west" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>East-west traffic: training and inference are different workloads</h2>
-            <p className={bodyP} style={bodyColor}>
-              East-west means machine-to-machine traffic inside the facility. It dominates AI sites,
-              but training and inference stress the fabric in opposite ways, and a fabric tuned for one
-              is mediocre at the other.
-            </p>
-
-            <div className="overflow-x-auto mt-6 panel" style={{ borderRadius: 12 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={th} scope="col">Dimension</th>
-                    <th style={th} scope="col">Distributed training</th>
-                    <th style={th} scope="col">Inference serving</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {TRAFFIC.map(([dim, train, infer]) => (
-                    <tr key={dim}>
-                      <td style={tdStrong}>{dim}</td>
-                      <td style={td}>{train}</td>
-                      <td style={td}>{infer}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <p className={bodyP} style={bodyColor}>
-              This is where the scale-up boundary earns its keep. NVIDIA describes NVLink as a direct
-              GPU-to-GPU interconnect that scales multi-GPU I/O within a server, with NVLink Switch
-              chips extending all-to-all GPU communication across the rack<Cite n={6} />; a GB200
-              NVL72 rack presents 72 GPUs and 36 CPUs as a single NVLink domain.<Cite n={7} /> Traffic
-              between racks falls to Ethernet or InfiniBand instead. Parallelism that fits inside the
-              scale-up domain never touches the fiber plant; parallelism that does not crosses a
-              bandwidth cliff at the rack boundary, which makes scheduler placement a networking
-              decision. The transport underneath is meanwhile consolidating on Ethernet: the Ultra
-              Ethernet Consortium launched Specification 1.0 in June 2025, an RDMA transport for
-              Ethernet and IP specified across NICs, switches, optics, and cables so multi-vendor
-              fabrics interoperate without lock-in.<Cite n={2} />
-            </p>
-          </section>
-
-          {/* -------- redundancy -------- */}
-          <section id="redundancy" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Redundancy, failure domains, and monitoring</h2>
-            <p className={bodyP} style={bodyColor}>
-              Network redundancy in an AI site is failure-domain arithmetic. Dual-homing servers to two
-              leaf switches, running N+1 spines, and feeding paired switches from separate power paths
-              all reduce the number of accelerators one component can take out of a running job. That
-              number is the design output: it sets how often jobs checkpoint, and therefore what a
-              failure costs. The Uptime Institute&apos;s 2025 survey of more than 800 operators found
-              roughly half had an impactful outage in the previous three years — redundancy is judged
-              on what it contains, not on what is installed.<Cite n={8} />
-            </p>
-            <p className={bodyP} style={bodyColor}>
-              Monitoring has to reach past up and down: per-queue depth and drop counters, ECN marking
-              and PFC pause rates on lossless fabrics, per-lane optical light levels, correctable-error
-              counts, fabric-wide path utilisation. Alone these are graphs. They become diagnostic when
-              correlated with job metrics — step time, collective completion time, rank stragglers —
-              because the characteristic AI failure is not a link going down but one degrading optic
-              quietly slowing every iteration of a job spanning thousands of GPUs.
-            </p>
-          </section>
-
-          {/* -------- checklist -------- */}
-          <section id="checklist" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Network design checklist</h2>
-            <p className={bodyP} style={bodyColor}>
-              The questions an engineering review actually asks, in roughly the order their answers
-              constrain each other.
-            </p>
-
-            <div className="overflow-x-auto mt-6 panel" style={{ borderRadius: 12 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={th} scope="col">#</th>
-                    <th style={th} scope="col">Criterion</th>
-                    <th style={th} scope="col">What to evaluate</th>
-                    <th style={th} scope="col">Design consequence</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {CHECKLIST.map(([n, criterion, evaluate, consequence, cite]) => (
-                    <tr key={n}>
-                      <td style={td}>
-                        <span style={codePill}>{n}</span>
-                      </td>
-                      <td style={tdStrong}>{criterion}</td>
-                      <td style={td}>{evaluate}</td>
-                      <td style={td}>
-                        {consequence}
-                        {cite ? <Cite n={cite} /> : null}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* -------- limitations -------- */}
-          <section id="limitations" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>When this architecture is not the right fit</h2>
-            <ul className="mt-5 grid gap-3 list-disc pl-5">
-              {LIMITATIONS.map((t) => (
-                <li key={t.slice(0, 24)} className="t-body" style={bodyColor}>
-                  {t}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* -------- PODOS application -------- */}
-          <section id="podos" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>How PODOS treats the network as part of the unit</h2>
-            <p className={bodyP} style={bodyColor}>
-              In a conventional build the cabling plant is field work: pathways pulled, fiber
-              terminated, links tested on site after the shell is up. PODOS moves that work into the
-              factory. Each{" "}
-              <Link href="/platform/podos-pod" style={linkStyle}>
-                PODOS Pod
-              </Link>{" "}
-              is <span data-claim="unit-capacity-1mw">designed as a standardized 1 MW building block</span>{" "}
-              and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, so the internal
-              fabric — racks, in-rack copper, intra-unit fiber, and the management plane — is a fixed,
-              repeatable topology rather than a bespoke design per site. Site-side work reduces to
-              landing external fiber on a defined interface at the unit boundary, which is part of why
-              PODOS{" "}
-              <span data-claim="deployment-window">targets a 90-day window from order to commissioning</span>{" "}
-              for a standard unit.
-            </p>
-            <p className={bodyP} style={bodyColor}>
-              Treating the unit as the failure domain lines the network up with the other physical
-              domains: the{" "}
-              <Link href="/engineering/data-center-power-architecture" style={linkStyle}>
-                power architecture
-              </Link>{" "}
-              feeding the racks and the{" "}
-              <Link href="/engineering/direct-to-chip-liquid-cooling" style={linkStyle}>
-                cooling loop
-              </Link>{" "}
-              are scoped to the same boundary as the fabric inside it, so blast radius means one thing
-              across all three. See the{" "}
-              <Link href="/platform" style={linkStyle}>
-                platform overview
-              </Link>{" "}
-              and{" "}
-              <Link href="/deploy" style={linkStyle}>
-                deployment model
-              </Link>{" "}
-              for how units compose,{" "}
-              <Link href="/use-cases" style={linkStyle}>
-                use cases
-              </Link>{" "}
-              for the workloads these fabrics carry,{" "}
-              <Link href="/compare/modular-ai-data-center-vs-traditional-data-center" style={linkStyle}>
-                modular vs traditional AI data centers
-              </Link>{" "}
-              for the comparison with a conventional facility, and the{" "}
-              <Link href="/resources/ai-infrastructure-glossary" style={linkStyle}>
-                AI infrastructure glossary
-              </Link>{" "}
-              for unfamiliar terms.
-            </p>
-          </section>
-
-          {/* -------- FAQ -------- */}
-          <section id="faq" className="mt-14" style={{ scrollMarginTop: 96 }}>
-            <h2 style={h2Style}>Frequently asked questions</h2>
-            <div className="mt-6 grid gap-6">
-              {FAQ.map((f) => (
-                <div key={f.q}>
-                  <h3 style={h3Style}>{f.q}</h3>
-                  <p className="t-body mt-2" style={bodyColor}>
-                    {f.a}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <EvidenceSourceRail sources={SOURCES} />
+          </div>
         </div>
-      </article>
+      </ProseWithRail>
+
+      {/* 4 · PLANE REFERENCE — wide table, canvas */}
+      <MatrixTable
+        id="fabric-planes"
+        eyebrow="Reference"
+        title="The planes, and what each one costs when it degrades"
+        lede="Five traffic planes share one building. They are separated because their failure modes are not interchangeable."
+        surface="canvas"
+        field="network"
+        head={["Plane", "Scope", "What it carries", "If it degrades"]}
+        rows={PLANE_ROWS}
+      />
+
+      {/* 5 · INK BEAT */}
+      <QuoteMetric
+        quote="A collective completes only as fast as its slowest participant — which is why a backend fabric is built non-blocking and every ratio above 1:1 is paid on every training step."
+        attribution="PODOS AI Engineering · backend fabric design"
+        metric="1:1"
+        label="Target backend oversubscription"
+        field="network"
+      />
+
+      {/* 6 · EAST-WEST — wide table, paper */}
+      <MatrixTable
+        id="east-west"
+        eyebrow="East-west traffic"
+        title="Training and inference are different workloads"
+        lede="East-west means machine-to-machine traffic inside the facility. It dominates AI sites, but training and inference stress the fabric in opposite ways, and a fabric tuned for one is mediocre at the other."
+        surface="paper"
+        head={["Dimension", "Distributed training", "Inference serving"]}
+        rows={TRAFFIC_ROWS}
+      />
+
+      {/* 7 · IN OPERATION — cards, canvas */}
+      <CardGrid
+        id="operations"
+        eyebrow="In operation"
+        title="Scale-up boundaries, redundancy, and monitoring"
+        lede="Three things decide whether a fabric that looks right on a diagram keeps GPUs busy in production."
+        surface="canvas"
+        field="network"
+        columns={3}
+        items={[
+          {
+            code: "OPS-01",
+            title: "Where the scale-up boundary earns its keep",
+            body: (
+              <>
+                NVIDIA describes NVLink as a direct GPU-to-GPU interconnect that scales multi-GPU I/O
+                within a server, with NVLink Switch chips extending all-to-all GPU communication across
+                the rack<Cite n={6} />; a GB200 NVL72 rack presents 72 GPUs and 36 CPUs as a single
+                NVLink domain.<Cite n={7} /> Traffic between racks falls to Ethernet or InfiniBand
+                instead. Parallelism that fits inside the scale-up domain never touches the fiber plant;
+                parallelism that does not crosses a bandwidth cliff at the rack boundary, which makes
+                scheduler placement a networking decision. The transport underneath is meanwhile
+                consolidating on Ethernet: the Ultra Ethernet Consortium launched Specification 1.0 in
+                June 2025, an RDMA transport for Ethernet and IP specified across NICs, switches,
+                optics, and cables so multi-vendor fabrics interoperate without lock-in.<Cite n={2} />
+              </>
+            ),
+          },
+          {
+            code: "OPS-02",
+            title: "Redundancy is failure-domain arithmetic",
+            body: (
+              <>
+                Network redundancy in an AI site is failure-domain arithmetic. Dual-homing servers to
+                two leaf switches, running N+1 spines, and feeding paired switches from separate power
+                paths all reduce the number of accelerators one component can take out of a running job.
+                That number is the design output: it sets how often jobs checkpoint, and therefore what
+                a failure costs. The Uptime Institute&apos;s 2025 survey of more than 800 operators
+                found roughly half had an impactful outage in the previous three years — redundancy is
+                judged on what it contains, not on what is installed.<Cite n={8} />
+              </>
+            ),
+          },
+          {
+            code: "OPS-03",
+            title: "Monitoring has to reach past up and down",
+            body: (
+              <>
+                Monitoring has to reach past up and down: per-queue depth and drop counters, ECN marking
+                and PFC pause rates on lossless fabrics, per-lane optical light levels, correctable-error
+                counts, fabric-wide path utilisation. Alone these are graphs. They become diagnostic
+                when correlated with job metrics — step time, collective completion time, rank
+                stragglers — because the characteristic AI failure is not a link going down but one
+                degrading optic quietly slowing every iteration of a job spanning thousands of GPUs.
+              </>
+            ),
+          },
+        ]}
+      />
+
+      {/* 8 · DESIGN CHECKLIST — wide table, paper */}
+      <MatrixTable
+        id="checklist"
+        eyebrow="Selecting a design"
+        title="Network design checklist"
+        lede="The questions an engineering review actually asks, in roughly the order their answers constrain each other."
+        surface="paper"
+        head={["#", "Criterion", "What to evaluate", "Design consequence"]}
+        rows={CHECKLIST_ROWS}
+      />
+
+      {/* 9 · LIMITS — mandatory */}
+      <LimitsBlock
+        title="When this architecture is not the right fit"
+        lede="A dedicated backend fabric is a commitment, and the cases below are where it does not pay for itself."
+        items={LIMITATIONS}
+      />
+
+      {/* 10 · PODOS APPLICATION — prose, paper */}
+      <ProseWithRail id="podos" surface="paper">
+        <SectionHead
+          eyebrow="In the product"
+          title="How PODOS treats the network as part of the unit"
+        />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            In a conventional build the cabling plant is field work: pathways pulled, fiber terminated,
+            links tested on site after the shell is up. PODOS moves that work into the factory. Each{" "}
+            <Link href="/platform/podos-pod" style={link}>
+              PODOS Pod
+            </Link>{" "}
+            is <span data-claim="unit-capacity-1mw">designed as a standardized 1 MW building block</span>{" "}
+            and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, so the internal
+            fabric — racks, in-rack copper, intra-unit fiber, and the management plane — is a fixed,
+            repeatable topology rather than a bespoke design per site. Site-side work reduces to landing
+            external fiber on a defined interface at the unit boundary, which is part of why PODOS{" "}
+            <span data-claim="deployment-window">targets a 90-day window from order to commissioning</span>{" "}
+            for a standard unit.
+          </p>
+          <p>
+            Treating the unit as the failure domain lines the network up with the other physical
+            domains: the{" "}
+            <Link href="/engineering/data-center-power-architecture" style={link}>
+              power architecture
+            </Link>{" "}
+            feeding the racks and the{" "}
+            <Link href="/engineering/direct-to-chip-liquid-cooling" style={link}>
+              cooling loop
+            </Link>{" "}
+            are scoped to the same boundary as the fabric inside it, so blast radius means one thing
+            across all three. See the{" "}
+            <Link href="/platform" style={link}>
+              platform overview
+            </Link>{" "}
+            and{" "}
+            <Link href="/deploy" style={link}>
+              deployment model
+            </Link>{" "}
+            for how units compose,{" "}
+            <Link href="/use-cases" style={link}>
+              use cases
+            </Link>{" "}
+            for the workloads these fabrics carry,{" "}
+            <Link href="/compare/modular-ai-data-center-vs-traditional-data-center" style={link}>
+              modular vs traditional AI data centers
+            </Link>{" "}
+            for the comparison with a conventional facility, and the{" "}
+            <Link href="/resources/ai-infrastructure-glossary" style={link}>
+              AI infrastructure glossary
+            </Link>{" "}
+            for unfamiliar terms.
+          </p>
+        </div>
+      </ProseWithRail>
+
+      {/* 11 · FAQ — canvas */}
+      <FAQBlock items={FAQ} surface="canvas" />
+
+      {/* 12 · SOURCES */}
+      <Section surface="paper" width="content" pad="flow">
+        <EvidenceSourceRail sources={SOURCES} />
+      </Section>
+
+      {/* 13 · RELATED */}
+      <RelatedRail
+        title="Adjacent systems"
+        items={[
+          {
+            href: "/engineering/data-center-power-architecture",
+            label: "ENGINEERING",
+            title: "Power architecture that feeds the racks",
+          },
+          {
+            href: "/engineering/direct-to-chip-liquid-cooling",
+            label: "ENGINEERING",
+            title: "Direct-to-chip liquid cooling",
+          },
+          {
+            href: "/compare/modular-ai-data-center-vs-traditional-data-center",
+            label: "COMPARE",
+            title: "Modular vs traditional AI data centers",
+          },
+          {
+            href: "/resources/ai-infrastructure-glossary",
+            label: "RESOURCE",
+            title: "AI infrastructure glossary",
+          },
+        ]}
+      />
+
+      {/* 14 · CTA */}
+      <CTABand
+        title="Bring the fabric design to"
+        accent="your site"
+        body="Send the workload mix, the carrier options, and the site constraints. Engineering will tell you what the network inside a pod-based build looks like there."
+        primary={{ href: "/configure", label: "Configure a build" }}
+        secondary={{ href: "/deploy", label: "See the deployment model" }}
+        field="network"
+      />
     </main>
   );
 }

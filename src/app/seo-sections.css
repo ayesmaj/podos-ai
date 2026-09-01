@@ -1,0 +1,325 @@
+/* =====================================================================
+   seo-sections.css — section primitives for the SEO page system.
+
+   Why plain CSS classes instead of Tailwind utilities: globals.css
+   carries an UNLAYERED reset (`* { margin:0; padding:0 }`). Unlayered
+   rules beat every @layer utilities rule, so `py-24` on a section
+   computes to 0. A class selector is also unlayered and has higher
+   specificity than `*`, so these win. See docs/design/COMPONENT_MAP.md.
+   ===================================================================== */
+
+:root {
+  --w-wide: min(1680px, 94vw);
+  --w-site: min(1440px, 92vw);
+  --w-content: min(1120px, 92vw);
+  --sec-pad-x: clamp(1.25rem, 4vw, 3.5rem);
+}
+
+/* ---------------------------------------------------------------- shell */
+.sec {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+.sec > * { position: relative; z-index: 1; }
+
+.sec--paper  { background: var(--paper); color: var(--ink-dim); }
+.sec--canvas { background: var(--canvas); color: var(--ink-dim); }
+.sec--blueprint { background: var(--paper); color: var(--ink-dim); }
+.sec--ink {
+  background: var(--ink);
+  color: rgba(226, 232, 240, 0.78);
+  /* consumed by Breadcrumbs — keeps the trail legible on a dark surface */
+  --crumb-fg: rgba(148, 163, 184, 0.95);
+  --crumb-current: #F8FAFC;
+}
+.sec--ink .h-display,
+.sec--ink .h2,
+.sec--ink .h3,
+.sec--ink .metric { color: #F8FAFC; }
+.sec--ink .lede { color: rgba(226, 232, 240, 0.82); }
+.sec--ink .eyebrow { color: rgba(148, 163, 184, 0.95); }
+.sec--ink .rule { border-color: rgba(148, 163, 184, 0.22); }
+
+/* vertical scale */
+.sec--hero  { padding-block: clamp(7rem, 13vh, 10rem) clamp(3.5rem, 7vh, 6rem); }
+.sec--major { padding-block: clamp(4.5rem, 9vh, 8rem); }
+.sec--band  { padding-block: clamp(3rem, 6vh, 5rem); }
+.sec--flow  { padding-block: clamp(3.5rem, 7vh, 6.5rem); }
+
+/* ---------------------------------------------------------------- frame */
+.sec__in { margin-inline: auto; padding-inline: var(--sec-pad-x); width: 100%; }
+.sec__in--bleed   { max-width: none; padding-inline: 0; }
+.sec__in--wide    { max-width: var(--w-wide); }
+.sec__in--site    { max-width: var(--w-site); }
+.sec__in--content { max-width: var(--w-content); }
+
+/* ------------------------------------------------------- ambient fields */
+.sec__field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.sec--ink .sec__field { opacity: 0.32; }
+
+.sec__field[data-field="cooling"] {
+  background:
+    radial-gradient(60% 50% at 12% 8%, var(--cyan-trace), transparent 70%),
+    radial-gradient(55% 45% at 88% 82%, var(--brand-trace), transparent 72%);
+}
+.sec__field[data-field="power"] {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 78px, var(--edge-faint) 78px 79px),
+    repeating-linear-gradient(0deg, transparent 0 78px, var(--edge-faint) 78px 79px),
+    radial-gradient(50% 40% at 82% 12%, var(--brand-trace), transparent 70%);
+}
+.sec__field[data-field="network"] {
+  background:
+    repeating-linear-gradient(72deg, transparent 0 42px, var(--cyan-trace) 42px 43px),
+    radial-gradient(60% 50% at 20% 90%, var(--brand-trace), transparent 70%);
+}
+.sec__field[data-field="deploy"] {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 120px, var(--edge-faint) 120px 121px),
+    repeating-linear-gradient(90deg, transparent 0 40px, var(--edge-faint) 40px 41px),
+    radial-gradient(55% 45% at 90% 20%, var(--cyan-trace), transparent 72%);
+}
+.sec__field[data-field="safety"] {
+  background:
+    radial-gradient(closest-side at 50% 50%, transparent 62%, var(--edge-faint) 63%, transparent 64%),
+    radial-gradient(60% 50% at 10% 20%, var(--brand-trace), transparent 70%);
+}
+.sec__field[data-field="compare"] {
+  background:
+    linear-gradient(90deg, var(--brand-trace) 0 50%, transparent 50%),
+    repeating-linear-gradient(90deg, transparent 0 34px, var(--edge-faint) 34px 35px);
+}
+.sec__field[data-field="insight"] {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 64px, var(--edge-faint) 64px 65px),
+    repeating-linear-gradient(90deg, transparent 0 64px, var(--edge-faint) 64px 65px),
+    radial-gradient(50% 60% at 78% 6%, var(--cyan-trace), transparent 70%);
+}
+.sec__field[data-field="blueprint"] {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 28px, var(--edge-faint) 28px 29px),
+    repeating-linear-gradient(90deg, transparent 0 28px, var(--edge-faint) 28px 29px);
+}
+
+/* ----------------------------------------------------------- typography */
+.h-display {
+  font-family: var(--font-display), ui-sans-serif, system-ui;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.99;
+  font-size: clamp(2.6rem, 5.6vw, 4.75rem);
+  color: var(--ink-strong);
+  text-wrap: balance;
+}
+.h2 {
+  font-family: var(--font-display), ui-sans-serif, system-ui;
+  font-weight: 800;
+  letter-spacing: -0.032em;
+  line-height: 1.06;
+  font-size: clamp(1.9rem, 3.4vw, 3rem);
+  color: var(--ink-strong);
+  text-wrap: balance;
+}
+.h3 {
+  font-family: var(--font-display), ui-sans-serif, system-ui;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  color: var(--ink-strong);
+}
+.lede {
+  font-size: clamp(1.05rem, 1.35vw, 1.3rem);
+  line-height: 1.55;
+  color: var(--ink-dim);
+  max-width: 58ch;
+}
+.eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+/* brand-deep, not cyan-deep: cyan on paper measures 3.49 (fails AA) */
+.eyebrow b { color: var(--brand-deep); font-weight: 700; }
+.sec--ink .eyebrow b { color: var(--cyan); }
+.metric {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-size: clamp(1.9rem, 3.4vw, 3rem);
+  color: var(--ink-strong);
+}
+.prose { max-width: 68ch; }
+.prose p { font-size: 1rem; line-height: 1.78; color: var(--ink-dim); }
+.prose p + p { margin-top: 1.15rem; }
+.rule { border: 0; border-top: 1px solid var(--edge-bright); }
+
+/* --------------------------------------------------------------- layout */
+.grid2 { display: grid; gap: clamp(1.5rem, 3vw, 3rem); }
+.grid3 { display: grid; gap: clamp(1.25rem, 2vw, 2rem); }
+.grid4 { display: grid; gap: clamp(1rem, 1.6vw, 1.75rem); }
+@media (min-width: 860px) {
+  .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 560px) and (max-width: 859px) {
+  .grid4, .grid3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Metric rails stay 2-up on phones — a column of single numbers reads as
+   a list, not a band (docs/design/SEO_PAGE_DESIGN_SYSTEM.md §10). */
+@media (max-width: 559px) {
+  .metric-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* hero: text + bleeding visual */
+.hsplit { display: grid; gap: clamp(2rem, 4vw, 3.5rem); align-items: center; }
+@media (min-width: 980px) {
+  .hsplit { grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr); }
+}
+.hsplit__media { border-radius: 14px; overflow: hidden; }
+
+/* split feature */
+.split { display: grid; gap: clamp(2rem, 4vw, 4rem); align-items: center; }
+@media (min-width: 900px) {
+  .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .split--flip > :first-child { order: 2; }
+}
+
+/* sticky explainer */
+.sticky2 { display: grid; gap: clamp(2rem, 4vw, 4rem); }
+@media (min-width: 980px) {
+  .sticky2 { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr); align-items: start; }
+  .sticky2__stick { position: sticky; top: 12vh; }
+}
+
+/* prose + rail */
+.proserail { display: grid; gap: clamp(2rem, 4vw, 3.5rem); }
+@media (min-width: 980px) {
+  .proserail { grid-template-columns: minmax(0, 1fr) 17rem; align-items: start; }
+  .proserail__rail { position: sticky; top: 12vh; }
+}
+
+/* ---------------------------------------------------------------- cards */
+.card {
+  border: 1px solid var(--edge-bright);
+  border-radius: 12px;
+  background: var(--glass-bg-strong);
+  padding: clamp(1.15rem, 1.8vw, 1.6rem);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s;
+}
+.card:hover { transform: translateY(-2px); border-color: var(--brand); }
+.sec--ink .card {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+.card p { font-size: 0.94rem; line-height: 1.62; color: var(--ink-dim); margin-top: 0.5rem; }
+.sec--ink .card p { color: rgba(226, 232, 240, 0.72); }
+
+.pill {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--brand-deep);
+  background: var(--brand-wash);
+  border: 1px solid var(--brand-trace);
+  border-radius: 999px;
+  padding: 0.16rem 0.6rem;
+  white-space: nowrap;
+  display: inline-block;
+}
+.sec--ink .pill { color: var(--cyan-bright); background: rgba(34, 211, 238, 0.09); border-color: rgba(34, 211, 238, 0.26); }
+
+/* --------------------------------------------------------------- tables */
+.tblwrap {
+  overflow-x: auto;
+  border: 1px solid var(--edge-bright);
+  border-radius: 12px;
+  background: var(--glass-bg-strong);
+  -webkit-overflow-scrolling: touch;
+}
+.tbl { width: 100%; border-collapse: collapse; min-width: 44rem; }
+.tbl th {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--edge-bright);
+  white-space: nowrap;
+  background: var(--canvas);
+}
+.tbl td {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--ink-dim);
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--edge-faint);
+  vertical-align: top;
+}
+.tbl tbody tr:hover { background: var(--brand-wash); }
+.tbl td:nth-child(2) { color: var(--ink-strong); font-weight: 500; }
+
+/* ---------------------------------------------------------------- misc */
+.limits { list-style: none; display: grid; gap: 1.1rem; }
+.limits li {
+  padding-left: 1.4rem;
+  border-left: 2px solid var(--cyan);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink-dim);
+  max-width: 76ch;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn--primary { background: var(--brand-gradient); color: #fff; }
+.btn--ghost { border: 1px solid rgba(148, 163, 184, 0.4); color: #E2E8F0; }
+.sec--paper .btn--ghost, .sec--canvas .btn--ghost { border-color: var(--edge-bright); color: var(--ink-strong); }
+
+.linkcard {
+  display: block;
+  text-decoration: none;
+  border: 1px solid var(--edge-bright);
+  border-radius: 12px;
+  padding: 1.25rem;
+  background: var(--glass-bg-strong);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s;
+}
+.linkcard:hover { transform: translateY(-2px); border-color: var(--brand); }
+.linkcard .arrow { transition: transform 0.3s; display: inline-block; }
+.linkcard:hover .arrow { transform: translateX(4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .btn, .linkcard, .linkcard .arrow { transition: none; }
+  .card:hover, .btn:hover, .linkcard:hover { transform: none; }
+}

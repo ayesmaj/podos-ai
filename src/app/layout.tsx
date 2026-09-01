@@ -3,8 +3,11 @@ import { Geist, Geist_Mono, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import "./mobile.css";
 import "./perf.css";
+import "./seo-sections.css";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import GlobalEnergyLayer from "@/components/site/GlobalEnergyLayer";
+import SiteChrome from "@/components/site/SiteChrome";
+import Footer from "@/components/site/Footer";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/jsonld";
 
 /**
@@ -86,7 +89,15 @@ export default function RootLayout({
             motion. See GlobalEnergyLayer.tsx for the full breakdown
             of what it paints and why. */}
         <GlobalEnergyLayer />
+        {/* Header for every route except "/" — the homepage mounts its
+            own anchor-driven nav inside the hero. Before this, the nav
+            and footer lived in app/page.tsx and every other route
+            rendered with no site chrome at all. */}
+        <SiteChrome />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        {/* Footer is identical on every page, so it is global. The
+            homepage no longer renders its own copy. */}
+        <Footer />
       </body>
     </html>
   );

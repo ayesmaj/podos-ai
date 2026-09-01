@@ -1,22 +1,37 @@
 /**
  * /compare/modular-ai-data-center-vs-traditional-data-center
+ * Archetype D, comparison. See docs/design/PAGE_ARCHETYPES.md.
  *
- * Comparison page (compare cluster). Server component — all copy in
- * initial HTML, CSS-only hovers, no client JS. Styled with the MAIN
- * site light technical system (design-language-lock.md), never .iv-*.
+ * Server component, zero client JS. Composed entirely from the section
+ * library (src/components/seo/sections.tsx) — 14 sections, 11 distinct
+ * types, strict paper/canvas alternation with two ink beats.
  *
- * Claims discipline: only publishable entries from
- * src/content/data/claims.ts render, each wrapped in data-claim with
- * its required qualifier. External numbers cite the source register.
+ * Claims discipline is unchanged: only publishable entries from
+ * src/content/data/claims.ts render, each wrapped in data-claim with its
+ * required qualifier; external numbers cite the source register. The
+ * comparison stays balanced — four cases for each delivery model.
  */
 
 import Link from "next/link";
 import { buildMetadata } from "@/lib/seo/metadata";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
-import SeoImage from "@/components/seo/SeoImage";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
+import {
+  HeroSplit,
+  ExecutiveAnswer,
+  ProseWithRail,
+  MatrixTable,
+  CardGrid,
+  QuoteMetric,
+  LimitsBlock,
+  FAQBlock,
+  RelatedRail,
+  CTABand,
+  Section,
+  SectionHead,
+} from "@/components/seo/sections";
 
 const PATH = "/compare/modular-ai-data-center-vs-traditional-data-center";
 const TITLE = "Modular AI Data Center vs Traditional Data Center Compared";
@@ -28,6 +43,8 @@ export const metadata = buildMetadata({
   description: DESCRIPTION,
   path: PATH,
 });
+
+const link = { color: "var(--brand-deep)", textDecoration: "underline" } as const;
 
 /* ------------------------------------------------------------------ */
 /* Sources — docs/seo/source-register.md (verified 2026-08-31)         */
@@ -147,66 +164,10 @@ const FAQ: { q: string; a: string }[] = [
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/* Small style helpers (tokens only — design-language-lock.md)         */
-/* ------------------------------------------------------------------ */
-const h2Style: React.CSSProperties = {
-  fontFamily: "var(--font-display)",
-  fontWeight: 800,
-  fontSize: "clamp(1.6rem, 3vw, 2.3rem)",
-  lineHeight: 1.06,
-  letterSpacing: "-0.035em",
-  color: "var(--ink-strong)",
-  textWrap: "balance",
-};
-
-const codePillStyle: React.CSSProperties = {
-  fontFamily: "var(--font-mono)",
-  fontSize: "0.72rem",
-  fontWeight: 600,
-  letterSpacing: "0.18em",
-  color: "var(--brand-deep)",
-  background: "rgba(37, 99, 235, 0.07)",
-  border: "1px solid rgba(37, 99, 235, 0.16)",
-  borderRadius: 999,
-  padding: "0.28rem 0.7rem",
-  display: "inline-block",
-};
-
-const panelStyle: React.CSSProperties = {
-  background: "var(--panel)",
-  border: "1px solid var(--edge)",
-  borderRadius: 12,
-  boxShadow: "0 1px 2px rgba(15,23,42,0.03), 0 4px 20px -8px rgba(15,23,42,0.06)",
-};
-
-function VerdictCard({ code, title, body }: { code: string; title: string; body: React.ReactNode }) {
-  return (
-    <div className="card-lift" style={{ ...panelStyle, padding: "1.4rem 1.5rem" }}>
-      <span style={codePillStyle}>{code}</span>
-      <h3
-        style={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 700,
-          fontSize: "1.08rem",
-          letterSpacing: "-0.02em",
-          color: "var(--ink-strong)",
-          marginTop: "0.75rem",
-        }}
-      >
-        {title}
-      </h3>
-      <p className="t-body" style={{ marginTop: "0.45rem", fontSize: "0.95rem" }}>
-        {body}
-      </p>
-    </div>
-  );
-}
-
 /* ================================================================== */
 export default function ModularVsTraditionalPage() {
   return (
-    <main style={{ background: "var(--paper)", color: "var(--ink-strong)" }}>
+    <main>
       <TechArticleJsonLd
         headline={TITLE}
         description={DESCRIPTION}
@@ -218,491 +179,341 @@ export default function ModularVsTraditionalPage() {
       />
       <FAQJsonLd items={FAQ} />
 
-      {/* ---------------- HERO — compact ---------------- */}
-      <section
-        style={{
-          borderBottom: "1px solid var(--edge-faint)",
-          paddingTop: "clamp(6.5rem, 14vh, 9rem)",
-          paddingBottom: "clamp(2.5rem, 6vh, 4rem)",
-        }}
-      >
-        <div className="container-site" style={{ maxWidth: 1160 }}>
+      {/* 1 · HERO — ink, split field. The only image on the page. */}
+      <HeroSplit
+        code="CMP-01"
+        cluster="Compare"
+        title="Modular AI data center vs traditional"
+        accent="data center"
+        lede="A modular AI data center is assembled from factory-built units — power, cooling, and IT integrated and tested before they reach the site. A traditional data center is engineered and constructed in place, trade by trade."
+        imageId="compare-split-frame"
+        field="compare"
+        crumbs={
           <Breadcrumbs
             crumbs={[
               { name: "Home", path: "/" },
               { name: "Modular vs traditional data center", path: PATH },
             ]}
           />
-
-          <p
-            style={{
-              marginTop: "2.2rem",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.55rem",
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.78rem",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "var(--brand-deep)",
-              background: "var(--glass-bg-strong)",
-              border: "1px solid var(--edge-bright)",
-              borderRadius: 999,
-              padding: "0.4rem 0.95rem",
-            }}
-          >
-            <span style={{ fontWeight: 800, color: "var(--cyan-deep)" }}>CMP-01</span>
-            <span aria-hidden style={{ opacity: 0.4 }}>
-              ·
-            </span>
-            COMPARE
-          </p>
-
-          <h1
-            className="t-headline"
-            style={{ marginTop: "1.3rem", maxWidth: "22ch", textWrap: "balance" }}
-          >
-            Modular AI data center <span className="t-sweep-brand">vs</span> traditional data
-            center
-          </h1>
-
-          <p className="t-lede" style={{ marginTop: "1.4rem", maxWidth: "62ch" }}>
-            A modular AI data center is assembled from factory-built units — power, cooling, and IT
-            integrated and tested before they reach the site. A traditional data center is
-            engineered and constructed in place, trade by trade. Neither is better in the abstract:
-            the choice moves schedule risk, capital commitment, and quality control between a
-            production line and a construction site.
-          </p>
-
-          <div style={{ marginTop: "1.6rem" }}>
+        }
+        meta={
+          <>
             <LastVerified
               published="2026-08-31"
               lastVerified="2026-08-31"
               author="Josef Elimelech"
               reviewer="PODOS AI Engineering"
             />
-          </div>
-
-          <figure style={{ marginTop: "2.4rem", maxWidth: 900 }}>
-            <SeoImage id="compare-split-frame" priority />
-            <figcaption
-              style={{
-                marginTop: "0.7rem",
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.68rem",
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                color: "var(--ink-dim)",
-              }}
-            >
+            <p className="eyebrow" style={{ marginTop: "1rem" }}>
               Left: built in place. Right: factory-built, commissioned on a pad.
-            </figcaption>
-          </figure>
-        </div>
-      </section>
+            </p>
+          </>
+        }
+      />
 
-      {/* ---------------- WHY THE QUESTION IS LIVE ---------------- */}
-      <section className="section-pad" style={{ paddingBottom: "clamp(2rem, 4vh, 3rem)" }}>
-        <div className="container-site" style={{ maxWidth: 1160 }}>
-          <div style={{ maxWidth: "70ch" }}>
-            <h2 style={h2Style}>Why AI forces the comparison</h2>
-            <p className="t-body" style={{ marginTop: "1rem" }}>
-              AI demand turned a niche procurement question into a schedule question. The IEA
-              projects data centres rising from around 1.5% of global electricity consumption in
-              2025 to roughly 3% — about 945 TWh — by 2030
-              <Cite n={1} />; Lawrence Berkeley National Laboratory estimates US data centers used
-              4.4% of US electricity in 2023, projected at 6.7–12% by 2028
-              <Cite n={2} />; and grid-connection bottlenecks tightened through 2025 even as demand
-              surged
-              <Cite n={4} />.
-            </p>
-            <p className="t-body" style={{ marginTop: "0.9rem" }}>
-              The workload changed shape too. Uptime Institute&apos;s 2025 survey reports typical
-              rack densities rising into the 10–30 kW band, with AI clusters beyond it
-              <Cite n={3} />, and ASHRAE documents liquid cooling displacing air as densities climb
-              <Cite n={5} />. Dense capacity rewards tight integration of{" "}
-              <Link
-                href="/engineering/direct-to-chip-liquid-cooling"
-                style={{ color: "var(--brand-deep)", textDecoration: "underline" }}
-              >
-                direct-to-chip liquid cooling
-              </Link>{" "}
-              and{" "}
-              <Link
-                href="/engineering/data-center-power-architecture"
-                style={{ color: "var(--brand-deep)", textDecoration: "underline" }}
-              >
-                power architecture
-              </Link>{" "}
-              — work a factory repeats and a field crew rebuilds on every project. That is the
-              engineering case for modular. It is not the whole case.
-            </p>
+      {/* 2 · THE VERDICT, UP FRONT — canvas glass panel */}
+      <ExecutiveAnswer label="The honest verdict">
+        Neither is better in the abstract: the choice moves schedule risk, capital commitment, and
+        quality control between a production line and a construction site. Modular vendors rarely say
+        this part plainly. Traditional construction wins when scale economics or unlimited
+        customization is the binding requirement.
+      </ExecutiveAnswer>
+
+      {/* 3 · WHY THE QUESTION IS LIVE — prose with a jump rail, paper */}
+      <ProseWithRail
+        id="why"
+        surface="paper"
+        rail={
+          <div style={{ borderTop: "1px solid var(--edge-bright)", paddingTop: "1.25rem" }}>
+            <p className="eyebrow">On this page</p>
+            <ul style={{ listStyle: "none", marginTop: "1rem", display: "grid", gap: "0.6rem" }}>
+              {[
+                ["#answer", "The honest verdict"],
+                ["#criteria", "Seven criteria"],
+                ["#traditional-wins", "When traditional wins"],
+                ["#modular-wins", "When modular wins"],
+                ["#assumptions", "Assumptions"],
+                ["#limitations", "What it cannot tell you"],
+                ["#faq", "Questions"],
+              ].map(([href, label]) => (
+                <li key={href}>
+                  <a href={href} style={{ ...link, fontSize: "0.9rem", textDecoration: "none" }}>
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-      </section>
-
-      {/* ---------------- CRITERIA TABLE ---------------- */}
-      <section className="section-pad" style={{ paddingTop: "clamp(2rem, 4vh, 3rem)" }}>
-        <div className="container-site" style={{ maxWidth: 1160 }}>
-          <h2 style={h2Style}>Seven criteria, no winner column</h2>
-          <p className="t-body" style={{ marginTop: "0.9rem", maxWidth: "70ch" }}>
-            Each row states where the risk or constraint actually sits — read it against your
-            project, not a vendor&apos;s brochure, including ours.
+        }
+      >
+        <SectionHead
+          eyebrow="Context"
+          code="CMP-02"
+          title="Why AI forces the comparison"
+        />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            AI demand turned a niche procurement question into a schedule question. The IEA projects
+            data centres rising from around 1.5% of global electricity consumption in 2025 to roughly
+            3% — about 945 TWh — by 2030
+            <Cite n={1} />; Lawrence Berkeley National Laboratory estimates US data centers used 4.4%
+            of US electricity in 2023, projected at 6.7–12% by 2028
+            <Cite n={2} />; and grid-connection bottlenecks tightened through 2025 even as demand
+            surged
+            <Cite n={4} />.
           </p>
-
-          <div
-            style={{
-              ...panelStyle,
-              marginTop: "1.8rem",
-              overflowX: "auto",
-            }}
-          >
-            <table
-              style={{
-                width: "100%",
-                minWidth: 780,
-                borderCollapse: "collapse",
-                fontSize: "0.92rem",
-                lineHeight: 1.55,
-              }}
-            >
-              <caption className="sr-only">
-                Comparison of traditional and modular data centers across seven criteria
-              </caption>
-              <thead>
-                <tr>
-                  {["Criterion", "Traditional (built in place)", "Modular (factory-built)"].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        scope="col"
-                        style={{
-                          textAlign: "left",
-                          fontFamily: "var(--font-mono)",
-                          fontSize: "0.68rem",
-                          fontWeight: 600,
-                          letterSpacing: "0.16em",
-                          textTransform: "uppercase",
-                          color: "var(--ink-dim)",
-                          padding: "0.95rem 1.2rem",
-                          borderBottom: "1px solid var(--edge)",
-                          background: "var(--canvas)",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ),
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {CRITERIA.map((row) => (
-                  <tr key={row.criterion}>
-                    <th
-                      scope="row"
-                      style={{
-                        textAlign: "left",
-                        verticalAlign: "top",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: "0.74rem",
-                        fontWeight: 600,
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
-                        color: "var(--brand-deep)",
-                        padding: "0.95rem 1.2rem",
-                        borderTop: "1px solid var(--edge-faint)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {row.criterion}
-                    </th>
-                    <td
-                      style={{
-                        verticalAlign: "top",
-                        color: "var(--ink-dim)",
-                        padding: "0.95rem 1.2rem",
-                        borderTop: "1px solid var(--edge-faint)",
-                      }}
-                    >
-                      {row.traditional}
-                    </td>
-                    <td
-                      style={{
-                        verticalAlign: "top",
-                        color: "var(--ink-dim)",
-                        padding: "0.95rem 1.2rem",
-                        borderTop: "1px solid var(--edge-faint)",
-                      }}
-                    >
-                      {row.modular}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------- WHEN TRADITIONAL WINS ---------------- */}
-      <section className="section-pad" style={{ paddingTop: "clamp(2rem, 4vh, 3rem)" }}>
-        <div className="container-site" style={{ maxWidth: 1160 }}>
-          <h2 style={h2Style}>When a traditional build is the right call</h2>
-          <p className="t-body" style={{ marginTop: "0.9rem", maxWidth: "70ch" }}>
-            Modular vendors rarely say this part plainly. Traditional construction wins when scale
-            economics or unlimited customization is the binding requirement.
+          <p>
+            The workload changed shape too. Uptime Institute&apos;s 2025 survey reports typical rack
+            densities rising into the 10–30 kW band, with AI clusters beyond it
+            <Cite n={3} />, and ASHRAE documents liquid cooling displacing air as densities climb
+            <Cite n={5} />. Dense capacity rewards tight integration of{" "}
+            <Link href="/engineering/direct-to-chip-liquid-cooling" style={link}>
+              direct-to-chip liquid cooling
+            </Link>{" "}
+            and{" "}
+            <Link href="/engineering/data-center-power-architecture" style={link}>
+              power architecture
+            </Link>{" "}
+            — work a factory repeats and a field crew rebuilds on every project. That is the
+            engineering case for modular. It is not the whole case.
           </p>
-          <div
-            style={{
-              marginTop: "1.6rem",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-              gap: "1rem",
-            }}
-          >
-            <VerdictCard
-              code="CMP-T1"
-              title="Hyperscale campuses"
-              body="At hundreds of megawatts on one site, a purpose-built campus amortizes design, sitework, and utility infrastructure across the whole build. Unit-by-unit delivery adds little there."
-            />
-            <VerdictCard
-              code="CMP-T2"
-              title="Bespoke requirements"
-              body="Custom security zoning, unusual redundancy topologies, special floor loading, or multi-tenant architecture exceed any standardized unit's envelope. Bespoke problems justify bespoke buildings."
-            />
-            <VerdictCard
-              code="CMP-T3"
-              title="An existing shell"
-              body="A powered building with usable structure already in hand can make a fit-out cheaper and faster than shipping new enclosures — the enclosure is the part you already own."
-            />
-            <VerdictCard
-              code="CMP-T4"
-              title="Jurisdictions that treat modules as buildings"
-              body="Where the authority routes factory-built units through the full building-permit path anyway, the permitting advantage shrinks and the decision reverts to logistics and quality control."
-            />
-          </div>
         </div>
-      </section>
+      </ProseWithRail>
 
-      {/* ---------------- WHEN MODULAR WINS ---------------- */}
-      <section className="section-pad" style={{ paddingTop: "clamp(2rem, 4vh, 3rem)" }}>
-        <div className="container-site" style={{ maxWidth: 1160 }}>
-          <h2 style={h2Style}>When modular wins</h2>
-          <div
-            style={{
-              marginTop: "1.6rem",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-              gap: "1rem",
-            }}
-          >
-            <VerdictCard
-              code="CMP-M1"
-              title="Time-bound AI capacity"
-              body="When GPU capacity has a deadline, moving integration work off the critical path and into a factory is the main lever a buyer controls. Sitework and production run in parallel instead of in sequence."
-            />
-            <VerdictCard
-              code="CMP-M2"
-              title="High density from day one"
-              body={
-                <>
-                  Liquid-cooled AI racks exceed the design assumptions of most legacy floor plans
-                  <Cite n={3} />
-                  <Cite n={5} />. A unit engineered around direct-to-chip cooling avoids retrofitting
-                  a building that was designed for air.
-                </>
-              }
-            />
-            <VerdictCard
-              code="CMP-M3"
-              title="Capacity where power already exists"
-              body={
-                <>
-                  With grid connections bottlenecked
-                  <Cite n={4} />, compact factory-built units can be placed at sites that already
-                  have power — substations, industrial parcels, campus edges — rather than waiting on
-                  a greenfield interconnection.
-                </>
-              }
-            />
-            <VerdictCard
-              code="CMP-M4"
-              title="Uncertain demand curves"
-              body="Buying capacity in unit-sized increments converts a forecast-sized capital commitment into a sequence of smaller, reversible decisions. Under-forecasting costs a purchase order, not a building."
-            />
-          </div>
+      {/* 4 · THE CRITERIA MATRIX — canvas, wide, split field */}
+      <MatrixTable
+        id="criteria"
+        eyebrow="The comparison"
+        title="Seven criteria, no winner column"
+        lede="Each row states where the risk or constraint actually sits — read it against your project, not a vendor's brochure, including ours."
+        surface="canvas"
+        field="compare"
+        head={["Criterion", "Traditional (built in place)", "Modular (factory-built)"]}
+        rows={CRITERIA.map((row) => [
+          <strong key={row.criterion} style={{ color: "var(--ink-strong)" }}>
+            {row.criterion}
+          </strong>,
+          row.traditional,
+          row.modular,
+        ])}
+      />
+
+      {/* 5 · WHEN TRADITIONAL WINS — paper, two columns */}
+      <CardGrid
+        id="traditional-wins"
+        eyebrow="Case A"
+        title="When a traditional build is the right call"
+        lede="Four project shapes where constructing in place remains the correct decision."
+        surface="paper"
+        columns={2}
+        items={[
+          {
+            code: "CMP-T1",
+            title: "Hyperscale campuses",
+            body: "At hundreds of megawatts on one site, a purpose-built campus amortizes design, sitework, and utility infrastructure across the whole build. Unit-by-unit delivery adds little there.",
+          },
+          {
+            code: "CMP-T2",
+            title: "Bespoke requirements",
+            body: "Custom security zoning, unusual redundancy topologies, special floor loading, or multi-tenant architecture exceed any standardized unit's envelope. Bespoke problems justify bespoke buildings.",
+          },
+          {
+            code: "CMP-T3",
+            title: "An existing shell",
+            body: "A powered building with usable structure already in hand can make a fit-out cheaper and faster than shipping new enclosures — the enclosure is the part you already own.",
+          },
+          {
+            code: "CMP-T4",
+            title: "Jurisdictions that treat modules as buildings",
+            body: "Where the authority routes factory-built units through the full building-permit path anyway, the permitting advantage shrinks and the decision reverts to logistics and quality control.",
+          },
+        ]}
+      />
+
+      {/* 6 · WHEN MODULAR WINS — canvas, two columns, same weight */}
+      <CardGrid
+        id="modular-wins"
+        eyebrow="Case B"
+        title="When modular wins"
+        lede="The same count, on the same terms: four project shapes where factory delivery is the correct decision."
+        surface="canvas"
+        columns={2}
+        items={[
+          {
+            code: "CMP-M1",
+            title: "Time-bound AI capacity",
+            body: "When GPU capacity has a deadline, moving integration work off the critical path and into a factory is the main lever a buyer controls. Sitework and production run in parallel instead of in sequence.",
+          },
+          {
+            code: "CMP-M2",
+            title: "High density from day one",
+            body: (
+              <>
+                Liquid-cooled AI racks exceed the design assumptions of most legacy floor plans
+                <Cite n={3} />
+                <Cite n={5} />. A unit engineered around direct-to-chip cooling avoids retrofitting a
+                building that was designed for air.
+              </>
+            ),
+          },
+          {
+            code: "CMP-M3",
+            title: "Capacity where power already exists",
+            body: (
+              <>
+                With grid connections bottlenecked
+                <Cite n={4} />, compact factory-built units can be placed at sites that already have
+                power — substations, industrial parcels, campus edges — rather than waiting on a
+                greenfield interconnection.
+              </>
+            ),
+          },
+          {
+            code: "CMP-M4",
+            title: "Uncertain demand curves",
+            body: "Buying capacity in unit-sized increments converts a forecast-sized capital commitment into a sequence of smaller, reversible decisions. Under-forecasting costs a purchase order, not a building.",
+          },
+        ]}
+      />
+
+      {/* 7 · INK BEAT — why no cost table appears anywhere above */}
+      <QuoteMetric
+        quote="Vendors publish targets; operators rarely publish actuals."
+        attribution="Why this page carries no delivered-cost table"
+        metric="10–30 kW"
+        label="Typical rack density band — Uptime Institute, 2025"
+        field="compare"
+      />
+
+      {/* 8 · ASSUMPTIONS — paper, two columns */}
+      <CardGrid
+        id="assumptions"
+        eyebrow="Ground rules"
+        title="Assumptions behind this comparison"
+        lede="Change any one of these and the rows above change with it."
+        surface="paper"
+        columns={2}
+        items={[
+          {
+            code: "CMP-A1",
+            title: "New-build capacity, both models available",
+            body: "New-build capacity for AI or other high-density workloads, where both delivery models are actually available.",
+          },
+          {
+            code: "CMP-A2",
+            title: "Power binds both paths equally",
+            body: "Power availability binds both paths equally; neither model manufactures megawatts.",
+          },
+          {
+            code: "CMP-A3",
+            title: "No cost figures",
+            body: "No cost figures. Delivered $/MW varies too widely by site, scale, and scope to publish a general number honestly.",
+          },
+          {
+            code: "CMP-A4",
+            title: "Vendor-neutral terminology",
+            body: (
+              <>
+                &quot;Modular&quot; is used vendor-neutrally for factory-built units of any form
+                factor — see the{" "}
+                <Link href="/resources/ai-infrastructure-glossary" style={link}>
+                  AI infrastructure glossary
+                </Link>{" "}
+                for term boundaries.
+              </>
+            ),
+          },
+        ]}
+      />
+
+      {/* 9 · LIMITS — canvas, mandatory */}
+      <LimitsBlock
+        eyebrow="Honest limits"
+        title="What this comparison cannot tell you"
+        items={[
+          "No public, apples-to-apples dataset of measured schedules and costs exists across both models at fleet scale.",
+          "The category boundary blurs in practice — many traditional builds now use prefabricated electrical rooms and cooling skids.",
+          "The numbers cited here are industry-level demand and density figures, not predictions for any specific project.",
+          "PODOS builds modular hardware. Read this page knowing where it comes from.",
+        ]}
+      />
+
+      {/* 10 · WHERE PODOS SITS — paper prose, disclosed after the limits */}
+      <ProseWithRail id="podos" surface="paper">
+        <SectionHead eyebrow="Disclosure" title="Where PODOS sits in this comparison" />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            PODOS builds on the modular side of this table.{" "}
+            <span data-claim="unit-capacity-1mw">
+              Each PODOS Pod is designed as a standardized 1-MW building block for AI infrastructure
+            </span>
+            , <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, and{" "}
+            <span data-claim="deployment-window">
+              PODOS targets a 90-day window from order to commissioning for a standard unit
+            </span>{" "}
+            — a target, not a measured deployment figure. The{" "}
+            <Link href="/platform" style={link}>
+              platform overview
+            </Link>{" "}
+            explains the architecture, the{" "}
+            <Link href="/platform/podos-pod" style={link}>
+              PODOS Pod page
+            </Link>{" "}
+            carries the unit specification, and the{" "}
+            <Link href="/deploy" style={link}>
+              deployment model
+            </Link>{" "}
+            covers what happens between order and commissioning. If your project matches the
+            traditional-wins rows above, a pod is the wrong tool.
+          </p>
         </div>
-      </section>
+      </ProseWithRail>
 
-      {/* ---------------- ASSUMPTIONS + LIMITATIONS ---------------- */}
-      <section className="section-pad" style={{ paddingTop: "clamp(2rem, 4vh, 3rem)" }}>
-        <div className="container-site" style={{ maxWidth: 1160 }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "1.4rem",
-            }}
-          >
-            <div style={{ ...panelStyle, padding: "1.6rem 1.7rem" }}>
-              <h2 style={{ ...h2Style, fontSize: "1.35rem" }}>Assumptions behind this comparison</h2>
-              <ul
-                className="t-body"
-                style={{
-                  marginTop: "0.9rem",
-                  fontSize: "0.95rem",
-                  display: "grid",
-                  gap: "0.6rem",
-                  paddingLeft: "1.1rem",
-                  listStyle: "disc",
-                }}
-              >
-                <li>
-                  New-build capacity for AI or other high-density workloads, where both delivery
-                  models are actually available.
-                </li>
-                <li>
-                  Power availability binds both paths equally; neither model manufactures megawatts.
-                </li>
-                <li>
-                  No cost figures. Delivered $/MW varies too widely by site, scale, and scope to
-                  publish a general number honestly.
-                </li>
-                <li>
-                  &quot;Modular&quot; is used vendor-neutrally for factory-built units of any form
-                  factor — see the{" "}
-                  <Link
-                    href="/resources/ai-infrastructure-glossary"
-                    style={{ color: "var(--brand-deep)", textDecoration: "underline" }}
-                  >
-                    AI infrastructure glossary
-                  </Link>{" "}
-                  for term boundaries.
-                </li>
-              </ul>
-            </div>
+      {/* 11 · FAQ — canvas. Same array that feeds FAQJsonLd. */}
+      <FAQBlock items={FAQ} surface="canvas" />
 
-            <div style={{ ...panelStyle, padding: "1.6rem 1.7rem" }}>
-              <h2 style={{ ...h2Style, fontSize: "1.35rem" }}>What this comparison cannot tell you</h2>
-              <ul
-                className="t-body"
-                style={{
-                  marginTop: "0.9rem",
-                  fontSize: "0.95rem",
-                  display: "grid",
-                  gap: "0.6rem",
-                  paddingLeft: "1.1rem",
-                  listStyle: "disc",
-                }}
-              >
-                <li>
-                  No public, apples-to-apples dataset of measured schedules and costs exists across
-                  both models at fleet scale. Vendors publish targets; operators rarely publish
-                  actuals.
-                </li>
-                <li>
-                  The category boundary blurs in practice — many traditional builds now use
-                  prefabricated electrical rooms and cooling skids.
-                </li>
-                <li>
-                  The numbers cited here are industry-level demand and density figures, not
-                  predictions for any specific project.
-                </li>
-                <li>
-                  PODOS builds modular hardware. Read this page knowing where it comes from.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 12 · SOURCES — paper */}
+      <Section surface="paper" width="content" pad="flow">
+        <EvidenceSourceRail sources={SOURCES} />
+      </Section>
 
-      {/* ---------------- WHERE PODOS SITS ---------------- */}
-      <section className="section-pad" style={{ paddingTop: "clamp(2rem, 4vh, 3rem)" }}>
-        <div className="container-site" style={{ maxWidth: 1160 }}>
-          <div style={{ maxWidth: "70ch" }}>
-            <h2 style={h2Style}>Where PODOS sits in this comparison</h2>
-            <p className="t-body" style={{ marginTop: "1rem" }}>
-              PODOS builds on the modular side of this table.{" "}
-              <span data-claim="unit-capacity-1mw">
-                Each PODOS Pod is designed as a standardized 1-MW building block for AI
-                infrastructure
-              </span>
-              ,{" "}
-              <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, and{" "}
-              <span data-claim="deployment-window">
-                PODOS targets a 90-day window from order to commissioning for a standard unit
-              </span>{" "}
-              — a target, not a measured deployment figure. The{" "}
-              <Link
-                href="/platform"
-                style={{ color: "var(--brand-deep)", textDecoration: "underline" }}
-              >
-                platform overview
-              </Link>{" "}
-              explains the architecture, the{" "}
-              <Link
-                href="/platform/podos-pod"
-                style={{ color: "var(--brand-deep)", textDecoration: "underline" }}
-              >
-                PODOS Pod page
-              </Link>{" "}
-              carries the unit specification, and the{" "}
-              <Link href="/deploy" style={{ color: "var(--brand-deep)", textDecoration: "underline" }}>
-                deployment model
-              </Link>{" "}
-              covers what happens between order and commissioning. If your project matches the
-              traditional-wins rows above, a pod is the wrong tool.
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* 13 · RELATED — canvas */}
+      <RelatedRail
+        title="Continue"
+        surface="canvas"
+        items={[
+          {
+            href: "/engineering/direct-to-chip-liquid-cooling",
+            label: "ENGINEERING",
+            title: "Direct-to-chip liquid cooling, explained",
+          },
+          {
+            href: "/engineering/data-center-power-architecture",
+            label: "ENGINEERING",
+            title: "Data center power architecture",
+          },
+          {
+            href: "/platform/podos-pod",
+            label: "PLATFORM",
+            title: "The PODOS Pod specification",
+          },
+          {
+            href: "/deploy",
+            label: "DEPLOY",
+            title: "Order to commissioning, stage by stage",
+          },
+        ]}
+      />
 
-      {/* ---------------- FAQ ---------------- */}
-      <section className="section-pad" style={{ paddingTop: "clamp(2rem, 4vh, 3rem)" }}>
-        <div className="container-site" style={{ maxWidth: 1160 }}>
-          <h2 style={h2Style}>Frequently asked questions</h2>
-          <div style={{ marginTop: "1.6rem", display: "grid", gap: "1rem", maxWidth: "78ch" }}>
-            {FAQ.map((item, i) => (
-              <div key={item.q} style={{ ...panelStyle, padding: "1.3rem 1.5rem" }}>
-                <h3
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 700,
-                    fontSize: "1.02rem",
-                    letterSpacing: "-0.015em",
-                    color: "var(--ink-strong)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "0.72rem",
-                      fontWeight: 600,
-                      letterSpacing: "0.14em",
-                      color: "var(--cyan-deep)",
-                      marginRight: "0.6rem",
-                    }}
-                  >
-                    Q{i + 1}
-                  </span>
-                  {item.q}
-                </h3>
-                <p className="t-body" style={{ marginTop: "0.55rem", fontSize: "0.95rem" }}>
-                  {item.a}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------- SOURCES ---------------- */}
-      <section style={{ paddingBottom: "clamp(4rem, 8vh, 6rem)" }}>
-        <div className="container-site" style={{ maxWidth: 1160 }}>
-          <EvidenceSourceRail sources={SOURCES} />
-        </div>
-      </section>
+      {/* 14 · CTA — ink */}
+      <CTABand
+        title="Run this comparison against"
+        accent="your actual site"
+        body="Bring the parcel, the power path, and the density target. If the traditional-wins rows describe your project, engineering will say so."
+        primary={{ href: "/configure", label: "Configure a build" }}
+        secondary={{ href: "/deploy", label: "Deployment model" }}
+        field="compare"
+      />
     </main>
   );
 }

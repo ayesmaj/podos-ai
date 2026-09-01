@@ -14,12 +14,22 @@ export default function SeoImage({
   className = "",
   sizes = "(max-width: 768px) 100vw, 900px",
   label = true,
+  ratio,
+  radius = 12,
+  cover = false,
 }: {
   id: string;
   priority?: boolean;
   className?: string;
   sizes?: string;
   label?: boolean;
+  /** Crop to this aspect ratio (e.g. "16 / 9", "4 / 3") and cover-fill it.
+   *  Lets a render occupy a section half or a full-bleed band instead of
+   *  sitting boxed at its native ratio inside a reading column. */
+  ratio?: string;
+  radius?: number;
+  /** Fill a positioned parent completely (used by the media hero). */
+  cover?: boolean;
 }) {
   const img = getSeoImage(id);
 
@@ -29,8 +39,10 @@ export default function SeoImage({
         aria-hidden
         className={className}
         style={{
-          aspectRatio: img ? `${img.width} / ${img.height}` : "3 / 2",
-          borderRadius: 12,
+          ...(cover
+            ? { position: "absolute" as const, inset: 0 }
+            : { aspectRatio: ratio ?? (img ? `${img.width} / ${img.height}` : "3 / 2") }),
+          borderRadius: radius,
           width: "100%",
           background:
             "radial-gradient(70% 60% at 30% 20%, rgba(37,99,235,0.08), transparent 70%), linear-gradient(150deg, #f2f5fa, #e8edf4)",
@@ -41,7 +53,18 @@ export default function SeoImage({
   }
 
   return (
-    <span className="relative block" style={{ borderRadius: 12, overflow: "hidden" }}>
+    <span
+      className="relative block"
+      style={{
+        borderRadius: radius,
+        overflow: "hidden",
+        ...(cover
+          ? { position: "absolute", inset: 0, width: "100%", height: "100%" }
+          : ratio
+            ? { aspectRatio: ratio }
+            : null),
+      }}
+    >
       <Image
         src={img.src}
         alt={img.alt}
@@ -50,7 +73,11 @@ export default function SeoImage({
         priority={priority}
         sizes={sizes}
         className={className}
-        style={{ width: "100%", height: "auto", display: "block" }}
+        style={
+          cover || ratio
+            ? { width: "100%", height: "100%", objectFit: "cover", display: "block" }
+            : { width: "100%", height: "auto", display: "block" }
+        }
       />
       {label && img.conceptual && (
         <span

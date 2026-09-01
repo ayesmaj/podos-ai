@@ -10,6 +10,8 @@
  * slash. The apex 301/307s to www at the platform level.
  */
 
+import { PRICING } from "@/data/configuratorPricing";
+
 export const SITE = {
   baseUrl: "https://www.podosai.com",
   name: "PODOS AI",
@@ -32,6 +34,12 @@ export interface IndexableRoute {
 
 /* Only routes that exist AND pass quality gates belong here. */
 export const INDEXABLE_ROUTES: IndexableRoute[] = [
+  // /configure is indexable ONLY once a founder-approved price book is in
+  // configuratorPricing.ts. Until then the estimator quotes placeholder
+  // figures and must not be crawled, ranked, or linked from navigation.
+  ...(PRICING.approved
+    ? [{ path: "/configure", changeFrequency: "monthly", priority: 0.9, cluster: "core" } as IndexableRoute]
+    : []),
   { path: "/", changeFrequency: "weekly", priority: 1, cluster: "core" },
   { path: "/invest", changeFrequency: "weekly", priority: 0.9, cluster: "invest" },
   /* Sprint 2 pillar pages */
@@ -54,9 +62,26 @@ export const INDEXABLE_ROUTES: IndexableRoute[] = [
   { path: "/compare/liquid-cooling-vs-air-cooling", changeFrequency: "monthly", priority: 0.7, cluster: "compare" },
   { path: "/resources/ai-infrastructure-glossary", changeFrequency: "monthly", priority: 0.7, cluster: "resources" },
   /* Estimator */
-  { path: "/configure", changeFrequency: "monthly", priority: 0.9, cluster: "core" },
   { path: "/resources/data-center-readiness-checklist", changeFrequency: "monthly", priority: 0.7, cluster: "resources" },
   { path: "/compare/on-prem-ai-infrastructure-vs-cloud", changeFrequency: "monthly", priority: 0.7, cluster: "compare" },
+  { path: "/deploy/transport-placement", changeFrequency: "monthly", priority: 0.7, cluster: "deploy" },
+  { path: "/use-cases/edge-ai", changeFrequency: "monthly", priority: 0.7, cluster: "use-cases" },
+  { path: "/deploy/operations-maintenance", changeFrequency: "monthly", priority: 0.7, cluster: "deploy" },
+  { path: "/insights/behind-the-meter-ai-compute", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
+  { path: "/deploy/site-power-readiness", changeFrequency: "monthly", priority: 0.8, cluster: "deploy" },
+  { path: "/insights/direct-to-chip-vs-immersion-vs-air-cooling", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
+  { path: "/use-cases/enterprise-ai", changeFrequency: "monthly", priority: 0.7, cluster: "use-cases" },
+  { path: "/use-cases/universities-research", changeFrequency: "monthly", priority: 0.7, cluster: "use-cases" },
+  { path: "/deploy/commissioning", changeFrequency: "monthly", priority: 0.8, cluster: "deploy" },
+  { path: "/use-cases/healthcare", changeFrequency: "monthly", priority: 0.7, cluster: "use-cases" },
+  { path: "/deploy/factory-build-testing", changeFrequency: "monthly", priority: 0.8, cluster: "deploy" },
+  { path: "/deploy/configuration-engineering", changeFrequency: "monthly", priority: 0.8, cluster: "deploy" },
+  { path: "/insights/kv-cache-memory-bottleneck", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
+  { path: "/insights/why-ai-infrastructure-is-moving-to-liquid-cooling", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
+  { path: "/insights/warm-water-liquid-cooling-explained", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
+  { path: "/insights/closed-loop-cooling-and-data-center-water-use", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
+  { path: "/insights/how-to-evaluate-ai-infrastructure-claims", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
+  { path: "/insights/ai-data-center-electricity-demand", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
 ];
 
 export const canonicalUrl = (path: string) =>

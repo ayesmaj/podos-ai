@@ -16,7 +16,19 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
-import SeoImage from "@/components/seo/SeoImage";
+import {
+  HeroSplit,
+  ExecutiveAnswer,
+  SummaryBand,
+  CardGrid,
+  MatrixTable,
+  QuoteMetric,
+  LimitsBlock,
+  RelatedRail,
+  CTABand,
+  Section,
+  SectionHead,
+} from "@/components/seo/sections";
 
 const PATH = "/resources/ai-infrastructure-glossary";
 const TITLE = "AI Infrastructure Glossary: 40 Data Center Terms Defined";
@@ -512,24 +524,65 @@ const TERMS: Term[] = [
   },
 ];
 
+/* ---- efficiency metric comparison ---- */
+
+const EFFICIENCY: { m: string; f: string; w: string; r: ReactNode; d: string }[] = [
+  {
+    m: "PUE",
+    f: "Total facility energy ÷ IT energy",
+    w: "Overhead spent on cooling, conversion, and building systems",
+    r: (
+      <>
+        Industry average roughly flat for ~6 years<Cite n={1} />; Google fleet TTM 1.09
+        <Cite n={2} />
+      </>
+    ),
+    d: "Snapshot vs annualized figures; partially loaded facilities read worse",
+  },
+  {
+    m: "WUE",
+    f: "Site water (L) ÷ IT energy (kWh)",
+    w: "Water consumed on site, mostly by evaporative cooling",
+    r: (
+      <>
+        Microsoft design WUE 0.30 L/kWh, down from 0.49 in 2021<Cite n={3} />
+      </>
+    ),
+    d: "Excludes water embedded in off-site electricity generation",
+  },
+  {
+    m: "ERE",
+    f: "(Total energy − reused energy) ÷ IT energy",
+    w: "Efficiency after crediting heat exported to a real customer",
+    r: (
+      <>
+        Can fall below 1.0 with heat export; NREL&rsquo;s ESIF pairs heat reuse with PUE ~1.04
+        <Cite n={8} />
+      </>
+    ),
+    d: "Meaningless without an actual off-taker for the heat",
+  },
+];
+
 /* ---- shared styles ---- */
 
-const mono: CSSProperties = {
+const chip: CSSProperties = {
   fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
-};
-
-const h2Style: CSSProperties = {
-  fontFamily: "var(--font-geist), var(--font-display), ui-sans-serif",
-  fontWeight: 800,
-  fontSize: "clamp(1.5rem, 2.6vw, 2.1rem)",
-  letterSpacing: "-0.03em",
-  lineHeight: 1.08,
-  color: "var(--ink-strong)",
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: 36,
+  fontSize: "0.72rem",
+  letterSpacing: "0.06em",
+  color: "var(--ink-dim)",
+  border: "1px solid var(--edge)",
+  borderRadius: 999,
+  padding: "0.35rem 0.75rem",
+  textDecoration: "none",
 };
 
 export default function GlossaryPage() {
   return (
-    <main style={{ background: "var(--paper)" }}>
+    <main>
       <TechArticleJsonLd
         headline="AI infrastructure glossary"
         description={DESCRIPTION}
@@ -540,287 +593,263 @@ export default function GlossaryPage() {
         articleType="TechArticle"
       />
 
-      {/* ---- compact hero ---- */}
-      <section style={{ borderBottom: "1px solid var(--edge-faint)" }}>
-        <div
-          className="container-site"
-          style={{ paddingTop: "clamp(6.5rem, 14vh, 10rem)", paddingBottom: "clamp(2.5rem, 6vh, 4rem)" }}
-        >
+      {/* 1 · HERO — ink split */}
+      <HeroSplit
+        code="R-01"
+        cluster="Resources"
+        title="AI infrastructure"
+        accent="glossary"
+        lede="This glossary defines 40 terms used across AI data-center engineering — power, cooling, compute, and grid interconnection — in two to four plain sentences each. It is written for people evaluating megawatt-scale AI infrastructure, not for people selling it."
+        imageId="glossary-abstract"
+        field="blueprint"
+        metrics={[
+          { value: String(TERMS.length), label: "Terms defined" },
+          { value: String(SOURCES.length), label: "Cited sources" },
+        ]}
+        crumbs={
           <Breadcrumbs
             crumbs={[
               { name: "Home", path: "/" },
               { name: "AI Infrastructure Glossary", path: PATH },
             ]}
           />
+        }
+        meta={
+          <LastVerified
+            published="2026-08-31"
+            lastVerified="2026-08-31"
+            author="Josef Elimelech"
+            reviewer="PODOS AI Engineering"
+          />
+        }
+      />
 
-          <p
-            style={{
-              ...mono,
-              marginTop: "1.6rem",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              fontSize: "0.78rem",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "var(--brand-deep)",
-              background: "var(--glass-bg-strong)",
-              border: "1px solid var(--edge-bright)",
-              borderRadius: 999,
-              padding: "0.45rem 1rem",
-            }}
-          >
-            <span style={{ fontWeight: 800, color: "var(--cyan-deep)" }}>R-01</span>
-            <span style={{ opacity: 0.4 }}>·</span>
-            <span>Resources</span>
-          </p>
+      {/* 2 · WHY THE VOCABULARY MATTERS — paper */}
+      <ExecutiveAnswer label="Why this vocabulary matters now" surface="paper">
+        <p>
+          The load behind this vocabulary is growing: data centers consumed about 1.5% of global
+          electricity in 2025, heading toward roughly 3% by 2030 per the IEA,<Cite n={5} /> and 4.4%
+          of US electricity in 2023, projected at 6.7–12% by 2028 per LBNL.<Cite n={4} />
+        </p>
+      </ExecutiveAnswer>
 
-          <h1 className="t-headline" style={{ marginTop: "1.2rem", maxWidth: "18ch" }}>
-            AI infrastructure <span className="t-sweep-brand">glossary</span>
-          </h1>
+      {/* 3 · HOW TO READ IT — canvas */}
+      <SummaryBand
+        title="How to read this glossary"
+        items={[
+          {
+            code: "01",
+            title: "Four vocabularies, one building",
+            body: "Power, cooling, compute, and grid interconnection — the four languages that meet inside an AI data center, defined in the terms they are actually used in.",
+          },
+          {
+            code: "02",
+            title: "Sourced inline",
+            body: "External figures cite the source register at the point of use: Uptime Institute, LBNL, the IEA, ASHRAE, NREL, the Open Compute Project, and vendor documentation.",
+          },
+          {
+            code: "03",
+            title: "Company figures marked",
+            body: "Where PODOS figures appear they are design targets, not measured results from operating deployments.",
+          },
+        ]}
+      />
 
-          <p className="t-lede" style={{ marginTop: "1.1rem", maxWidth: "56ch", color: "var(--ink-dim)" }}>
-            This glossary defines 40 terms used across AI data-center engineering — power, cooling,
-            compute, and grid interconnection — in two to four plain sentences each. It is written for
-            people evaluating megawatt-scale AI infrastructure, not for people selling it.
-          </p>
+      {/* 4 · RESOURCES AND NEXT STEPS — paper; the hub's real outbound links */}
+      <CardGrid
+        eyebrow="Resources"
+        title="Resources and next steps"
+        lede="Every entry below sits inside a larger decision. These pages carry the decisions."
+        columns={2}
+        surface="paper"
+        field="blueprint"
+        items={[
+          {
+            code: "R-02",
+            title: "Data center readiness checklist",
+            body: (
+              <>
+                A site readiness checklist for AI data centers: power and interconnection, pad and
+                structural loads, network, water, permitting, logistics, and security.{" "}
+                {link("/resources/data-center-readiness-checklist", "Open the readiness checklist")}.
+              </>
+            ),
+          },
+          {
+            code: "ENG",
+            title: "Engineering overview",
+            body: (
+              <>
+                How the cooling, power, and enclosure decisions fit together.{" "}
+                {link("/engineering", "Engineering overview")}.
+              </>
+            ),
+          },
+          {
+            code: "PLT",
+            title: "Platform overview",
+            body: (
+              <>
+                What a standardized modular AI data-center unit is.{" "}
+                {link("/platform", "Platform overview")}.
+              </>
+            ),
+          },
+          {
+            code: "CMP",
+            title: "Modular vs traditional data centers",
+            body: (
+              <>
+                The decision framework behind the vocabulary.{" "}
+                {link(
+                  "/compare/modular-ai-data-center-vs-traditional-data-center",
+                  "Modular vs traditional data centers",
+                )}
+                .
+              </>
+            ),
+          },
+        ]}
+      />
 
-          <p className="t-body" style={{ marginTop: "0.9rem", maxWidth: "62ch", color: "var(--ink-dim)" }}>
-            The load behind this vocabulary is growing: data centers consumed about 1.5% of global
-            electricity in 2025, heading toward roughly 3% by 2030 per the IEA,<Cite n={5} /> and 4.4%
-            of US electricity in 2023, projected at 6.7–12% by 2028 per LBNL.<Cite n={4} />
-          </p>
+      {/* 5 · EFFICIENCY METRICS — canvas matrix */}
+      <MatrixTable
+        id="efficiency-metrics"
+        eyebrow="Metrics"
+        title="Efficiency metrics, side by side"
+        lede="All three share a denominator — IT energy — but answer different questions. Compare them only with measurement boundary and season stated."
+        surface="canvas"
+        field="blueprint"
+        head={["Metric", "Formula", "What it tells you", "Published reference points", "Common distortions"]}
+        rows={EFFICIENCY.map((row) => [
+          <span key="m" className="pill">
+            {row.m}
+          </span>,
+          row.f,
+          row.w,
+          <span key="r">{row.r}</span>,
+          row.d,
+        ])}
+      />
 
-          <div style={{ marginTop: "1.6rem" }}>
-            <LastVerified
-              published="2026-08-31"
-              lastVerified="2026-08-31"
-              author="Josef Elimelech"
-              reviewer="PODOS AI Engineering"
-            />
-          </div>
+      {/* 6 · CONTRAST BEAT — ink */}
+      <QuoteMetric
+        quote="A PUE or WUE quoted without methodology, load level, and averaging period is not comparable to one quoted with them."
+        attribution="Measurement note · PODOS AI Engineering"
+        field="blueprint"
+      />
 
-          {/* decorative header plate — registry alt is intentionally empty */}
-          <div style={{ marginTop: "clamp(2rem, 5vh, 3rem)", maxWidth: 900 }}>
-            <SeoImage id="glossary-abstract" priority />
-          </div>
-        </div>
-      </section>
-
-      {/* ---- term index ---- */}
-      <section>
-        <div className="container-site" style={{ paddingTop: "clamp(2.5rem, 6vh, 4rem)" }}>
-          <h2 className="t-eyebrow" style={{ ...mono, letterSpacing: "0.16em" }}>
-            Term index — 40 entries
-          </h2>
-          <nav aria-label="Glossary term index" style={{ marginTop: "1rem" }}>
-            <ul style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", listStyle: "none" }}>
-              {TERMS.map((t) => (
-                <li key={t.id}>
-                  <a
-                    href={`#${t.id}`}
-                    className="transition-colors hover:border-[var(--brand)] hover:text-[var(--brand-deep)]"
-                    style={{
-                      ...mono,
-                      display: "inline-block",
-                      fontSize: "0.72rem",
-                      letterSpacing: "0.06em",
-                      color: "var(--ink-dim)",
-                      border: "1px solid var(--edge)",
-                      borderRadius: 999,
-                      padding: "0.35rem 0.75rem",
-                      textDecoration: "none",
-                      minHeight: 36,
-                    }}
-                  >
-                    {t.term}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-      </section>
-
-      {/* ---- efficiency metrics table ---- */}
-      <section>
-        <div className="container-site" style={{ paddingTop: "clamp(3rem, 7vh, 4.5rem)" }}>
-          <h2 style={h2Style}>Efficiency metrics, side by side</h2>
-          <p className="t-body" style={{ marginTop: "0.7rem", maxWidth: "62ch", color: "var(--ink-dim)" }}>
-            All three share a denominator — IT energy — but answer different questions. Compare them
-            only with measurement boundary and season stated.
-          </p>
-
-          <div
-            className="panel overflow-x-auto"
-            style={{ marginTop: "1.4rem", borderRadius: 12, border: "1px solid var(--edge)", background: "var(--panel)" }}
-          >
-            <table style={{ width: "100%", minWidth: 760, borderCollapse: "collapse", fontSize: "0.92rem" }}>
-              <thead>
-                <tr>
-                  {["Metric", "Formula", "What it tells you", "Published reference points", "Common distortions"].map((h) => (
-                    <th
-                      key={h}
-                      scope="col"
-                      style={{
-                        ...mono,
-                        textAlign: "left",
-                        fontSize: "0.68rem",
-                        fontWeight: 600,
-                        letterSpacing: "0.14em",
-                        textTransform: "uppercase",
-                        color: "var(--ink-dim)",
-                        padding: "0.9rem 1rem",
-                        borderBottom: "1px solid var(--edge)",
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  {
-                    m: "PUE",
-                    f: "Total facility energy ÷ IT energy",
-                    w: "Overhead spent on cooling, conversion, and building systems",
-                    r: (
-                      <>
-                        Industry average roughly flat for ~6 years<Cite n={1} />; Google fleet TTM 1.09
-                        <Cite n={2} />
-                      </>
-                    ),
-                    d: "Snapshot vs annualized figures; partially loaded facilities read worse",
-                  },
-                  {
-                    m: "WUE",
-                    f: "Site water (L) ÷ IT energy (kWh)",
-                    w: "Water consumed on site, mostly by evaporative cooling",
-                    r: (
-                      <>
-                        Microsoft design WUE 0.30 L/kWh, down from 0.49 in 2021<Cite n={3} />
-                      </>
-                    ),
-                    d: "Excludes water embedded in off-site electricity generation",
-                  },
-                  {
-                    m: "ERE",
-                    f: "(Total energy − reused energy) ÷ IT energy",
-                    w: "Efficiency after crediting heat exported to a real customer",
-                    r: (
-                      <>
-                        Can fall below 1.0 with heat export; NREL&rsquo;s ESIF pairs heat reuse with PUE
-                        ~1.04<Cite n={8} />
-                      </>
-                    ),
-                    d: "Meaningless without an actual off-taker for the heat",
-                  },
-                ].map((row) => (
-                  <tr key={row.m}>
-                    <td style={{ ...mono, fontWeight: 600, color: "var(--brand-deep)", padding: "0.9rem 1rem", borderBottom: "1px solid var(--edge-faint)", verticalAlign: "top" }}>
-                      {row.m}
-                    </td>
-                    <td style={{ padding: "0.9rem 1rem", borderBottom: "1px solid var(--edge-faint)", color: "var(--ink-strong)", verticalAlign: "top" }}>{row.f}</td>
-                    <td style={{ padding: "0.9rem 1rem", borderBottom: "1px solid var(--edge-faint)", color: "var(--ink-dim)", verticalAlign: "top" }}>{row.w}</td>
-                    <td style={{ padding: "0.9rem 1rem", borderBottom: "1px solid var(--edge-faint)", color: "var(--ink-dim)", verticalAlign: "top" }}>{row.r}</td>
-                    <td style={{ padding: "0.9rem 1rem", borderBottom: "1px solid var(--edge-faint)", color: "var(--ink-dim)", verticalAlign: "top" }}>{row.d}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* ---- the glossary ---- */}
-      <section>
-        <div className="container-site" style={{ paddingTop: "clamp(3rem, 7vh, 4.5rem)" }}>
-          <h2 style={h2Style}>Terms, A to Z</h2>
-          <dl style={{ marginTop: "0.5rem", maxWidth: "72ch" }}>
+      {/* 7 · TERM INDEX — canvas */}
+      <Section surface="canvas" width="site" pad="major" id="term-index">
+        <SectionHead eyebrow="Index" title={`Term index — ${TERMS.length} entries`} />
+        <nav aria-label="Glossary term index" style={{ marginTop: "2rem" }}>
+          <ul style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", listStyle: "none" }}>
             {TERMS.map((t) => (
-              <div key={t.id} style={{ borderBottom: "1px solid var(--edge-faint)", padding: "1.35rem 0" }}>
-                <dt
-                  id={t.id}
-                  className="scroll-mt-24"
-                  style={{
-                    fontFamily: "var(--font-geist), var(--font-display), ui-sans-serif",
-                    fontWeight: 700,
-                    fontSize: "1.05rem",
-                    letterSpacing: "-0.02em",
-                    color: "var(--ink-strong)",
-                    scrollMarginTop: 96,
-                  }}
+              <li key={t.id}>
+                <a
+                  href={`#${t.id}`}
+                  className="transition-colors hover:border-[var(--brand)] hover:text-[var(--brand-deep)]"
+                  style={chip}
                 >
                   {t.term}
-                </dt>
-                <dd className="t-body" style={{ marginTop: "0.45rem", color: "var(--ink-dim)" }}>
-                  {t.def}
-                </dd>
-              </div>
+                </a>
+              </li>
             ))}
-          </dl>
-        </div>
-      </section>
-
-      {/* ---- limitations ---- */}
-      <section>
-        <div className="container-site" style={{ paddingTop: "clamp(3rem, 7vh, 4.5rem)" }}>
-          <h2 style={h2Style}>What this glossary does not settle</h2>
-          <ul
-            className="t-body"
-            style={{ marginTop: "1rem", maxWidth: "68ch", color: "var(--ink-dim)", display: "grid", gap: "0.7rem", paddingLeft: "1.2rem" }}
-          >
-            <li>
-              Definitions reflect common industry usage; vendors attach narrower or looser meanings to
-              terms like &ldquo;pod&rdquo; and &ldquo;AI-ready.&rdquo; Contracts should define terms
-              explicitly.
-            </li>
-            <li>
-              Every metric here depends on measurement boundary and season. A PUE or WUE quoted without
-              methodology, load level, and averaging period is not comparable to one quoted with them.
-            </li>
-            <li>
-              ASHRAE, NFPA, and IEEE standards are paywalled; these entries summarize scope and do not
-              substitute for the current editions.
-            </li>
-            <li>
-              Where PODOS figures appear they are design targets, not measured results from operating
-              deployments. Third-party numbers carry their source and as-of year inline.
-            </li>
-            <li>
-              The vocabulary is moving — 800 VDC distribution, for one, is still being standardized.
-              These definitions were last verified on 2026-08-31.
-            </li>
           </ul>
-        </div>
-      </section>
+        </nav>
+      </Section>
 
-      {/* ---- related reading ---- */}
-      <section>
-        <div
-          className="container-site"
-          style={{ paddingTop: "clamp(3rem, 7vh, 4.5rem)", paddingBottom: "clamp(4rem, 9vh, 6rem)" }}
-        >
-          <h2 className="t-eyebrow" style={{ ...mono, letterSpacing: "0.16em" }}>
-            Go deeper
-          </h2>
-          <ul
-            className="t-body"
-            style={{ marginTop: "1rem", display: "grid", gap: "0.6rem", listStyle: "none", color: "var(--ink-dim)" }}
-          >
-            <li>{link("/engineering", "Engineering overview")} — how the cooling, power, and enclosure decisions fit together.</li>
-            <li>{link("/platform", "Platform overview")} — what a standardized modular AI data-center unit is.</li>
-            <li>{link("/compare/modular-ai-data-center-vs-traditional-data-center", "Modular vs traditional data centers")} — the decision framework behind the vocabulary.</li>
-            <li>
-              {link("/", "PODOS AI")} builds factory-built modular AI compute infrastructure; investor
-              information lives on the {link("/invest", "invest page")}.
-            </li>
-          </ul>
+      {/* 8 · THE GLOSSARY — paper, two columns */}
+      <Section surface="paper" width="site" pad="major" id="terms">
+        <SectionHead eyebrow="A to Z" title="Terms, A to Z" />
+        <dl className="grid2" style={{ marginTop: "2.5rem" }}>
+          {TERMS.map((t) => (
+            <div key={t.id} style={{ borderTop: "1px solid var(--edge-bright)", paddingTop: "1.1rem" }}>
+              <dt id={t.id} className="h3" style={{ fontSize: "1.05rem", scrollMarginTop: 96 }}>
+                {t.term}
+              </dt>
+              <dd
+                style={{
+                  marginTop: "0.5rem",
+                  fontSize: "0.95rem",
+                  lineHeight: 1.7,
+                  color: "var(--ink-dim)",
+                }}
+              >
+                {t.def}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
 
-          <EvidenceSourceRail sources={SOURCES} />
-        </div>
-      </section>
+      {/* 9 · LIMITS — canvas, mandatory */}
+      <LimitsBlock
+        title="What this glossary does not settle"
+        eyebrow="Honest limits"
+        items={[
+          <>
+            Definitions reflect common industry usage; vendors attach narrower or looser meanings to
+            terms like &ldquo;pod&rdquo; and &ldquo;AI-ready.&rdquo; Contracts should define terms
+            explicitly.
+          </>,
+          <>
+            Every metric here depends on measurement boundary and season. A PUE or WUE quoted without
+            methodology, load level, and averaging period is not comparable to one quoted with them.
+          </>,
+          <>
+            ASHRAE, NFPA, and IEEE standards are paywalled; these entries summarize scope and do not
+            substitute for the current editions.
+          </>,
+          <>
+            Where PODOS figures appear they are design targets, not measured results from operating
+            deployments. Third-party numbers carry their source and as-of year inline.
+          </>,
+          <>
+            The vocabulary is moving — 800 VDC distribution, for one, is still being standardized.
+            These definitions were last verified on 2026-08-31.
+          </>,
+        ]}
+      />
+
+      {/* 10 · SOURCES — paper */}
+      <Section surface="paper" width="content" pad="flow">
+        <EvidenceSourceRail sources={SOURCES} />
+      </Section>
+
+      {/* 11 · RELATED — canvas */}
+      <RelatedRail
+        title="Go deeper"
+        surface="canvas"
+        items={[
+          {
+            href: "/resources/data-center-readiness-checklist",
+            label: "RESOURCE",
+            title: "Data center readiness checklist",
+          },
+          {
+            href: "/engineering/direct-to-chip-liquid-cooling",
+            label: "ENGINEERING",
+            title: "Direct-to-chip liquid cooling, explained",
+          },
+          {
+            href: "/compare/modular-ai-data-center-vs-traditional-data-center",
+            label: "COMPARE",
+            title: "Modular vs traditional data centers",
+          },
+          { href: "/invest", label: "INVEST", title: "Investor information" },
+        ]}
+      />
+
+      {/* 12 · CTA — ink */}
+      <CTABand
+        title="Know the terms. Now"
+        accent="check the site"
+        body="PODOS AI builds factory-built modular AI compute infrastructure."
+        primary={{ href: "/resources/data-center-readiness-checklist", label: "Open the readiness checklist" }}
+        secondary={{ href: "/configure", label: "Configure a build" }}
+        field="blueprint"
+      />
     </main>
   );
 }

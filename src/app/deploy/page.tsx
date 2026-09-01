@@ -1,20 +1,41 @@
-import type { CSSProperties, ReactNode } from "react";
+/**
+ * /deploy — deployment cluster HUB, composed from the SEO section library.
+ * See docs/design/PAGE_ARCHETYPES.md and SEO_PAGE_DESIGN_SYSTEM.md.
+ *
+ * Server component, zero client JS. This hub is the parent of the six
+ * per-stage guides under /deploy/* — every one of them is linked here
+ * (card grid, stage table, prose rail, CTA), because a hub that does not
+ * link its children leaves them orphaned.
+ *
+ * Claims discipline: only publishable ids from src/content/data/claims.ts
+ * render, each wrapped in data-claim (or passed as a MetricRail `claim`)
+ * with its required qualifier.
+ */
+
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import { FAQJsonLd, TechArticleJsonLd } from "@/components/seo/jsonld";
 import LastVerified from "@/components/seo/LastVerified";
-import SeoImage from "@/components/seo/SeoImage";
-import Footer from "@/components/site/Footer";
 import { buildMetadata } from "@/lib/seo/metadata";
+import {
+  HeroSplit,
+  SummaryBand,
+  CardGrid,
+  MatrixTable,
+  ProseWithRail,
+  SplitFeature,
+  QuoteMetric,
+  LimitsBlock,
+  FAQBlock,
+  RelatedRail,
+  CTABand,
+  Section,
+  SectionHead,
+} from "@/components/seo/sections";
 
-/**
- * /deploy — deployment cluster hub (SEO batch, server component).
- * Six-stage deployment overview. Styling: main-site light technical
- * system only (globals.css tokens + Tailwind utilities). Claims are
- * gated through src/content/data/claims.ts via data-claim attributes.
- */
-
+const PATH = "/deploy";
 const TITLE = "Modular AI Data Center Deployment: The Six Stages | PODOS AI";
 const DESCRIPTION =
   "How a factory-built modular AI data center is deployed: six stages from site and power readiness to operations, and the 90-day target window explained.";
@@ -22,7 +43,7 @@ const DESCRIPTION =
 export const metadata = buildMetadata({
   title: TITLE,
   description: DESCRIPTION,
-  path: "/deploy",
+  path: PATH,
 });
 
 /* ---------------------------------------------------------------- data */
@@ -79,13 +100,63 @@ const SOURCES: Source[] = [
   },
 ];
 
-const STAGES = [
-  { code: "DP-01", name: "Site & power readiness", focus: "Confirm power, permits, ground, access, network", owner: "Owner / operator + utility", exit: "Power path and permit scope confirmed" },
-  { code: "DP-02", name: "Configuration", focus: "Fix the build specification from a bounded menu", owner: "Owner + PODOS", exit: "Configuration freeze signed" },
-  { code: "DP-03", name: "Factory build & testing", focus: "Assembly, integration, burn-in on the line", owner: "PODOS factory", exit: "Factory acceptance test passed" },
-  { code: "DP-04", name: "Transport & placement", focus: "Ship as heavy freight, rig, set, connect", owner: "Logistics + site crew", exit: "Unit set and mechanically connected" },
-  { code: "DP-05", name: "Commissioning", focus: "Energize, verify, load-test on site power", owner: "Commissioning team", exit: "Site acceptance test passed" },
-  { code: "DP-06", name: "Operations", focus: "Monitor, maintain, grow unit by unit", owner: "Operator", exit: "Ongoing" },
+/** The six stages — and the six child guides this hub is the parent of. */
+const STAGES: {
+  code: string;
+  name: string;
+  focus: string;
+  owner: string;
+  exit: string;
+  href: string;
+}[] = [
+  {
+    code: "DP-01",
+    name: "Site & power readiness",
+    focus: "Confirm power, permits, ground, access, network",
+    owner: "Owner / operator + utility",
+    exit: "Power path and permit scope confirmed",
+    href: "/deploy/site-power-readiness",
+  },
+  {
+    code: "DP-02",
+    name: "Configuration",
+    focus: "Fix the build specification from a bounded menu",
+    owner: "Owner + PODOS",
+    exit: "Configuration freeze signed",
+    href: "/deploy/configuration-engineering",
+  },
+  {
+    code: "DP-03",
+    name: "Factory build & testing",
+    focus: "Assembly, integration, burn-in on the line",
+    owner: "PODOS factory",
+    exit: "Factory acceptance test passed",
+    href: "/deploy/factory-build-testing",
+  },
+  {
+    code: "DP-04",
+    name: "Transport & placement",
+    focus: "Ship as heavy freight, rig, set, connect",
+    owner: "Logistics + site crew",
+    exit: "Unit set and mechanically connected",
+    href: "/deploy/transport-placement",
+  },
+  {
+    code: "DP-05",
+    name: "Commissioning",
+    focus: "Energize, verify, load-test on site power",
+    owner: "Commissioning team",
+    exit: "Site acceptance test passed",
+    href: "/deploy/commissioning",
+  },
+  {
+    code: "DP-06",
+    name: "Operations",
+    focus: "Monitor, maintain, grow unit by unit",
+    owner: "Operator",
+    exit: "Ongoing",
+    href: "/deploy/operations-maintenance",
+  },
 ];
 
 /* FAQ — the visible answers and the JSON-LD payload share these strings. */
@@ -93,7 +164,7 @@ const FAQ_1_CLAIM =
   "PODOS targets a 90-day window from order to commissioning for a standard unit.";
 const FAQ_1_REST =
   "The target assumes a ready site; in practice the calendar is set by site power availability, permitting, and transport, so the honest answer for a specific project starts with a site and power assessment.";
-const FAQ_ITEMS = [
+const FAQ = [
   {
     q: "How long does it take to deploy a modular AI data center?",
     a: `${FAQ_1_CLAIM} ${FAQ_1_REST}`,
@@ -108,510 +179,466 @@ const FAQ_ITEMS = [
   },
 ];
 
-/* --------------------------------------------------------------- styles */
-
-const mono: CSSProperties = { fontFamily: "var(--font-geist-mono), monospace" };
-
-const h2Style: CSSProperties = {
-  fontFamily: "var(--font-geist), ui-sans-serif, system-ui, sans-serif",
-  fontWeight: 800,
-  fontSize: "clamp(1.65rem, 3.2vw, 2.4rem)",
-  lineHeight: 1.06,
-  letterSpacing: "-0.035em",
-  color: "var(--ink-strong)",
-};
-
-const proseStyle: CSSProperties = { maxWidth: "70ch", color: "var(--ink-dim)" };
-
-const linkStyle: CSSProperties = {
+const link: CSSProperties = {
   color: "var(--brand-deep)",
   textDecoration: "underline",
   textUnderlineOffset: "3px",
   textDecorationColor: "rgba(37, 99, 235, 0.35)",
 };
 
-const codePillStyle: CSSProperties = {
-  ...mono,
-  fontSize: "0.72rem",
-  fontWeight: 600,
-  letterSpacing: "0.18em",
-  color: "var(--brand-deep)",
-  background: "rgba(37, 99, 235, 0.07)",
-  border: "1px solid rgba(37, 99, 235, 0.16)",
-  borderRadius: 999,
-  padding: "0.3rem 0.75rem",
-};
-
-const thStyle: CSSProperties = {
-  ...mono,
-  fontSize: "0.66rem",
-  fontWeight: 600,
-  letterSpacing: "0.16em",
-  textTransform: "uppercase",
-  color: "var(--ink-dim)",
-  textAlign: "left",
-  padding: "0.7rem 0.9rem",
-  borderBottom: "1px solid var(--edge-bright)",
-  whiteSpace: "nowrap",
-};
-
-const tdStyle: CSSProperties = {
-  fontSize: "0.92rem",
-  lineHeight: 1.55,
-  color: "var(--ink-dim)",
-  padding: "0.75rem 0.9rem",
-  borderBottom: "1px solid var(--edge)",
-  verticalAlign: "top",
-};
-
-const captionStyle: CSSProperties = {
-  ...mono,
-  fontSize: "0.74rem",
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
-  color: "var(--ink-faint)",
-};
-
-function Figure({
-  id,
-  caption,
-  priority = false,
-}: {
-  id: string;
-  caption: string;
-  priority?: boolean;
-}) {
-  return (
-    <figure style={{ margin: 0, maxWidth: "760px", width: "100%" }}>
-      <SeoImage id={id} priority={priority} sizes="(max-width: 768px) 100vw, 720px" />
-      <figcaption className="mt-3" style={captionStyle}>
-        {caption}
-      </figcaption>
-    </figure>
-  );
-}
-
-function StageSection({
-  code,
-  title,
-  children,
-}: {
-  code: string;
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <section
-      id={code.toLowerCase()}
-      className="section-pad"
-      style={{ borderTop: "1px solid var(--edge-faint)", scrollMarginTop: "96px", paddingBlock: "clamp(2.6rem, 5vh, 4rem)" }}
-    >
-      <div className="flex flex-wrap items-center gap-3">
-        <span style={codePillStyle}>{code}</span>
-        <h2 style={h2Style}>{title}</h2>
-      </div>
-      <div className="mt-5 grid gap-4 t-body" style={proseStyle}>
-        {children}
-      </div>
-    </section>
-  );
-}
+const strong: CSSProperties = { color: "var(--ink-strong)", fontWeight: 600 };
 
 /* ----------------------------------------------------------------- page */
 
 export default function DeployPage() {
   return (
-    <>
+    <main>
       <TechArticleJsonLd
         headline="How a modular AI data center gets deployed: the six stages"
         description={DESCRIPTION}
-        path="/deploy"
+        path={PATH}
         datePublished="2026-08-31"
         dateModified="2026-08-31"
         authorName="Josef Elimelech"
       />
-      <FAQJsonLd items={FAQ_ITEMS} />
+      <FAQJsonLd items={FAQ} />
 
-      <main style={{ background: "var(--paper)", color: "var(--ink-strong)" }}>
-        {/* ---- Compact hero ---- */}
-        <section
-          style={{
-            background:
-              "radial-gradient(ellipse at 75% -10%, rgba(34,211,238,0.10), rgba(37,99,235,0.04) 55%, transparent 75%), var(--paper)",
-            borderBottom: "1px solid var(--edge-faint)",
-          }}
-        >
-          <div
-            className="container-site"
-            style={{ paddingBlock: "clamp(5.5rem, 12vh, 8rem) clamp(2.8rem, 6vh, 4.5rem)" }}
-          >
-            <Breadcrumbs
-              crumbs={[
-                { name: "Home", path: "/" },
-                { name: "Deploy", path: "/deploy" },
-              ]}
-            />
+      {/* 1 · HERO — ink, text left, prepared pad right */}
+      <HeroSplit
+        code="DEP-01"
+        cluster="Deployment"
+        title="How a modular AI data center gets"
+        accent="deployed"
+        lede="Deploying a factory-built modular AI data center is a six-stage process: site and power readiness, configuration, factory build and testing, transport and placement, commissioning, and operations. The stages overlap — the unit is built and tested in a factory while the site is prepared in parallel."
+        imageId="deploy-pad-prep"
+        field="deploy"
+        metrics={[
+          { value: "6", label: "Stages, two run in parallel" },
+          {
+            value: "90 days",
+            label: "Target, order to commissioning",
+            claim: "deployment-window",
+          },
+          { value: "1 MW", label: "Per standardized unit", claim: "unit-capacity-1mw" },
+        ]}
+        crumbs={
+          <Breadcrumbs
+            crumbs={[
+              { name: "Home", path: "/" },
+              { name: "Deploy", path: PATH },
+            ]}
+          />
+        }
+        meta={
+          <LastVerified
+            published="2026-08-31"
+            lastVerified="2026-08-31"
+            author="Josef Elimelech"
+            reviewer="PODOS AI Engineering"
+          />
+        }
+      />
 
-            <p className="mt-8">
-              <span
-                style={{
-                  ...mono,
-                  fontSize: "0.78rem",
-                  letterSpacing: "0.16em",
-                  textTransform: "uppercase",
-                  color: "var(--brand-deep)",
-                  background: "var(--glass-bg-strong)",
-                  border: "1px solid var(--edge-bright)",
-                  borderRadius: 999,
-                  padding: "0.45rem 0.95rem",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.55rem",
-                }}
-              >
-                <span style={{ fontWeight: 800, color: "var(--cyan-deep)" }}>DEP-01</span>
-                <span style={{ opacity: 0.4 }}>·</span>
-                <span>Deployment</span>
-              </span>
-            </p>
-
-            <h1 className="t-headline mt-6" style={{ maxWidth: "24ch" }}>
-              How a modular AI data center gets <span className="t-sweep-brand">deployed</span>
-            </h1>
-
-            <p className="t-lede mt-6" style={{ maxWidth: "62ch", color: "var(--ink-dim)" }}>
-              Deploying a factory-built modular AI data center is a six-stage process: site and
-              power readiness, configuration, factory build and testing, transport and placement,
-              commissioning, and operations. The stages overlap — the unit is built and tested in a
-              factory while the site is prepared in parallel, which is why{" "}
-              <span data-claim="deployment-window">
-                PODOS targets a 90-day window from order to commissioning for a standard unit
-              </span>
-              .
-            </p>
-
-            <p className="t-body mt-4" style={{ maxWidth: "62ch", color: "var(--ink-dim)" }}>
-              This page is the overview: what each stage covers, who owns it, what must be true
-              before the next stage starts, and where the schedule risk actually lives. Each{" "}
-              <Link href="/platform/podos-pod" style={linkStyle}>
-                PODOS Pod
-              </Link>{" "}
-              is{" "}
-              <span data-claim="unit-capacity-1mw">
-                designed as a standardized 1-MW building block
-              </span>{" "}
-              and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, so the process
-              repeats per unit rather than being re-engineered per project.
-            </p>
-
-            <div className="mt-8">
-              <Figure
-                id="deploy-pad-prep"
-                priority
-                caption="Stage one — a prepared pad with anchor points and conduit stub-ups, before the unit arrives"
-              />
-            </div>
-
-            <div className="mt-8">
-              <LastVerified
-                published="2026-08-31"
-                lastVerified="2026-08-31"
-                author="Josef Elimelech"
-                reviewer="PODOS AI Engineering"
-              />
-            </div>
-          </div>
-        </section>
-
-        <div className="container-site">
-          {/* ---- Stage index table ---- */}
-          <section
-            className="section-pad"
-            style={{ paddingBlock: "clamp(2.8rem, 6vh, 4.5rem) clamp(2.2rem, 4vh, 3rem)" }}
-          >
-            <h2 style={h2Style}>The six stages at a glance</h2>
-            <div className="mt-6 overflow-x-auto panel" style={{ padding: 0 }}>
-              <table style={{ width: "100%", minWidth: 760, borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={thStyle}>Code</th>
-                    <th style={thStyle}>Stage</th>
-                    <th style={thStyle}>What happens</th>
-                    <th style={thStyle}>Primary owner</th>
-                    <th style={thStyle}>Exit criterion</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {STAGES.map((s, i) => (
-                    <tr key={s.code}>
-                      <td style={{ ...tdStyle, ...mono, fontSize: "0.78rem", fontWeight: 600, color: "var(--brand-deep)", ...(i === STAGES.length - 1 ? { borderBottom: "none" } : {}) }}>
-                        {s.code}
-                      </td>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: "var(--ink-strong)", ...(i === STAGES.length - 1 ? { borderBottom: "none" } : {}) }}>{s.name}</td>
-                      <td style={{ ...tdStyle, ...(i === STAGES.length - 1 ? { borderBottom: "none" } : {}) }}>{s.focus}</td>
-                      <td style={{ ...tdStyle, ...(i === STAGES.length - 1 ? { borderBottom: "none" } : {}) }}>{s.owner}</td>
-                      <td style={{ ...tdStyle, ...(i === STAGES.length - 1 ? { borderBottom: "none" } : {}) }}>{s.exit}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="mt-4" style={{ ...mono, fontSize: "0.74rem", letterSpacing: "0.08em", color: "var(--ink-faint)", textTransform: "uppercase" }}>
-              Detailed per-stage guides · upcoming — this page is the overview
-            </p>
-          </section>
-
-          {/* ---- DP-01 ---- */}
-          <StageSection code="DP-01" title="Site & power readiness">
-            <p>
-              Everything starts with power. A modular unit removes construction from the critical
-              path, but it cannot manufacture electrons: the site needs megawatt-class power
-              available, or a credible path to it, before anything else matters. The IEA reports
-              that data-centre electricity use surged in 2025 while grid-connection bottlenecks
-              tightened
-              <Cite n={1} />, and Lawrence Berkeley National Laboratory estimates US data centers
-              consumed 4.4% of US electricity in 2023, projected to reach 6.7–12% by 2028
-              <Cite n={2} />. Competition for grid capacity is structural, not cyclical — which is
-              why this stage comes first and owns the real calendar.
-            </p>
-            <p>Readiness means answering a short list of questions honestly before an order is placed:</p>
-            <div className="panel" style={{ padding: "1.25rem 1.4rem" }}>
-              <ul className="grid gap-3" style={{ listStyle: "none", margin: 0, padding: 0 }}>
-                {[
-                  ["Power", <>Is megawatt-class capacity available at the site today — an existing service, an on-site source, or an executed interconnection agreement? The <Link href="/engineering/data-center-power-architecture" style={linkStyle}>power-architecture explainer</Link> covers how medium-voltage input becomes rack power.</>],
-                  ["Permits", <>What does the local jurisdiction require for a placed, factory-built unit — electrical work under the National Electrical Code (NFPA 70)<Cite n={3} />, and stationary energy-storage rules under NFPA 855 if batteries are in scope<Cite n={4} />?</>],
-                  ["Ground", <>Is there a level, load-rated surface — pad or engineered foundation — with drainage?</>],
-                  ["Access", <>Can heavy road freight reach the placement point: turning radii, overhead clearance, crane or rigging position?</>],
-                  ["Network", <>Is there a data path — fiber or wireless backhaul — matched to the intended workloads?</>],
-                ].map(([label, body]) => (
-                  <li key={label as string} className="grid gap-1">
-                    <span style={{ ...mono, fontSize: "0.66rem", fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--brand-deep)" }}>
-                      {label}
-                    </span>
-                    <span style={{ fontSize: "0.95rem", lineHeight: 1.6 }}>{body}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </StageSection>
-
-          {/* ---- DP-02 ---- */}
-          <StageSection code="DP-02" title="Configuration">
-            <p>
-              Configuration fixes the build specification before the factory starts. Because the
-              unit is standardized, this is a bounded menu rather than a design project: the GPU
-              platform installed at integration, the electrical service arrangement at the site
-              boundary, the heat-rejection option, the network handoff, and the operating model —
-              who monitors and who maintains. The output is a configuration freeze: a signed
-              specification the factory builds against and the reference every later acceptance
-              test uses. What is deliberately not on the menu is the core architecture — enclosure,
-              cooling loop, power distribution — which stays identical across units. The{" "}
-              <Link href="/platform/podos-pod" style={linkStyle}>
-                PODOS Pod page
-              </Link>{" "}
-              describes what is inside that fixed architecture.
-            </p>
-          </StageSection>
-
-          {/* ---- DP-03 ---- */}
-          <StageSection code="DP-03" title="Factory build & testing">
-            <p>
-              The factory stage is where the modular model earns its schedule. Structure, power
-              distribution, the closed-loop{" "}
-              <Link href="/engineering/direct-to-chip-liquid-cooling" style={linkStyle}>
-                direct-to-chip liquid-cooling
-              </Link>{" "}
-              circuit, racks, and networking are assembled and integrated on a production line
-              instead of being sequenced as separate trades on a construction site. Integration
-              testing happens before shipment: point-to-point electrical verification, pressure and
-              flow testing of the coolant loop, controls and safety interlocks exercised end to
-              end, and burn-in of installed IT under load. The exit gate is a factory acceptance
-              test against the configuration freeze.
-            </p>
-            <p>
-              Factory testing has a real limit, and the commissioning stage exists to close it: it
-              validates the unit against factory power and factory conditions — not against your
-              utility, your grounding system, or your climate.
-            </p>
-          </StageSection>
-
-          {/* ---- DP-04 ---- */}
-          <StageSection code="DP-04" title="Transport & placement">
-            <p>
-              While the factory builds, the site is prepared: pad, conduit runs, service
-              connections. This parallelism is the schedule mechanism — the two longest
-              workstreams run at the same time instead of one after the other. The finished unit
-              then ships as heavy road freight, is rigged onto the prepared surface, and is
-              connected mechanically: power terminations, heat-rejection connections, network.
-            </p>
-            <p>
-              Placement is measured in days rather than months because nothing is being
-              constructed on site — the unit arrives as a tested machine, and site work is limited
-              to connections. The units are designed to be relocatable, so a later move follows
-              the same steps in reverse.
-            </p>
-            <Figure
-              id="deploy-crane-lift"
-              caption="DP-04 — the unit is rigged and set onto the prepared surface"
-            />
-          </StageSection>
-
-          {/* ---- DP-05 ---- */}
-          <StageSection code="DP-05" title="Commissioning">
-            <p>
-              Commissioning proves the unit on real site power under real load. The sequence is
-              conventional critical-facility practice applied to a factory-tested machine: staged
-              energization with protection and grounding verification, cooling-loop verification
-              against the thermal envelopes the IT equipment is specified for — ASHRAE&rsquo;s
-              thermal guidelines define the environmental classes commissioning verifies against
-              <Cite n={5} /> — then integrated load testing and deliberate failure-mode exercises
-              (loss of a power path, loss of heat rejection) before workloads are admitted.
-              Reliability analysis of the site&rsquo;s electrical distribution follows established
-              practice such as the IEEE 3006 series
-              <Cite n={6} />.
-            </p>
-            <p>
-              The discipline matters. In Uptime Institute&rsquo;s 2025 global survey, roughly half
-              of operators reported an outage with meaningful impact within the previous three
-              years
-              <Cite n={7} />. A factory-tested unit shortens commissioning; it does not replace it.
-              The exit gate is a site acceptance test, after which the unit enters operations.
-            </p>
-            <Figure
-              id="deploy-commission-check"
-              caption="DP-05 — systems checked at the open service bay on site power"
-            />
-          </StageSection>
-
-          {/* ---- DP-06 ---- */}
-          <StageSection code="DP-06" title="Operations">
-            <p>
-              Operations is the longest stage and the least discussed. It covers monitoring —
-              power, thermals, coolant-loop health, IT telemetry — plus preventive maintenance on
-              pumps, filtration, and heat-rejection equipment, a spares strategy, and physical
-              security. Industry rack densities keep rising: Uptime Institute&rsquo;s 2025 survey
-              reports typical densities moving into the 10–30 kW band
-              <Cite n={7} />, which is why the liquid loop is maintained as a first-class system
-              rather than an afterthought.
-            </p>
-            <p>
-              Growth is additive. Because each unit is{" "}
-              <span data-claim="unit-capacity-1mw">
-                designed as a standardized 1-MW building block
-              </span>
-              , capacity scales by repeating the same six stages for the next unit instead of
-              re-entering a construction program. Which organizations this model fits is covered in
-              the{" "}
-              <Link href="/use-cases" style={linkStyle}>
-                use-cases overview
-              </Link>
-              ; how it differs from a conventional build is covered in the{" "}
-              <Link href="/compare/modular-ai-data-center-vs-traditional-data-center" style={linkStyle}>
-                modular-vs-traditional comparison
-              </Link>
-              .
-            </p>
-          </StageSection>
-
-          {/* ---- 90-day target ---- */}
-          <section className="section-pad" style={{ borderTop: "1px solid var(--edge-faint)", paddingBlock: "clamp(2.6rem, 5vh, 4rem)" }}>
-            <h2 style={h2Style}>
-              Where the <span data-claim="deployment-window">90-day target</span> comes from
-            </h2>
-            <div className="mt-5 grid gap-4 t-body" style={proseStyle}>
-              <p>
+      {/* 2 · TAKEAWAYS — canvas */}
+      <SummaryBand
+        title="What the six stages actually decide"
+        items={[
+          {
+            code: "01",
+            title: "Two stages run at the same time",
+            body: "Site and power readiness and configuration come first, but factory build and site preparation run in parallel, and that overlap is what compresses the calendar.",
+          },
+          {
+            code: "02",
+            title: "Power owns the real calendar",
+            body: "Site power availability dominates the real calendar and sits outside any vendor's control. A site without a power path has an indeterminate timeline regardless of how fast the unit is built.",
+          },
+          {
+            code: "03",
+            title: "90 days is a design target",
+            body: (
+              <>
                 <span data-claim="deployment-window">
-                  PODOS targets a 90-day window from order to commissioning for a standard unit.
+                  PODOS targets a 90-day window from order to commissioning for a standard unit
                 </span>{" "}
-                The target is arithmetic, not optimism: the factory stage and site preparation run
-                concurrently, transport and placement are measured in days, and commissioning
-                verifies a machine that has already passed a factory acceptance test rather than
-                debugging a first-of-a-kind assembly.
-              </p>
-              <p>
-                Three dependencies sit outside the target and can extend it: power availability at
-                the site (the dominant variable), permitting timelines in the local jurisdiction,
-                and transport distance and routing. The target is a design goal for a standard unit
-                on a ready site — it is not a measured deployment statistic, and PODOS does not
-                publish deployment counts or completed-project timelines at this stage.
-              </p>
-            </div>
-          </section>
+                — a design goal for a ready site, not a measured deployment statistic.
+              </>
+            ),
+          },
+          {
+            code: "04",
+            title: "Growth is additive",
+            body: "Capacity scales by repeating the same six stages for the next unit instead of re-entering a construction program.",
+          },
+        ]}
+      />
 
-          {/* ---- Limitations ---- */}
-          <section className="section-pad" style={{ borderTop: "1px solid var(--edge-faint)", paddingBlock: "clamp(2.6rem, 5vh, 4rem)" }}>
-            <h2 style={h2Style}>Limitations and open variables</h2>
-            <ul className="mt-5 grid gap-3 t-body" style={{ ...proseStyle, paddingLeft: "1.2rem", listStyle: "disc" }}>
-              <li>
-                The <span data-claim="deployment-window">90-day window</span> and the{" "}
-                <span data-claim="unit-capacity-1mw">1-MW unit capacity</span> are company targets, not measured
-                results from completed deployments. No deployment counts or customer projects are
-                published.
-              </li>
-              <li>
-                Site power availability dominates the real calendar and sits outside any
-                vendor&rsquo;s control. A site without a power path has an indeterminate timeline
-                regardless of how fast the unit is built.
-              </li>
-              <li>
-                Permitting is jurisdiction-specific. A placed, factory-built unit typically narrows
-                the construction-permitting scope, but it does not remove electrical, fire, or
-                zoning review.
-              </li>
-              <li>
-                Factory acceptance testing validates the unit against factory conditions.
-                Site-specific risks — utility power quality, grounding, climate extremes — are only
-                retired at commissioning.
-              </li>
-              <li>
-                This page describes single-unit deployment. Multi-unit sites add shared-infrastructure
-                decisions this overview does not cover.
-              </li>
-            </ul>
-          </section>
-
-          {/* ---- FAQ ---- */}
-          <section className="section-pad" style={{ borderTop: "1px solid var(--edge-faint)", paddingBlock: "clamp(2.6rem, 5vh, 4rem)" }}>
-            <h2 style={h2Style}>Deployment FAQ</h2>
-            <div className="mt-6 grid gap-4" style={{ maxWidth: "70ch" }}>
-              <div className="panel card-lift" style={{ padding: "1.25rem 1.4rem" }}>
-                <h3 className="t-body" style={{ fontWeight: 600, color: "var(--ink-strong)" }}>{FAQ_ITEMS[0].q}</h3>
-                <p className="t-body mt-2" style={{ color: "var(--ink-dim)" }}>
-                  <span data-claim="deployment-window">{FAQ_1_CLAIM}</span> {FAQ_1_REST}
-                </p>
-              </div>
-              {FAQ_ITEMS.slice(1).map((f) => (
-                <div key={f.q} className="panel card-lift" style={{ padding: "1.25rem 1.4rem" }}>
-                  <h3 className="t-body" style={{ fontWeight: 600, color: "var(--ink-strong)" }}>{f.q}</h3>
-                  <p className="t-body mt-2" style={{ color: "var(--ink-dim)" }}>{f.a}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* ---- Related + sources ---- */}
-          <section className="section-pad" style={{ borderTop: "1px solid var(--edge-faint)", paddingBlock: "clamp(2.6rem, 5vh, 4rem) clamp(4rem, 8vh, 6rem)" }}>
-            <p className="t-body" style={proseStyle}>
-              Deployment is one leg of the platform. The{" "}
-              <Link href="/platform" style={linkStyle}>
-                platform overview
-              </Link>{" "}
-              covers the full architecture, the{" "}
-              <Link href="/engineering" style={linkStyle}>
-                engineering hub
-              </Link>{" "}
-              covers the systems each stage exercises, and investors evaluating the model can
-              review the{" "}
-              <Link href="/invest" style={linkStyle}>
-                investor page
+      {/* 3 · THE SIX CHILD GUIDES — paper. Every stage links to its own page. */}
+      <CardGrid
+        id="stages"
+        eyebrow="Stage guides"
+        title="Six stages, six detailed guides"
+        lede="This page is the overview. Each stage has its own guide covering what happens inside it, who owns it, and the criterion that has to be met before the next stage starts."
+        surface="paper"
+        field="deploy"
+        columns={3}
+        items={STAGES.map((s) => ({
+          code: s.code,
+          title: s.name,
+          body: (
+            <>
+              {s.focus}. Exit criterion: {s.exit.toLowerCase()}.{" "}
+              <Link href={s.href} style={link}>
+                Read the {s.name.toLowerCase()} guide
               </Link>
               .
-            </p>
-            <EvidenceSourceRail sources={SOURCES} />
-          </section>
+            </>
+          ),
+        }))}
+      />
+
+      {/* 4 · STAGE INDEX — canvas, wide table */}
+      <MatrixTable
+        id="at-a-glance"
+        eyebrow="Stage index"
+        title="The six stages at a glance"
+        lede="Who owns each stage, and what has to be true before it closes."
+        surface="canvas"
+        head={["Code", "Stage", "What happens", "Primary owner", "Exit criterion"]}
+        rows={STAGES.map((s) => [
+          <span key={`${s.code}-c`} className="pill">
+            {s.code}
+          </span>,
+          <Link key={`${s.code}-n`} href={s.href} style={link}>
+            {s.name}
+          </Link>,
+          s.focus,
+          s.owner,
+          s.exit,
+        ])}
+      />
+
+      {/* 5 · DP-01 + DP-02 — paper prose, stage-guide rail */}
+      <ProseWithRail
+        id="before-the-factory"
+        surface="paper"
+        rail={
+          <div style={{ borderTop: "1px solid var(--edge-bright)", paddingTop: "1.25rem" }}>
+            <p className="eyebrow">Stage guides</p>
+            <ul style={{ listStyle: "none", marginTop: "1rem", display: "grid", gap: "0.7rem" }}>
+              {STAGES.map((s) => (
+                <li key={s.href}>
+                  <Link
+                    href={s.href}
+                    style={{ ...link, fontSize: "0.9rem", textDecoration: "none" }}
+                  >
+                    <span className="pill">{s.code}</span> {s.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        }
+      >
+        <SectionHead
+          eyebrow="DP-01 · DP-02"
+          title="Before the factory starts: readiness, then a frozen specification"
+        />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            This page is the overview: what each stage covers, who owns it, what must be true
+            before the next stage starts, and where the schedule risk actually lives. Each{" "}
+            <Link href="/platform/podos-pod" style={link}>
+              PODOS Pod
+            </Link>{" "}
+            is{" "}
+            <span data-claim="unit-capacity-1mw">
+              designed as a standardized 1-MW building block
+            </span>{" "}
+            and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span>, so the process
+            repeats per unit rather than being re-engineered per project.
+          </p>
+
+          <h3 className="h3" style={{ marginTop: "2.5rem" }}>
+            DP-01 · Site &amp; power readiness
+          </h3>
+          <p style={{ marginTop: "1rem" }}>
+            Everything starts with power. A modular unit removes construction from the critical
+            path, but it cannot manufacture electrons: the site needs megawatt-class power
+            available, or a credible path to it, before anything else matters. The IEA reports that
+            data-centre electricity use surged in 2025 while grid-connection bottlenecks tightened
+            <Cite n={1} />, and Lawrence Berkeley National Laboratory estimates US data centers
+            consumed 4.4% of US electricity in 2023, projected to reach 6.7–12% by 2028
+            <Cite n={2} />. Competition for grid capacity is structural, not cyclical — which is why
+            this stage comes first and owns the real calendar.
+          </p>
+          <p>
+            Readiness means answering a short list of questions honestly before an order is placed:
+          </p>
+          <ul className="limits" style={{ marginTop: "1.5rem" }}>
+            <li>
+              <strong style={strong}>Power.</strong> Is megawatt-class capacity available at the
+              site today — an existing service, an on-site source, or an executed interconnection
+              agreement? The{" "}
+              <Link href="/engineering/data-center-power-architecture" style={link}>
+                power-architecture explainer
+              </Link>{" "}
+              covers how medium-voltage input becomes rack power.
+            </li>
+            <li>
+              <strong style={strong}>Permits.</strong> What does the local jurisdiction require for
+              a placed, factory-built unit — electrical work under the National Electrical Code
+              (NFPA 70)
+              <Cite n={3} />, and stationary energy-storage rules under NFPA 855 if batteries are in
+              scope
+              <Cite n={4} />?
+            </li>
+            <li>
+              <strong style={strong}>Ground.</strong> Is there a level, load-rated surface — pad or
+              engineered foundation — with drainage?
+            </li>
+            <li>
+              <strong style={strong}>Access.</strong> Can heavy road freight reach the placement
+              point: turning radii, overhead clearance, crane or rigging position?
+            </li>
+            <li>
+              <strong style={strong}>Network.</strong> Is there a data path — fiber or wireless
+              backhaul — matched to the intended workloads?
+            </li>
+          </ul>
+          <p style={{ marginTop: "1.5rem" }}>
+            The full assessment, including the conditions that disqualify a site early, is in the{" "}
+            <Link href="/deploy/site-power-readiness" style={link}>
+              site and power readiness guide
+            </Link>
+            .
+          </p>
+
+          <h3 className="h3" style={{ marginTop: "2.5rem" }}>
+            DP-02 · Configuration
+          </h3>
+          <p style={{ marginTop: "1rem" }}>
+            Configuration fixes the build specification before the factory starts. Because the unit
+            is standardized, this is a bounded menu rather than a design project: the GPU platform
+            installed at integration, the electrical service arrangement at the site boundary, the
+            heat-rejection option, the network handoff, and the operating model — who monitors and
+            who maintains. The output is a configuration freeze: a signed specification the factory
+            builds against and the reference every later acceptance test uses. What is deliberately
+            not on the menu is the core architecture — enclosure, cooling loop, power distribution —
+            which stays identical across units. The{" "}
+            <Link href="/platform/podos-pod" style={link}>
+              PODOS Pod page
+            </Link>{" "}
+            describes what is inside that fixed architecture, and the{" "}
+            <Link href="/deploy/configuration-engineering" style={link}>
+              configuration engineering guide
+            </Link>{" "}
+            walks the menu decision by decision.
+          </p>
         </div>
-      </main>
-      <Footer />
-    </>
+      </ProseWithRail>
+
+      {/* 6 · DP-03 + DP-04 — canvas split, the crane set */}
+      <SplitFeature
+        imageId="deploy-crane-lift"
+        eyebrow="DP-03 · DP-04"
+        title="Built and tested on a line, then"
+        accent="rigged onto the pad"
+        surface="canvas"
+        field="deploy"
+        flip
+      >
+        <p>
+          The factory stage is where the modular model earns its schedule. Structure, power
+          distribution, the closed-loop{" "}
+          <Link href="/engineering/direct-to-chip-liquid-cooling" style={link}>
+            direct-to-chip liquid-cooling
+          </Link>{" "}
+          circuit, racks, and networking are assembled and integrated on a production line instead
+          of being sequenced as separate trades on a construction site. Integration testing happens
+          before shipment: point-to-point electrical verification, pressure and flow testing of the
+          coolant loop, controls and safety interlocks exercised end to end, and burn-in of
+          installed IT under load. The exit gate is a factory acceptance test against the
+          configuration freeze —{" "}
+          <Link href="/deploy/factory-build-testing" style={link}>
+            the factory build and testing guide
+          </Link>{" "}
+          covers the hold points and handover documents.
+        </p>
+        <p>
+          Factory testing has a real limit, and the commissioning stage exists to close it: it
+          validates the unit against factory power and factory conditions — not against your
+          utility, your grounding system, or your climate.
+        </p>
+        <p>
+          While the factory builds, the site is prepared: pad, conduit runs, service connections.
+          This parallelism is the schedule mechanism — the two longest workstreams run at the same
+          time instead of one after the other. The finished unit then ships as heavy road freight,
+          is rigged onto the prepared surface, and is connected mechanically: power terminations,
+          heat-rejection connections, network.
+        </p>
+        <p>
+          Placement is measured in days rather than months because nothing is being constructed on
+          site — the unit arrives as a tested machine, and site work is limited to connections. The
+          units are designed to be relocatable, so a later move follows the same steps in reverse.
+          Route survey, freight envelope, permits, and the rigging sequence are detailed in the{" "}
+          <Link href="/deploy/transport-placement" style={link}>
+            transport and placement guide
+          </Link>
+          .
+        </p>
+      </SplitFeature>
+
+      {/* 7 · DP-05 + DP-06 — paper split, systems check on site power */}
+      <SplitFeature
+        imageId="deploy-commission-check"
+        eyebrow="DP-05 · DP-06"
+        title="Proven on site power, then"
+        accent="operated for years"
+        surface="paper"
+      >
+        <p>
+          Commissioning proves the unit on real site power under real load. The sequence is
+          conventional critical-facility practice applied to a factory-tested machine: staged
+          energization with protection and grounding verification, cooling-loop verification against
+          the thermal envelopes the IT equipment is specified for — ASHRAE&rsquo;s thermal
+          guidelines define the environmental classes commissioning verifies against
+          <Cite n={5} /> — then integrated load testing and deliberate failure-mode exercises (loss
+          of a power path, loss of heat rejection) before workloads are admitted. Reliability
+          analysis of the site&rsquo;s electrical distribution follows established practice such as
+          the IEEE 3006 series
+          <Cite n={6} />.
+        </p>
+        <p>
+          The discipline matters. In Uptime Institute&rsquo;s 2025 global survey, roughly half of
+          operators reported an outage with meaningful impact within the previous three years
+          <Cite n={7} />. A factory-tested unit shortens commissioning; it does not replace it. The
+          exit gate is a site acceptance test, after which the unit enters operations — the tests
+          and sign-offs are enumerated in the{" "}
+          <Link href="/deploy/commissioning" style={link}>
+            commissioning guide
+          </Link>
+          .
+        </p>
+        <p>
+          Operations is the longest stage and the least discussed. It covers monitoring — power,
+          thermals, coolant-loop health, IT telemetry — plus preventive maintenance on pumps,
+          filtration, and heat-rejection equipment, a spares strategy, and physical security.
+          Industry rack densities keep rising: Uptime Institute&rsquo;s 2025 survey reports typical
+          densities moving into the 10–30 kW band
+          <Cite n={7} />, which is why the liquid loop is maintained as a first-class system rather
+          than an afterthought. The{" "}
+          <Link href="/deploy/operations-maintenance" style={link}>
+            operations and maintenance guide
+          </Link>{" "}
+          covers service access, spares, and lifecycle planning.
+        </p>
+        <p>
+          Growth is additive. Because each unit is{" "}
+          <span data-claim="unit-capacity-1mw">
+            designed as a standardized 1-MW building block
+          </span>
+          , capacity scales by repeating the same six stages for the next unit instead of
+          re-entering a construction program. Which organizations this model fits is covered in the{" "}
+          <Link href="/use-cases" style={link}>
+            use-cases overview
+          </Link>
+          ; how it differs from a conventional build is covered in the{" "}
+          <Link href="/compare/modular-ai-data-center-vs-traditional-data-center" style={link}>
+            modular-vs-traditional comparison
+          </Link>
+          .
+        </p>
+      </SplitFeature>
+
+      {/* 8 · INK BEAT — the target, stated honestly */}
+      <QuoteMetric
+        quote="The target is arithmetic, not optimism: the factory stage and site preparation run concurrently, transport and placement are measured in days, and commissioning verifies a machine that has already passed a factory acceptance test."
+        attribution="Design goal for a standard unit on a ready site — not a measured deployment statistic"
+        metric="90 days"
+        label="Order to commissioning"
+        claim="deployment-window"
+        field="deploy"
+      />
+
+      {/* 9 · THE TARGET — paper prose */}
+      <ProseWithRail id="target" surface="paper">
+        <SectionHead
+          eyebrow="Schedule"
+          title="Where the 90-day target comes from"
+          lede="Three dependencies sit outside the target, and the largest of them is not a vendor decision."
+        />
+        <div style={{ marginTop: "1.5rem" }}>
+          <p>
+            <span data-claim="deployment-window">
+              PODOS targets a 90-day window from order to commissioning for a standard unit.
+            </span>{" "}
+            The target is arithmetic, not optimism: the factory stage and site preparation run
+            concurrently, transport and placement are measured in days, and commissioning verifies a
+            machine that has already passed a factory acceptance test rather than debugging a
+            first-of-a-kind assembly.
+          </p>
+          <p>
+            Three dependencies sit outside the target and can extend it: power availability at the
+            site (the dominant variable), permitting timelines in the local jurisdiction, and
+            transport distance and routing. The target is a design goal for a standard unit on a
+            ready site — it is not a measured deployment statistic, and PODOS does not publish
+            deployment counts or completed-project timelines at this stage.
+          </p>
+        </div>
+      </ProseWithRail>
+
+      {/* 10 · LIMITS — canvas, mandatory */}
+      <LimitsBlock
+        title="Limitations and open variables"
+        eyebrow="HONEST LIMITS"
+        items={[
+          <>
+            The <span data-claim="deployment-window">90-day window</span> and the{" "}
+            <span data-claim="unit-capacity-1mw">1-MW unit capacity</span> are company targets, not
+            measured results from completed deployments. No deployment counts or customer projects
+            are published.
+          </>,
+          "Site power availability dominates the real calendar and sits outside any vendor's control. A site without a power path has an indeterminate timeline regardless of how fast the unit is built.",
+          "Permitting is jurisdiction-specific. A placed, factory-built unit typically narrows the construction-permitting scope, but it does not remove electrical, fire, or zoning review.",
+          "Factory acceptance testing validates the unit against factory conditions. Site-specific risks — utility power quality, grounding, climate extremes — are only retired at commissioning.",
+          "This page describes single-unit deployment. Multi-unit sites add shared-infrastructure decisions this overview does not cover.",
+        ]}
+      />
+
+      {/* 11 · FAQ — paper */}
+      <FAQBlock items={FAQ} title="Deployment FAQ" surface="paper" />
+
+      {/* 12 · SOURCES — canvas */}
+      <Section surface="canvas" width="content" pad="flow">
+        <EvidenceSourceRail sources={SOURCES} />
+      </Section>
+
+      {/* 13 · RELATED — paper */}
+      <RelatedRail
+        title="Related reading"
+        surface="paper"
+        items={[
+          { href: "/platform", label: "PLATFORM", title: "The full architecture" },
+          { href: "/engineering", label: "ENGINEERING", title: "The systems each stage exercises" },
+          {
+            href: "/compare/modular-ai-data-center-vs-traditional-data-center",
+            label: "COMPARE",
+            title: "Modular vs traditional build",
+          },
+          { href: "/invest", label: "INVEST", title: "Evaluating the model" },
+        ]}
+      />
+
+      {/* 14 · CTA */}
+      <CTABand
+        title="Start where the schedule actually"
+        accent="starts"
+        body="Power availability, permitting, and access decide the calendar before a unit is ordered. Stage one is the assessment that tells you whether the rest of the schedule is real."
+        primary={{ href: "/configure", label: "Configure a build" }}
+        secondary={{ href: "/deploy/site-power-readiness", label: "Site & power readiness" }}
+        field="deploy"
+      />
+    </main>
   );
 }

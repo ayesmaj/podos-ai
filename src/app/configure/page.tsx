@@ -13,13 +13,24 @@ import { buildMetadata } from "@/lib/seo/metadata";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import ConfiguratorClient from "@/components/configurator/ConfiguratorClient";
 import { ESTIMATOR_HERO } from "@/data/configuratorOptionImages";
+import { PRICING } from "@/data/configuratorPricing";
 
-export const metadata: Metadata = buildMetadata({
-  title: "PODOS Estimator: Configure Modular AI Infrastructure",
-  description:
-    "Size a modular AI deployment: choose pod count, cooling, power, and network, and see capacity plus a preliminary cost estimate for planning.",
-  path: "/configure",
-});
+/**
+ * Indexability is gated on PRICING.approved. While it is false the figures
+ * are placeholders, not a founder-approved price book — so the page stays
+ * reachable by direct link (for internal review) but is noindex, absent
+ * from the sitemap, and unlinked from site navigation. Setting
+ * `approved: true` in configuratorPricing.ts restores all four together.
+ */
+export const metadata: Metadata = {
+  ...buildMetadata({
+    title: "PODOS Estimator: Configure Modular AI Infrastructure",
+    description:
+      "Size a modular AI deployment: choose pod count, cooling, power, and network, and see capacity plus a preliminary cost estimate for planning.",
+    path: "/configure",
+  }),
+  ...(PRICING.approved ? {} : { robots: { index: false, follow: false } }),
+};
 
 export default function ConfigurePage() {
   return (
