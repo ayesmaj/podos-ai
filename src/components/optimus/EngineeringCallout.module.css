@@ -136,7 +136,7 @@
      normal viewing distance and match the optical weight of the
      dimension lines (6 096 mm / 2 591 mm). Color shifted to ink-strong
      for better contrast against the paper background. */
-  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.22em;

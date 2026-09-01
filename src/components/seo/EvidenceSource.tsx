@@ -18,7 +18,7 @@ export function EvidenceSourceRail({ sources }: { sources: Source[] }) {
     <section aria-label="Sources" style={{ borderTop: "1px solid var(--edge)", marginTop: "3rem", paddingTop: "1.5rem" }}>
       <h2
         style={{
-          fontFamily: "var(--font-geist-mono), monospace",
+          fontFamily: "var(--font-body)",
           fontSize: 12,
           letterSpacing: "0.16em",
           textTransform: "uppercase",
@@ -30,7 +30,7 @@ export function EvidenceSourceRail({ sources }: { sources: Source[] }) {
       <ol style={{ marginTop: "0.9rem", display: "grid", gap: "0.55rem" }}>
         {sources.map((s) => (
           <li key={s.n} id={`source-${s.n}`} style={{ fontSize: 13.5, lineHeight: 1.55, color: "var(--graphite)" }}>
-            <span style={{ fontFamily: "var(--font-geist-mono), monospace", color: "var(--brand)" }}>
+            <span style={{ fontFamily: "var(--font-body)", color: "var(--brand)" }}>
               [{s.n}]
             </span>{" "}
             {s.url ? (
@@ -57,7 +57,7 @@ export function Cite({ n }: { n: number }) {
       <a
         href={`#source-${n}`}
         aria-label={`Source ${n}`}
-        style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: "0.72em", color: "var(--brand)" }}
+        style={{ fontFamily: "var(--font-body)", fontSize: "0.72em", color: "var(--brand)" }}
       >
         [{n}]
       </a>

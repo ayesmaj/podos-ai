@@ -85,7 +85,7 @@ export default function SeoImage({
             position: "absolute",
             left: 12,
             bottom: 12,
-            fontFamily: "var(--font-geist-mono), monospace",
+            fontFamily: "var(--font-body)",
             fontSize: 10,
             letterSpacing: "0.14em",
             padding: "5px 9px",

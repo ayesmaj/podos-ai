@@ -35,7 +35,7 @@
      variable keeps its name so every reference stays one-line swappable */
   --iv-serif: var(--font-geist), system-ui, sans-serif;
   --iv-sans: var(--font-inter-tight), system-ui, sans-serif;
-  --iv-mono: var(--font-geist-mono), monospace;
+  --iv-mono: var(--font-body);
 
   background: var(--iv-bg);
   color: var(--iv-ink);

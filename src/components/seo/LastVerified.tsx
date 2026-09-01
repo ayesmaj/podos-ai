@@ -12,7 +12,7 @@ export default function LastVerified(props: {
   return (
     <p
       style={{
-        fontFamily: "var(--font-geist-mono), monospace",
+        fontFamily: "var(--font-body)",
         fontSize: 12,
         letterSpacing: "0.06em",
         color: "var(--graphite)",

@@ -116,7 +116,7 @@ const linkStyle: CSSProperties = { color: "var(--brand-deep)", textDecoration: "
 const emph: CSSProperties = { fontWeight: 600, color: "var(--ink-strong)" };
 
 const eqStyle: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
+  fontFamily: "var(--font-body)",
   fontSize: "1.02rem",
   lineHeight: 1.8,
   color: "var(--ink-strong)",

@@ -108,10 +108,15 @@ export default async function ClientEstimatePage({
           <p style={mono}>Preliminary estimate</p>
           <p
             style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "clamp(1.6rem, 4vw, 2.4rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
+              // Geist display, not mono: mono is this site's data face for small
+              // readouts and codes. The headline figure is a statement number,
+              // so it uses the same treatment as the site's giant stats
+              // (.t-number) — display weight with tabular figures so the digits
+              // still align.
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(2rem, 5vw, 3.1rem)",
+              fontWeight: 800,
+              letterSpacing: "-0.04em",
               color: "var(--ink-strong)",
               marginTop: "0.4rem",
               fontVariantNumeric: "tabular-nums",

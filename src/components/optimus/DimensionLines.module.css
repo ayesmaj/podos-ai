@@ -23,7 +23,7 @@
    slate-400 → ink-700 for better optical weight against the bright
    paper background. Sizes are in viewBox units (scaled by canvas). */
 .label {
-  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-family: var(--font-body);
   font-size: 1.7px;
   font-weight: 500;
   letter-spacing: 0.20em;
@@ -32,7 +32,7 @@
 }
 
 .bannerLabel {
-  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-family: var(--font-body);
   font-size: 1.8px;
   font-weight: 600;
   letter-spacing: 0.22em;

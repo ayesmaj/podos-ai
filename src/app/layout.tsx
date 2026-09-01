@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter_Tight } from "next/font/google";
+import { Geist, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import "./mobile.css";
 import "./perf.css";
@@ -43,13 +43,6 @@ const interTight = Inter_Tight({
   weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
-  display: "swap",
-  weight: ["400", "500", "600"],
-});
-
 export const metadata: Metadata = {
   title: "PODOS AI — The New Physical Layer for AI",
   description:
@@ -78,7 +71,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${interTight.variable} ${geistMono.variable}`}
+      className={`${geist.variable} ${interTight.variable}`}
     >
       <body>
         <OrganizationJsonLd />

@@ -76,6 +76,9 @@ Before rendering, check:
 - no fake certifications
 - no impossible engineering geometry
 - no random UI metrics
+- no invented measurements: if a dimension callout is drawn on the product it may
+  only use the approved figures 12′ × 53′ × 12′, never a metric conversion and
+  never any other length, weight, temperature or capacity value
 - no black full-page background
 - no cheap blue glow overload
 - no generic SaaS cards
@@ -784,6 +787,112 @@ Place the exact PODOS logo in the top-left and a subtle product blueprint waterm
 
 FINAL FEEL:
 A confident final invitation to move from concept into an engineered site-specific commercial package.`,
+  },
+
+  /* ---------------------------------------------------------------------
+   * PLATE VARIANTS for pages 5 and 7.
+   *
+   * The image model renders the words and the art beautifully but draws the
+   * DATA wrong — on page 5 it sized the stacked bar decoratively ($74 came out
+   * narrower than $72), and on page 7 it put the Pod line at ~$16.6M instead of
+   * $24.5M, so the drawn gap contradicted the $8.6M headline.
+   *
+   * So these plates render everything EXCEPT the data graphic and hold a
+   * defined region empty; overlay.py then composites a pixel-exact chart into
+   * it. Art from the model, numbers from arithmetic.
+   * ------------------------------------------------------------------- */
+  {
+    id: "05-economics-plate",
+    title: "Operating Economics — art plate (bar composited separately)",
+    prompt: `Apply the universal PODOS visual lock.
+
+Create a premium horizontal operating-economics page for PODOS AI — this is an ART PLATE. A precise data graphic will be composited into it afterwards, so one region must be left completely empty.
+
+BACKGROUND:
+A bright porcelain-white technical environment with a soft cool-gray gradient, faint blueprint geometry and restrained engineering measurement marks. Calm and uncluttered.
+
+LEFT COLUMN — render fully, occupying roughly the left quarter of the frame:
+
+Eyebrow:
+OPERATING ECONOMICS
+
+Headline:
+WHAT A POD COSTS TO RUN
+
+One very large dominant number beneath the headline:
+$187
+
+Directly beneath that number:
+PER kW-MONTH
+FULLY LOADED · OWNER-OPERATED
+
+RESERVED EMPTY REGION — THIS IS THE MOST IMPORTANT INSTRUCTION:
+Everything to the right of the left column, in the upper two-thirds of the frame, must be COMPLETELY EMPTY — clean, bright, uninterrupted background only.
+
+In that region there must be absolutely NO bar, NO chart, NO stacked segments, NO coloured rectangles, NO category labels, NO dollar amounts, NO icons, NO callout lines and NO panels. It is deliberately blank space held for a graphic that will be added later. Treat it as a large empty area of pure background.
+
+LOWER BAND — render fully:
+Along the bottom of the frame, place a photorealistic matte-black PODOS Pod in the lower left, connected by a subtle luminous cyan thermal line running to the right into a neighbouring industrial or district-heating building. Keep this band clean and below the reserved region.
+
+Bottom footnote, small, lower left:
+Indicative for this comparison. A firm figure is issued against a specific site.
+Excludes servers, racks and network equipment.
+
+Place the exact PODOS logo in the upper-left corner.
+
+FINAL FEEL:
+Institutional financial clarity — a beautifully composed page that is deliberately waiting for its central data graphic.`,
+  },
+  {
+    id: "07-ten-year-plate",
+    title: "The Ten-Year View — art plate (chart composited separately)",
+    prompt: `Apply the universal PODOS visual lock.
+
+Create a premium horizontal ten-year cost page for PODOS AI — this is an ART PLATE. A precise line chart will be composited into it afterwards, so one region must be left completely empty.
+
+BACKGROUND:
+A bright porcelain-white technical environment with a soft cool-gray gradient, faint blueprint geometry and restrained engineering measurement marks.
+
+UPPER LEFT — render fully:
+
+Eyebrow:
+THE TEN-YEAR VIEW
+
+Headline:
+CUMULATIVE COST
+OF ONE MEGAWATT
+
+RIGHT PANEL — render fully as a premium translucent glass panel occupying roughly the right quarter of the frame, with a thin cobalt border:
+
+Large number at the top of the panel:
+$8.6M
+
+Label beneath it:
+DIFFERENCE PER MEGAWATT
+OVER TEN YEARS
+
+Supporting copy in the middle of the panel:
+Rent rises every year.
+Owned capital does not.
+
+Closing statement lower in the panel, in cobalt:
+THE ASSET IS STILL THERE IN YEAR ELEVEN —
+RELOCATABLE, WITH RESIDUAL VALUE.
+
+RESERVED EMPTY REGION — THIS IS THE MOST IMPORTANT INSTRUCTION:
+The large central-left area beneath the headline and to the left of the glass panel must be COMPLETELY EMPTY — clean, bright, uninterrupted background only.
+
+In that region there must be absolutely NO chart, NO plotted lines, NO axes, NO gridlines, NO year labels, NO numbers, NO legend, NO data points, NO shaded area and NO product render. It is deliberately blank space held for a graphic that will be added later. Do not place the Pod there. Treat it as a large empty area of pure background.
+
+BOTTOM EDGE — render fully:
+A thin cobalt rule across the lower edge with small technical mono metadata at the far left:
+[ DATA MODEL ]
+Both models fully loaded.
+
+Place the exact PODOS logo in the upper-left corner.
+
+FINAL FEEL:
+A confident, quiet, institutional page that is deliberately waiting for its central graph.`,
   },
 ];
 

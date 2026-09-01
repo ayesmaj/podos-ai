@@ -567,7 +567,7 @@ const EFFICIENCY: { m: string; f: string; w: string; r: ReactNode; d: string }[]
 /* ---- shared styles ---- */
 
 const chip: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
+  fontFamily: "var(--font-body)",
   display: "inline-flex",
   alignItems: "center",
   minHeight: 36,

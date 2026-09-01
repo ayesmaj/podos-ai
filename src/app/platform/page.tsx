@@ -60,7 +60,7 @@ const FAQ = [
 /* ------------------------------------------------------------------ */
 /* Small style helpers (design-language-lock recipes, copied exactly)  */
 /* ------------------------------------------------------------------ */
-const mono: CSSProperties = { fontFamily: "var(--font-geist-mono), monospace" };
+const mono: CSSProperties = { fontFamily: "var(--font-body)" };
 
 function Eyebrow({ idx, label }: { idx: string; label: string }) {
   return (

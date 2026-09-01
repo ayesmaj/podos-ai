@@ -191,7 +191,7 @@ function UseCaseCard({
         <div className="flex items-center justify-center gap-2 text-slate-400">
           <span
             className="text-[0.68rem] tracking-[0.28em] uppercase font-semibold text-blue-700"
-            style={{ fontFamily: "var(--font-mono, ui-monospace, monospace)" }}
+            style={{ fontFamily: "var(--font-body)" }}
           >
             {c.tag}
           </span>
@@ -200,7 +200,7 @@ function UseCaseCard({
           </span>
           <span
             className="text-[0.68rem] tracking-[0.18em] uppercase font-medium"
-            style={{ fontFamily: "var(--font-mono, ui-monospace, monospace)" }}
+            style={{ fontFamily: "var(--font-body)" }}
           >
             {idxLabel} <span className="text-slate-300">/</span> {totalLabel}
           </span>

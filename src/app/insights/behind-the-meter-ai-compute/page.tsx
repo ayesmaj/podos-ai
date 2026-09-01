@@ -108,7 +108,7 @@ const SOURCES: Source[] = [
 const linkStyle: CSSProperties = { color: "var(--brand-deep)", textDecoration: "underline" };
 
 const eqStyle: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
+  fontFamily: "var(--font-body)",
   fontSize: "1.02rem",
   lineHeight: 1.8,
   color: "var(--ink-strong)",

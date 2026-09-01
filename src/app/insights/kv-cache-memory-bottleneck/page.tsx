@@ -42,7 +42,7 @@ export const metadata = buildMetadata({ title: TITLE, description: DESCRIPTION, 
 const link = { color: "var(--brand-deep)", textDecoration: "underline" } as const;
 
 const formula = {
-  fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
+  fontFamily: "var(--font-body)",
   fontSize: "0.88rem",
   lineHeight: 1.75,
   color: "var(--ink-strong)",
@@ -55,7 +55,7 @@ const formula = {
 };
 
 const num = {
-  fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
+  fontFamily: "var(--font-body)",
   fontVariantNumeric: "tabular-nums" as const,
   whiteSpace: "nowrap" as const,
 };

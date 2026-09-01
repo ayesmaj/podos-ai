@@ -89,7 +89,7 @@ const FAQS = [
 ];
 
 /* Documented recipes from docs/seo/design-language-lock.md §4.2–4.3 */
-const mono: CSSProperties = { fontFamily: "var(--font-mono), monospace" };
+const mono: CSSProperties = { fontFamily: "var(--font-body)" };
 
 const eyebrowPill: CSSProperties = {
   ...mono,

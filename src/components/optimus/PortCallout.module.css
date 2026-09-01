@@ -145,7 +145,7 @@
      smaller (11.5px vs 12px on engineering callouts) because port
      labels are dense (5 across) and need more breathing room. */
   margin-top: 7px;
-  font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+  font-family: var(--font-body);
   font-size: 11.5px;
   font-weight: 500;
   letter-spacing: 0.22em;

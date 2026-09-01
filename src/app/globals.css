@@ -86,7 +86,12 @@
      Geist Mono     — data / telemetry / pills. Tabular figures. */
   --font-display: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-body:    var(--font-inter-tight), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono:    var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, monospace;
+  /* Monospace retired at the founder's request: the typewriter face is gone
+     from the whole site. Both tokens now resolve to the body face, so the
+     ~30 components that reference either one need no edits. Restore by
+     re-adding Geist_Mono in layout.tsx and reverting these two lines. */
+  --font-geist-mono: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
 
   /* ============== LEGACY SHIMS ============== */
   /* Existing components reference --electric / --teal / --sky / --gold.

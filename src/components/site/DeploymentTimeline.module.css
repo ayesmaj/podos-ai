@@ -75,7 +75,7 @@
   top: clamp(5.5rem, 9vh, 7rem);
   right: clamp(1.25rem, 3vw, 2.5rem);
   z-index: 5;
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: var(--font-body);
   font-size: 0.78rem;
   letter-spacing: 0.18em;
   font-weight: 600;
@@ -105,7 +105,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: var(--font-body);
   font-size: 0.78rem;
   letter-spacing: 0.36em;
   text-transform: uppercase;
@@ -169,7 +169,7 @@
 
 /* "STEP" small eyebrow */
 .stepBadge {
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: var(--font-body);
   font-size: 0.78rem;
   letter-spacing: 0.36em;
   text-transform: uppercase;
@@ -301,7 +301,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.15rem;
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: var(--font-body);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   text-align: center;
@@ -329,7 +329,7 @@
   position: absolute;
   bottom: clamp(1rem, 2.5vh, 1.75rem);
   z-index: 4;
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: var(--font-body);
   font-size: 0.7rem;
   letter-spacing: 0.16em;
   color: rgba(255, 255, 255, 0.55);

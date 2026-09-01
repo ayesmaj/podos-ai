@@ -16,7 +16,7 @@ export default function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
             display: "flex",
             flexWrap: "wrap",
             gap: "0.45rem",
-            fontFamily: "var(--font-geist-mono), monospace",
+            fontFamily: "var(--font-body)",
             fontSize: 12,
             letterSpacing: "0.08em",
             /* Surface-overridable: a dark section redefines these (see

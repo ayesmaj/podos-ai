@@ -120,7 +120,7 @@ const linkStyle: CSSProperties = { color: "var(--brand-deep)", textDecoration: "
 const emph: CSSProperties = { fontWeight: 600, color: "var(--ink-strong)" };
 
 const assumptionStyle: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
+  fontFamily: "var(--font-body)",
   fontSize: 12.5,
   lineHeight: 1.7,
   color: "var(--ink-dim)",

@@ -433,7 +433,7 @@
 }
 
 .menuLinkIdx {
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: var(--font-body);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.16em;

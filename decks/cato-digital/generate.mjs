@@ -20,7 +20,10 @@ const ROOT = path.resolve(HERE, "..", "..");
 const OUT = path.join(HERE, "out");
 
 const args = process.argv.slice(2);
-const SIZE = args.find((a) => a.startsWith("--size="))?.slice(7) ?? "1536x1024";
+/* 2560x1440 = exact 16:9. gpt-image-2 accepts any size whose width and height
+ * are both divisible by 16 — the repo's usual 1536x1024 (3:2) squashed the pod
+ * out of its real road-legal proportions, so the deck renders wide. */
+const SIZE = args.find((a) => a.startsWith("--size="))?.slice(7) ?? "2560x1440";
 const WANTED = args.filter((a) => !a.startsWith("--"));
 const CONCURRENCY = 3;
 

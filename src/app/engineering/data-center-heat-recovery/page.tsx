@@ -144,12 +144,12 @@ const linkStyle: CSSProperties = {
 };
 
 const monoInline: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
+  fontFamily: "var(--font-body)",
   color: "var(--ink-strong)",
 };
 
 const eqStyle: CSSProperties = {
-  fontFamily: "var(--font-geist-mono), monospace",
+  fontFamily: "var(--font-body)",
   fontSize: "0.98rem",
   lineHeight: 1.85,
   color: "var(--ink-strong)",
