@@ -439,15 +439,20 @@ Build three large vertical comparison zones across the image, but avoid generic 
 
 ZONE 1 — COLOCATION:
 Show a large conventional data-center building in cool desaturated gray.
-Use a dark-gray cost line rising above it.
+Use a dark-gray cost line rising steeply above it.
 
 ZONE 2 — POD, OWNER-OPERATED:
 Show one matte-black PODOS Pod on a clean engineered pad.
-Use a cobalt cost line.
+Use a cobalt cost line that is clearly much flatter than the colocation line.
 
 ZONE 3 — POD + HEAT MONETISED:
 Show the Pod connected by a warm-water loop to a neighboring usable heat load.
-Use cobalt with a restrained green efficiency accent.
+Use cobalt with a restrained green efficiency accent, flattest of the three.
+
+THE THREE COST LINES MUST NOT LOOK ALIKE. Their relative slopes carry the whole
+argument: colocation rent escalates steeply, an owned Pod stays nearly flat, and
+a heat-monetised Pod is flatter still. A steeply rising line above the Pod
+columns would contradict the page and must not appear.
 
 TEXT TO RENDER EXACTLY:
 
@@ -660,6 +665,11 @@ Do not make the room dark. Use a clean white industrial test environment with co
 
 On the right, show a refined "Birth Certificate" data document associated with the exact physical unit. The document should look official and technical but should not contain fake certifications.
 
+CRITICAL CONSTRAINT ON THE CERTIFICATE AND THE DIAGNOSTIC SCREENS:
+This is a real investor document, so no measurement may be invented. The certificate shows its field labels only — UNIT ID, SERIAL NUMBER, MODEL, RATED CAPACITY, TEST LOCATION, COMPLETED, TEST RESULT — each followed by a neutral placeholder of light gray dashes or a blank rule, never a fabricated value. Do not print any specific serial, city, factory name, country, calendar date, time or signature anywhere on the page. Do not draw a handwritten signature.
+
+The diagnostic screens likewise carry titles, waveforms, thermal gradients and wireframes but NO numeric readouts: no voltages, currents, power figures, decibel values, pressure values, gas percentages, temperatures or percentage-verified badges. Visual instrumentation only, with the numbers deliberately absent.
+
 TEXT TO RENDER EXACTLY:
 
 Eyebrow:
@@ -690,7 +700,7 @@ Supporting line:
 Operation compared continuously
 against the factory baseline.
 
-Large bottom statement:
+Large bottom statement, set in near-black type directly on the bright porcelain-white background — this band must NOT be filled with navy, dark blue or any dark colour, because every other page in the deck is bright and this one has to match them:
 A SUSTAINABILITY CLAIM THAT CAN BE
 EVIDENCED — NOT ASSERTED.
 

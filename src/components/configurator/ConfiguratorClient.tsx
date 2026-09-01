@@ -14,6 +14,7 @@
  */
 
 import { useMemo, useState } from "react";
+import RequestForm from "./RequestForm";
 import Image from "next/image";
 import { usePricingOverride } from "@/lib/configurator/usePricingOverride";
 import {
@@ -140,36 +141,6 @@ export default function ConfiguratorClient() {
       services: s.services.includes(id) ? s.services.filter((x) => x !== id) : [...s.services, id],
     }));
 
-  const mailBody = [
-    "Configuration",
-    "------------",
-    "Pods: " + sel.pods,
-    "Capacity: " + result.totalMw + " MW",
-    "Compute: " + (sel.includeCompute ? "PODOS-supplied (" + result.totalGpus + " GPUs)" : "Customer-furnished"),
-    "Cooling: " + sel.cooling,
-    "Power: " + sel.power,
-    "Network: " + sel.network,
-    "Support: " + sel.support,
-    "Services: " + (sel.services.join(", ") || "none"),
-    "Site power available: " + (sel.sitePowerMw || "not specified") + " MW",
-    "",
-    "Preliminary estimate: " + fmtCompact(result.low) + " - " + fmtCompact(result.high) + " one-time" +
-      (result.recurringPerYear ? ", " + fmtUSD(result.recurringPerYear) + "/yr support" : ""),
-    "",
-    "My details",
-    "----------",
-    "Name:",
-    "Company:",
-    "Site location:",
-    "Timeline:",
-    "",
-  ].join("\n");
-
-  const mailto =
-    "mailto:info@podosai.com?subject=" +
-    encodeURIComponent("PODOS deployment inquiry") +
-    "&body=" +
-    encodeURIComponent(mailBody);
 
   return (
     <div className="cfg-grid">
@@ -403,24 +374,25 @@ export default function ConfiguratorClient() {
               ))}
             </div>
           </details>
-
-          <a
-            href={mailto}
-            style={{
-              display: "block",
-              textAlign: "center",
-              marginTop: "1.3rem",
-              padding: "0.9rem 1rem",
-              borderRadius: 999,
-              background: "var(--ink)",
-              color: "#F3F6FA",
-              fontWeight: 600,
-              fontSize: 14.5,
-              textDecoration: "none",
+          <RequestForm
+            payload={{
+              config: {
+                pods: sel.pods,
+                capacityMw: result.totalMw,
+                gpus: result.totalGpus,
+                compute: sel.includeCompute ? "PODOS-supplied" : "Customer-furnished",
+                cooling: sel.cooling,
+                power: sel.power,
+                network: sel.network,
+                support: sel.support,
+                services: sel.services,
+                sitePowerMw: sel.sitePowerMw || null,
+              },
+              lowCents: Math.round(result.low * 100),
+              highCents: Math.round(result.high * 100),
+              recurringCents: Math.round(result.recurringPerYear * 100),
             }}
-          >
-            Request a deployment conversation →
-          </a>
+          />
 
           <p style={{ fontSize: 11, lineHeight: 1.55, color: "var(--ink-faint)", marginTop: "0.9rem" }}>
             Preliminary estimate for planning only — not a quote, offer, or

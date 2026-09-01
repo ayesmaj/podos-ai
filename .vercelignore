@@ -9,3 +9,6 @@
 /.claude
 *.psd
 *.aep
+
+# Confidential client decks — rendered locally, never served by the site.
+/decks
