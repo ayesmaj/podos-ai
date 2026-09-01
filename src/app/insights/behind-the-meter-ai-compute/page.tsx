@@ -678,7 +678,7 @@ export default function BehindTheMeterAiComputePage() {
               AI infrastructure glossary
             </Link>
             , and you can size an increment in the{" "}
-            <Link href="/configure" style={linkStyle}>
+            <Link href="/estimate" style={linkStyle}>
               configurator
             </Link>
             .
@@ -724,7 +724,7 @@ export default function BehindTheMeterAiComputePage() {
         title="Size the increment against"
         accent="your interconnection date"
         body="Bring the constraint the utility named, the delay you are actually trying to avoid, and the margin an idle megawatt is losing. Engineering will tell you which gate you fail first."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "Deployment model" }}
         field="insight"
       />

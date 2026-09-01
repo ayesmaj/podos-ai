@@ -58,6 +58,7 @@ const FAQ = [
 
 export default function PodosPodPage() {
   return (
+    <>
     <main style={{ background: "var(--paper)", color: "var(--ink-strong)" }}>
       <ProductJsonLd
         name="PODOS Pod"
@@ -362,5 +363,6 @@ export default function PodosPodPage() {
         </div>
       </section>
     </main>
+    </>
   );
 }

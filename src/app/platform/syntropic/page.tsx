@@ -171,6 +171,7 @@ const DESIGN_GOALS = [
 
 export default function SyntropicPage() {
   return (
+    <>
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
         headline="Syntropic: the AI inference-efficiency software layer"
@@ -725,5 +726,6 @@ export default function SyntropicPage() {
         </div>
       </section>
     </main>
+    </>
   );
 }

@@ -764,7 +764,7 @@ export default function CommissioningPage() {
         title="Write the commissioning script"
         accent="before the unit ships"
         body="Bring your site, your acceptance criteria, and your witness list. Engineering will map which levels the factory retires and which stay on your calendar."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "Deployment sequence" }}
         field="deploy"
       />

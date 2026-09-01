@@ -675,7 +675,7 @@ export default function MonitoringControlsPage() {
         title="Ask what a unit actually"
         accent="reports"
         body="Send the points you need visible and the systems they have to reach. Engineering will tell you what the instrumentation layer looks like on a pod-based build."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "See the deployment model" }}
         field="network"
       />

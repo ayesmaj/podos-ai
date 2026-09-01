@@ -656,7 +656,7 @@ export default function NetworkingFiberPage() {
         title="Bring the fabric design to"
         accent="your site"
         body="Send the workload mix, the carrier options, and the site constraints. Engineering will tell you what the network inside a pod-based build looks like there."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "See the deployment model" }}
         field="network"
       />

@@ -672,7 +672,7 @@ export default function SafetySecurityPage() {
         title="Bring the safety review to"
         accent="your jurisdiction"
         body="Send the site, the AHJ, and the battery question. Engineering will tell you what the detection, suppression, and access design looks like there."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "See the deployment model" }}
         field="safety"
       />

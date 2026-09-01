@@ -735,7 +735,7 @@ export default function AiDataCenterElectricityDemandPage() {
               glossary
             </Link>{" "}
             for terms, and{" "}
-            <Link href="/configure" style={linkStyle}>
+            <Link href="/estimate" style={linkStyle}>
               the configurator
             </Link>{" "}
             to turn a target load into a unit count.
@@ -784,7 +784,7 @@ export default function AiDataCenterElectricityDemandPage() {
         title="Turn a load target into"
         accent="a unit count"
         body="Bring the megawatts you can actually interconnect, not the terawatt-hours a national model projects. Engineering will size the rest."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/engineering", label: "Engineering index" }}
         field="insight"
       />

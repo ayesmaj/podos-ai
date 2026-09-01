@@ -1,6 +1,6 @@
 /**
  * configuratorPricing.ts — the single source of truth for every number
- * the /configure estimator shows.
+ * the /estimate estimator shows.
  *
  * STATUS: PRELIMINARY. These figures are placeholders chosen to be
  * order-of-magnitude defensible for modular AI infrastructure; they are

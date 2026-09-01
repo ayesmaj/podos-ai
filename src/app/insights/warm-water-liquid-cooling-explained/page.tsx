@@ -699,7 +699,7 @@ export default function WarmWaterLiquidCoolingInsightPage() {
         title="Set the coolant budget"
         accent="before you pick the site"
         body="Bring your target W-class, the site's design dry bulb, and the return temperature an off-taker would actually take. Engineering will tell you whether the compressor leaves."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/engineering", label: "Engineering index" }}
         field="insight"
       />

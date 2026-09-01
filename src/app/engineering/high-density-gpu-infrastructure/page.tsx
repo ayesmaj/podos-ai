@@ -701,7 +701,7 @@ export default function HighDensityGpuInfrastructurePage() {
         title="Bring your density target to"
         accent="engineering"
         body="Send the sustained rack load, the building constraints, and the growth increment. Engineering will tell you what a pod-based build looks like there."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "See the deployment model" }}
         field="power"
       />

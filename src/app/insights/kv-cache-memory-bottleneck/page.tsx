@@ -546,7 +546,7 @@ export default function KvCacheMemoryBottleneckPage() {
             and <span data-claim="pod-gpu-capacity">designed for 128 GPUs</span> — a unit sized so
             that power, cooling and the accelerator domain scale together rather than being
             renegotiated per site. To sketch capacity against your own workload, start with the{" "}
-            <Link href="/configure" style={link}>
+            <Link href="/estimate" style={link}>
               configurator
             </Link>
             ; unfamiliar terms are defined in the{" "}
@@ -611,7 +611,7 @@ export default function KvCacheMemoryBottleneckPage() {
         title="Bring your own"
         accent="token budget"
         body="Send the model shape, the context window, and the concurrency you need to serve. Engineering will work the memory arithmetic back to a unit count."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/engineering", label: "See the engineering" }}
         field="insight"
       />

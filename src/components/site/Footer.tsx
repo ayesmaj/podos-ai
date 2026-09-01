@@ -84,7 +84,7 @@ export default function Footer() {
           <div className={styles.footerColTitle}>Explore</div>
           <ul className={styles.footerLinks}>
             {PRICING.approved && (
-              <li><a className={styles.footerLink} href="/configure">Estimator</a></li>
+              <li><a className={styles.footerLink} href="/estimate">Estimate</a></li>
             )}
             <li><a className={styles.footerLink} href="/platform">Platform</a></li>
             <li><a className={styles.footerLink} href="/platform/podos-pod">PODOS Pod</a></li>

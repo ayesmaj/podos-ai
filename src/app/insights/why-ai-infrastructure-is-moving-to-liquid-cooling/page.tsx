@@ -569,7 +569,7 @@ export default function LiquidCoolingInsightPage() {
         title="Run the numbers against"
         accent="your density target"
         body="Bring the rack load, the geometry, and the site elevation. Engineering will tell you where the fan curve puts you."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/engineering", label: "Engineering index" }}
         field="insight"
       />

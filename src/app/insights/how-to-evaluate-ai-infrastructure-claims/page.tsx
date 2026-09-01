@@ -732,7 +732,7 @@ export default function EvaluateAiInfrastructureClaimsPage() {
               modular versus traditional AI data centers
             </Link>{" "}
             covers the differences this keeps surfacing. To size a configuration first, use the{" "}
-            <Link href="/configure" style={linkStyle}>
+            <Link href="/estimate" style={linkStyle}>
               configurator
             </Link>
             .
@@ -778,7 +778,7 @@ export default function EvaluateAiInfrastructureClaimsPage() {
         title="Send us the checklist and"
         accent="hold us to it"
         body="Bring the eight domains to the first call. Engineering will answer the rows it can and mark the rest unanswered."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy/site-power-readiness", label: "Site power readiness" }}
         field="insight"
       />

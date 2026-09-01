@@ -635,7 +635,7 @@ export default function DeployPage() {
         title="Start where the schedule actually"
         accent="starts"
         body="Power availability, permitting, and access decide the calendar before a unit is ordered. Stage one is the assessment that tells you whether the rest of the schedule is real."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy/site-power-readiness", label: "Site & power readiness" }}
         field="deploy"
       />

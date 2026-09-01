@@ -65,7 +65,7 @@ const SITE_NAV: NavItem[] = [
   { label: "Deploy", href: "#deployment" },
   { label: "Use Cases", href: "#use-cases" },
   { label: "Engineering", href: "#design" },
-  ...(PRICING.approved ? [{ label: "Estimator", href: "/configure" }] : []),
+  ...(PRICING.approved ? [{ label: "Estimate", href: "/estimate" }] : []),
   { label: "Invest", href: "/invest" },
   { label: "Contact", href: "#access" },
 ];

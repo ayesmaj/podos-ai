@@ -573,7 +573,7 @@ export default function ThermalEnclosurePage() {
         title="Bring your site conditions to"
         accent="engineering"
         body="Send the climate, the exposure, and the service constraints. Engineering will tell you what the envelope has to be at that site."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "See the deployment model" }}
         field="cooling"
       />

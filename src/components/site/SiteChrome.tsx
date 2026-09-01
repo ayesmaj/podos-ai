@@ -36,7 +36,7 @@ const ROUTE_NAV: NavItem[] = [
   { label: "Use Cases", href: "/use-cases" },
   // Estimator appears only once a founder-approved price book exists —
   // same gate as the footer and the sitemap. See configuratorPricing.ts.
-  ...(PRICING.approved ? [{ label: "Estimator", href: "/configure" }] : []),
+  ...(PRICING.approved ? [{ label: "Estimator", href: "/estimate" }] : []),
   { label: "Invest", href: "/invest" },
   { label: "Contact", href: "/#access" },
 ];

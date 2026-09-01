@@ -847,7 +847,7 @@ export default function GlossaryPage() {
         accent="check the site"
         body="PODOS AI builds factory-built modular AI compute infrastructure."
         primary={{ href: "/resources/data-center-readiness-checklist", label: "Open the readiness checklist" }}
-        secondary={{ href: "/configure", label: "Configure a build" }}
+        secondary={{ href: "/estimate", label: "Size your deployment" }}
         field="blueprint"
       />
     </main>

@@ -510,7 +510,7 @@ export default function ModularVsTraditionalPage() {
         title="Run this comparison against"
         accent="your actual site"
         body="Bring the parcel, the power path, and the density target. If the traditional-wins rows describe your project, engineering will say so."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "Deployment model" }}
         field="compare"
       />

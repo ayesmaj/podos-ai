@@ -1,5 +1,5 @@
 /**
- * /configure — the PODOS estimator.
+ * /estimate — the PODOS estimator.
  *
  * Server shell (crawlable copy, metadata, breadcrumbs, JSON-LD) wrapping
  * the interactive ConfiguratorClient island. Capacity figures come from
@@ -24,22 +24,23 @@ import { PRICING } from "@/data/configuratorPricing";
  */
 export const metadata: Metadata = {
   ...buildMetadata({
-    title: "PODOS Estimator: Configure Modular AI Infrastructure",
+    title: "Modular AI Infrastructure Cost Estimate | PODOS AI",
     description:
       "Size a modular AI deployment: choose pod count, cooling, power, and network, and see capacity plus a preliminary cost estimate for planning.",
-    path: "/configure",
+    path: "/estimate",
   }),
   ...(PRICING.approved ? {} : { robots: { index: false, follow: false } }),
 };
 
-export default function ConfigurePage() {
+export default function EstimatePage() {
   return (
+    <>
     <main className="pageOverlay" style={{ marginTop: 0, borderRadius: 0, boxShadow: "none", background: "var(--paper)" }}>
       <div className="container-site" style={{ paddingBlock: "clamp(88px, 10vw, 128px)" }}>
         <Breadcrumbs
           crumbs={[
             { name: "Home", path: "/" },
-            { name: "Estimator", path: "/configure" },
+            { name: "Estimate", path: "/estimate" },
           ]}
         />
 
@@ -53,7 +54,7 @@ export default function ConfigurePage() {
             marginTop: "1.6rem",
           }}
         >
-          CFG-01 · Estimator
+          EST-01 · Estimate
         </p>
 
         <h1
@@ -172,5 +173,6 @@ export default function ConfigurePage() {
         </section>
       </div>
     </main>
+    </>
   );
 }

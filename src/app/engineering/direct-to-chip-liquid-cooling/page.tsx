@@ -499,7 +499,7 @@ export default function DirectToChipLiquidCoolingPage() {
         title="Bring the cooling design to"
         accent="your site"
         body="Send the rack density, the water story, and the site constraints. Engineering will tell you what a pod-based loop looks like there."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "See the deployment model" }}
         field="cooling"
       />

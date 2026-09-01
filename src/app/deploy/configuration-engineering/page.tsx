@@ -616,7 +616,7 @@ export default function ConfigurationEngineeringPage() {
           </p>
           <p>
             To work the axes above as a live selection, use the{" "}
-            <Link href="/configure" style={link}>
+            <Link href="/estimate" style={link}>
               configurator
             </Link>
             . It walks the same order — profile, accelerators, density, cooling, site interfaces —
@@ -675,7 +675,7 @@ export default function ConfigurationEngineeringPage() {
         title="Work the six axes as a"
         accent="live selection"
         body="Start from the workload profile and let each axis constrain the next. The configurator produces the outline a configuration freeze is written from."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "See the deployment model" }}
         field="deploy"
       />

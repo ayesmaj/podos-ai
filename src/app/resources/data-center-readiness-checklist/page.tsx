@@ -702,7 +702,7 @@ export default function DataCenterReadinessChecklistPage() {
         title="Score a site against"
         accent="a known unit load"
         body="Bring the energization date, the heat-rejection method, and the transport route survey. The configurator walks the same variables an engineering review would."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "Deployment model" }}
         field="deploy"
       />

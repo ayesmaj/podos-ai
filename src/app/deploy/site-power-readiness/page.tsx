@@ -633,7 +633,7 @@ export default function SitePowerReadinessPage() {
         title="Bring us a site and"
         accent="a date"
         body="Stage one is cheap and reversible. Send the service capacity, the access route, and the jurisdiction, and engineering will tell you which of the eight categories needs work."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "Deployment overview" }}
         field="deploy"
       />

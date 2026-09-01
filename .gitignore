@@ -77,3 +77,9 @@ public/Meshy_AI_PODOS_Solar_Freight_C_0507220136_texture.glb
 *.mp4.bak
 public/use-cases/helicopter.mov
 public/problem-bg.mp4
+
+# Loose source videos at repo root (hundreds of MB; GitHub rejects >100MB).
+# Production transcodes live in /public/videos/.
+/PODOS_AI_infrastructure_*.mp4
+/podos ai video*.mp4
+/podos video investors.mp4

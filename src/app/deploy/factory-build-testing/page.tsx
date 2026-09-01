@@ -727,7 +727,7 @@ export default function FactoryBuildTestingPage() {
         title="Witness the test that releases"
         accent="your unit"
         body="Bring the configuration and the site constraints. Engineering will walk the build sequence, the hold points, and the FAT procedure line by line."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "Deployment model" }}
         field="deploy"
       />

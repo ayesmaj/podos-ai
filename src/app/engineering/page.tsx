@@ -573,7 +573,7 @@ export default function EngineeringHub() {
         title="Bring the seven domains to"
         accent="your site"
         body="Send the load, the site, and the constraint that worries you most. Engineering will tell you which domain decides your build."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "See the deployment model" }}
         field="blueprint"
       />

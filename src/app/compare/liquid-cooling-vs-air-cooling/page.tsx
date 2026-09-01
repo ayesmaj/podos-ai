@@ -591,7 +591,7 @@ export default function LiquidVsAirCoolingPage() {
         title="Bring your density target and"
         accent="we will tell you which side wins"
         body="Rack load, hall condition, climate, and remaining lease. Engineering will say where the crossover sits for your site — including when it does not sit anywhere yet."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/engineering", label: "Engineering index" }}
         field="compare"
       />

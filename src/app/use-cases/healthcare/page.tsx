@@ -595,7 +595,7 @@ export default function HealthcareUseCasePage() {
         title="Size it against"
         accent="your campus"
         body="Bring the archive, the governance answers, and the pad. The configurator walks the same variables an engineering review would."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "Deployment model" }}
         field="safety"
       />

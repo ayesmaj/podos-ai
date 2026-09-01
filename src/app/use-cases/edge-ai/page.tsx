@@ -602,7 +602,7 @@ export default function EdgeAiUseCasePage() {
         title="Survey the site before"
         accent="you specify the hardware"
         body="Bring the firm capacity, the uplink, the climate design day, and the road route. The configurator walks the same variables an engineering review would."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/resources/data-center-readiness-checklist", label: "Readiness checklist" }}
         field="deploy"
       />

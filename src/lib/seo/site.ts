@@ -38,7 +38,7 @@ export const INDEXABLE_ROUTES: IndexableRoute[] = [
   // configuratorPricing.ts. Until then the estimator quotes placeholder
   // figures and must not be crawled, ranked, or linked from navigation.
   ...(PRICING.approved
-    ? [{ path: "/configure", changeFrequency: "monthly", priority: 0.9, cluster: "core" } as IndexableRoute]
+    ? [{ path: "/estimate", changeFrequency: "monthly", priority: 0.9, cluster: "core" } as IndexableRoute]
     : []),
   { path: "/", changeFrequency: "weekly", priority: 1, cluster: "core" },
   { path: "/invest", changeFrequency: "weekly", priority: 0.9, cluster: "invest" },

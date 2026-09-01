@@ -1,5 +1,5 @@
 /**
- * /admin/pricing — founder price controls for the /configure estimator.
+ * /admin/pricing — founder price controls for the /estimate estimator.
  *
  * noindex + nofollow: internal tool, never a search result.
  *

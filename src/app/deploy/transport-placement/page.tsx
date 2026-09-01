@@ -559,7 +559,7 @@ export default function TransportPlacementPage() {
                 factory-built versus site-built comparison
               </Link>{" "}
               sets out the tradeoffs; to size a configuration before a site visit, use the{" "}
-              <Link href="/configure" style={link}>
+              <Link href="/estimate" style={link}>
                 configurator
               </Link>
               ; and any unfamiliar term here is defined in the{" "}
@@ -674,7 +674,7 @@ export default function TransportPlacementPage() {
         title="Survey the route before"
         accent="you pour the pad"
         body="Bring the access route, the pad drawing, and the interface positions. Sizing a configuration first makes the freight envelope a known quantity rather than a late surprise."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy/commissioning", label: "Next: commissioning" }}
         field="deploy"
       />

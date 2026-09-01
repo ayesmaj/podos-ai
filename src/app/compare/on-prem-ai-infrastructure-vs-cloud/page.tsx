@@ -681,7 +681,7 @@ export default function OnPremVsCloudPage() {
         title="Bring your duty cycle."
         accent="We will tell you which side you are on."
         body="If sustained utilization does not clear the break-even, the honest answer is cloud — and you will hear it from us."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/platform", label: "Platform overview" }}
         field="compare"
       />

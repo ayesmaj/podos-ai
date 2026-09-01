@@ -562,7 +562,7 @@ export default function DataCenterPowerArchitecturePage() {
         title="Size the power chain for"
         accent="your site"
         body="Send the interconnection status, the service class, and the capacity you can actually get delivered. Engineering will tell you what a pod-based block looks like there."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "See the deployment model" }}
         field="power"
       />

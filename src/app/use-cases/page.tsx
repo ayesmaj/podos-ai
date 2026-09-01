@@ -679,7 +679,7 @@ export default function UseCasesPage() {
         title="Test your profile against"
         accent="a real configuration"
         body="Bring the utilization curve, the binding constraint, and the power path. The configurator walks the same variables an engineering review would."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "See the deployment process" }}
         field="deploy"
       />

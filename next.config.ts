@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
       { pathname: "/**", search: "" },
     ],
   },
+  async redirects() {
+    return [
+      // The estimator shipped briefly at /configure and was registered in the
+      // sitemap under that path. Permanent so any indexed URL or bookmark
+      // consolidates onto /estimate rather than 404ing.
+      { source: "/configure", destination: "/estimate", permanent: true },
+    ];
+  },
   // Turbopack is default in Next.js 16; empty config silences the warning
   turbopack: {
     // Anchor workspace root to this project, not the parent directory

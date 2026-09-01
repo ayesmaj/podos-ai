@@ -680,7 +680,7 @@ export default function FactoryBuiltVsSiteBuiltPage() {
         title="Test the method against"
         accent="your critical path"
         body="Bring the site, the schedule, and the route to the pad. If the checklist points to site-built, we would rather say so before a kickoff meeting."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "Deployment sequence" }}
         field="compare"
       />

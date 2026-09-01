@@ -797,7 +797,7 @@ export default function ClosedLoopCoolingWaterPage() {
         title="Bring your grid, your basin, and"
         accent="your rejection stage"
         body="Engineering will run the break-even against your balancing authority's water intensity before anything is specified."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/engineering", label: "Engineering index" }}
         field="insight"
       />

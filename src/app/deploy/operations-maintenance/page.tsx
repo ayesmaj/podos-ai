@@ -645,7 +645,7 @@ export default function OperationsMaintenancePage() {
         title="Design the operating model"
         accent="before the unit ships"
         body="Bring the response window, the spares posture, and the refresh horizon. The configurator walks the same variables an engineering review would."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/deploy", label: "Back to deployment" }}
         field="deploy"
       />

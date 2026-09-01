@@ -595,7 +595,7 @@ export default function UniversitiesResearchUseCasePage() {
         title="Size it against"
         accent="your campus"
         body="Bring the campus electrical study, the siting constraint, and the award period. The configurator walks the same variables a facilities review would."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/use-cases", label: "Other verticals" }}
         field="network"
       />

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * ConfiguratorClient — the interactive estimator island for /configure.
+ * ConfiguratorClient — the interactive estimator island for /estimate.
  *
  * Left: configuration controls. Right: sticky live summary with capacity
  * (from the approved claims register) and a PRELIMINARY price RANGE.

@@ -595,7 +595,7 @@ export default function DataCenterHeatRecoveryPage() {
         title="Bring the off-taker into"
         accent="the design"
         body="Send the site, the loop temperature you can hold, and the load you would like to heat. Engineering will tell you what a pod-based loop can hand across the boundary."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/engineering", label: "Engineering index" }}
         field="cooling"
       />

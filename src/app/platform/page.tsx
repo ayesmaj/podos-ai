@@ -168,6 +168,7 @@ const tdStyle: CSSProperties = {
 
 export default function PlatformPage() {
   return (
+    <>
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
         headline="The modular AI data center, delivered as one platform"
@@ -623,5 +624,6 @@ export default function PlatformPage() {
         <EvidenceSourceRail sources={SOURCES} />
       </section>
     </main>
+    </>
   );
 }

@@ -460,7 +460,7 @@ export default function EnterpriseAiUseCasePage() {
             PODOS AI is an early-stage company. Nothing here describes a completed deployment, a
             customer, or a certified product; the profile above is design intent. To size a
             configuration against a specific site, the{" "}
-            <Link href="/configure" style={link}>
+            <Link href="/estimate" style={link}>
               configurator
             </Link>{" "}
             walks the same variables.
@@ -493,7 +493,7 @@ export default function EnterpriseAiUseCasePage() {
         title="Size it against"
         accent="your site"
         body="Bring the utilization curve, the residency requirement, and the power path. The configurator walks the same variables an engineering review would."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/use-cases", label: "Other verticals" }}
         field="deploy"
       />

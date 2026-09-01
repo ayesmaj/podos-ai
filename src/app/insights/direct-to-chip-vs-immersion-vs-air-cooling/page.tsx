@@ -723,7 +723,7 @@ export default function CoolingComparisonInsightPage() {
         title="Find out which constraint binds on"
         accent="your site"
         body="Bring the rack load, the delivery method, and the floor plan. Engineering will tell you which row of the matrix you are actually standing on."
-        primary={{ href: "/configure", label: "Configure a build" }}
+        primary={{ href: "/estimate", label: "Size your deployment" }}
         secondary={{ href: "/engineering", label: "Engineering index" }}
         field="insight"
       />
