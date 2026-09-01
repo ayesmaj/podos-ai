@@ -11,6 +11,8 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
@@ -171,6 +173,8 @@ const DESIGN_GOALS = [
 
 export default function SyntropicPage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
         headline="Syntropic: the AI inference-efficiency software layer"
@@ -725,5 +729,7 @@ export default function SyntropicPage() {
         </div>
       </section>
     </main>
+      <Footer />
+    </>
   );
 }

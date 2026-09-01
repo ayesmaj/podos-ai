@@ -12,6 +12,8 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
@@ -307,6 +309,8 @@ const LIMITATIONS = [
 
 export default function NetworkingFiberPage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
         headline="Networking and fiber in an AI data center"
@@ -659,5 +663,7 @@ export default function NetworkingFiberPage() {
         </div>
       </article>
     </main>
+      <Footer />
+    </>
   );
 }

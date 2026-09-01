@@ -11,6 +11,8 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
@@ -168,6 +170,8 @@ const tdStyle: CSSProperties = {
 
 export default function PlatformPage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
         headline="The modular AI data center, delivered as one platform"
@@ -623,5 +627,7 @@ export default function PlatformPage() {
         <EvidenceSourceRail sources={SOURCES} />
       </section>
     </main>
+      <Footer />
+    </>
   );
 }

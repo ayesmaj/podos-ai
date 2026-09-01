@@ -17,6 +17,8 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
@@ -328,6 +330,8 @@ const CHECKLIST: { n: string; q: string; leans: string }[] = [
 /* ================================================================== */
 export default function FactoryBuiltVsSiteBuiltPage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)", color: "var(--ink-strong)" }}>
       <TechArticleJsonLd
         headline={TITLE}
@@ -757,5 +761,7 @@ export default function FactoryBuiltVsSiteBuiltPage() {
         <EvidenceSourceRail sources={SOURCES} />
       </article>
     </main>
+      <Footer />
+    </>
   );
 }

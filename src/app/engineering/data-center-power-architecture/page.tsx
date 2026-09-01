@@ -16,6 +16,8 @@ import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/Evidence
 import LastVerified from "@/components/seo/LastVerified";
 import SeoImage from "@/components/seo/SeoImage";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 
 const PATH = "/engineering/data-center-power-architecture";
 const TITLE = "AI Data Center Power Architecture: Utility to Rack | PODOS";
@@ -217,6 +219,8 @@ export default function DataCenterPowerArchitecturePage() {
   ];
 
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)", overflowX: "clip" }}>
       <TechArticleJsonLd
         headline="Data center power architecture for AI workloads"
@@ -607,5 +611,7 @@ export default function DataCenterPowerArchitecturePage() {
         </nav>
       </article>
     </main>
+      <Footer />
+    </>
   );
 }

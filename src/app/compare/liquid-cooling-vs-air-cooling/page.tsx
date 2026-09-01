@@ -15,6 +15,8 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
@@ -298,6 +300,8 @@ const linkStyle: CSSProperties = {
 
 export default function LiquidVsAirCoolingPage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
         headline="Liquid cooling vs air cooling for AI data centers"
@@ -599,5 +603,7 @@ export default function LiquidVsAirCoolingPage() {
         </div>
       </article>
     </main>
+      <Footer />
+    </>
   );
 }

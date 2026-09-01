@@ -10,6 +10,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import ConfiguratorClient from "@/components/configurator/ConfiguratorClient";
 import { ESTIMATOR_HERO } from "@/data/configuratorOptionImages";
@@ -23,6 +25,8 @@ export const metadata: Metadata = buildMetadata({
 
 export default function EstimatePage() {
   return (
+    <>
+      <SiteHeader />
     <main className="pageOverlay" style={{ marginTop: 0, borderRadius: 0, boxShadow: "none", background: "var(--paper)" }}>
       <div className="container-site" style={{ paddingBlock: "clamp(88px, 10vw, 128px)" }}>
         <Breadcrumbs
@@ -161,5 +165,7 @@ export default function EstimatePage() {
         </section>
       </div>
     </main>
+      <Footer />
+    </>
   );
 }

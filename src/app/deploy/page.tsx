@@ -6,6 +6,7 @@ import { FAQJsonLd, TechArticleJsonLd } from "@/components/seo/jsonld";
 import LastVerified from "@/components/seo/LastVerified";
 import SeoImage from "@/components/seo/SeoImage";
 import Footer from "@/components/site/Footer";
+import SiteHeader from "@/components/site/SiteHeader";
 import { buildMetadata } from "@/lib/seo/metadata";
 
 /**
@@ -231,6 +232,8 @@ export default function DeployPage() {
         authorName="Josef Elimelech"
       />
       <FAQJsonLd items={FAQ_ITEMS} />
+
+      <SiteHeader />
 
       <main style={{ background: "var(--paper)", color: "var(--ink-strong)" }}>
         {/* ---- Compact hero ---- */}

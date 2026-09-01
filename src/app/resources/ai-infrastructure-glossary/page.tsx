@@ -12,6 +12,8 @@
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
@@ -529,6 +531,8 @@ const h2Style: CSSProperties = {
 
 export default function GlossaryPage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
         headline="AI infrastructure glossary"
@@ -822,5 +826,7 @@ export default function GlossaryPage() {
         </div>
       </section>
     </main>
+      <Footer />
+    </>
   );
 }

@@ -14,6 +14,8 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
@@ -303,6 +305,8 @@ const link: CSSProperties = { color: "var(--brand-deep)", textDecoration: "under
 
 export default function OnPremVsCloudPage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
         headline="On-prem AI infrastructure vs cloud"
@@ -708,5 +712,7 @@ export default function OnPremVsCloudPage() {
         </div>
       </article>
     </main>
+      <Footer />
+    </>
   );
 }

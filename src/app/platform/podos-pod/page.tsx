@@ -15,6 +15,8 @@ import Link from "next/link";
 import styles from "@/components/site/NewSections.module.css";
 import SeoImage from "@/components/seo/SeoImage";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { ProductJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
@@ -58,6 +60,8 @@ const FAQ = [
 
 export default function PodosPodPage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)", color: "var(--ink-strong)" }}>
       <ProductJsonLd
         name="PODOS Pod"
@@ -362,5 +366,7 @@ export default function PodosPodPage() {
         </div>
       </section>
     </main>
+      <Footer />
+    </>
   );
 }

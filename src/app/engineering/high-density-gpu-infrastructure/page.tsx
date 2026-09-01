@@ -11,6 +11,8 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
@@ -307,6 +309,8 @@ const LIMITS = [
 
 export default function HighDensityGpuInfrastructurePage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
         headline="High-density GPU infrastructure, rack by rack"
@@ -666,5 +670,7 @@ export default function HighDensityGpuInfrastructurePage() {
         </div>
       </article>
     </main>
+      <Footer />
+    </>
   );
 }

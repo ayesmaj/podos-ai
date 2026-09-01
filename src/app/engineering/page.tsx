@@ -23,6 +23,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { TechArticleJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
@@ -181,6 +183,8 @@ const iconProps = { strokeWidth: 1.5, className: "shrink-0", size: 26, color: "v
 
 export default function EngineeringHub() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)", color: "var(--ink-strong)" }}>
       <TechArticleJsonLd
         headline="AI data-center engineering: cooling, power, density, and the envelope"
@@ -638,5 +642,7 @@ export default function EngineeringHub() {
         </div>
       </section>
     </main>
+      <Footer />
+    </>
   );
 }

@@ -12,6 +12,8 @@
 
 import Link from "next/link";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import SeoImage from "@/components/seo/SeoImage";
 import { TechArticleJsonLd, FAQJsonLd } from "@/components/seo/jsonld";
@@ -206,6 +208,8 @@ function VerdictCard({ code, title, body }: { code: string; title: string; body:
 /* ================================================================== */
 export default function ModularVsTraditionalPage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)", color: "var(--ink-strong)" }}>
       <TechArticleJsonLd
         headline={TITLE}
@@ -704,5 +708,7 @@ export default function ModularVsTraditionalPage() {
         </div>
       </section>
     </main>
+      <Footer />
+    </>
   );
 }

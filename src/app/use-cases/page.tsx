@@ -20,6 +20,8 @@ import { TechArticleJsonLd } from "@/components/seo/jsonld";
 import { EvidenceSourceRail, Cite, type Source } from "@/components/seo/EvidenceSource";
 import LastVerified from "@/components/seo/LastVerified";
 import { buildMetadata } from "@/lib/seo/metadata";
+import SiteHeader from "@/components/site/SiteHeader";
+import Footer from "@/components/site/Footer";
 
 export const metadata: Metadata = buildMetadata({
   title: "Modular AI Data Center Use Cases: Fit and Limits — PODOS AI",
@@ -187,6 +189,8 @@ const FIT_ROWS = [
 
 export default function UseCasesPage() {
   return (
+    <>
+      <SiteHeader />
     <main style={{ background: "var(--paper)" }}>
       <TechArticleJsonLd
         headline="Modular AI Data Center Use Cases: Fit and Limits"
@@ -648,5 +652,7 @@ export default function UseCasesPage() {
         </div>
       </section>
     </main>
+      <Footer />
+    </>
   );
 }
