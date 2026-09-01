@@ -80,7 +80,7 @@ export default function AccessForm({
         setPhase("code");
         return;
       }
-      router.replace(`/proposal/${json.id}`);
+      router.replace(`/client/proposals/${json.id}`);
     } catch {
       setError("Network problem — try again.");
       setPhase("code");

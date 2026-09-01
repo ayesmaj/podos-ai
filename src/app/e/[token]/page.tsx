@@ -1,183 +1,172 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { invitationStatus } from "@/lib/proposals/access";
 import { getEstimateByToken, usd } from "@/lib/estimates/store";
+import AccessForm from "./AccessForm";
 
 /**
- * /e/[token] — a private, per-client estimate.
+ * /e/[token] — the unified secure entry (docs/estimator/03-ROUTE-ARCHITECTURE).
  *
- * Reachable only by its secret link: a 256-bit token, stored server-side as a
- * SHA-256 hash. Unknown, revoked and expired tokens all render the same 404, so
- * the page cannot be used to probe for valid links.
- *
- * Never indexed, never cached, never in the sitemap (master brief §23/§26).
- * Opening the page records a view, which is what powers the "viewed 3x" column
- * on the staff side.
+ * Dual lookup, invitation-first:
+ *  1. proposal_invitations — the canonical per-recipient invitation. Renders
+ *     the Step-00 access screen (masked email, OTP or email-confirm) which
+ *     exchanges the token for an HttpOnly session and moves to the clean
+ *     /client/proposals/[publicId] route.
+ *  2. legacy estimates.token_hash — the retired link-possession tier. Old
+ *     links keep working during migration (rendered read-only, logged as
+ *     'legacy_link_used' via the view tracking) until the founder rotates or
+ *     revokes them (09-BUSINESS-DATA founder decisions).
+ * Unknown/revoked/expired of EITHER kind render one identical screen.
  */
 
 export const metadata: Metadata = {
-  title: "Your PODOS estimate",
+  title: "Secure access | PODOS AI",
   robots: { index: false, follow: false, nocache: true },
 };
-
-// Every request must hit the database: the view counter has to increment, and a
-// commercial document must never be served from a shared cache.
 export const dynamic = "force-dynamic";
 
-function StatusPill({ status }: { status: string }) {
-  const tone =
-    status === "signed"
-      ? { bg: "rgba(34,197,94,0.10)", bd: "rgba(34,197,94,0.45)", fg: "#15803D" }
-      : status === "viewed"
-        ? { bg: "rgba(34,211,238,0.10)", bd: "rgba(34,211,238,0.45)", fg: "var(--cyan-deep)" }
-        : { bg: "var(--glass-bg-strong)", bd: "var(--edge-bright)", fg: "var(--ink-dim)" };
+const mono: React.CSSProperties = {
+  fontSize: 11,
+  letterSpacing: "0.16em",
+  textTransform: "uppercase",
+  color: "var(--ink-faint)",
+};
+
+function Shell({ children, wide }: { children: React.ReactNode; wide?: boolean }) {
   return (
-    <span
+    <main
       style={{
-        fontFamily: "var(--font-mono)",
-        fontSize: 11,
-        letterSpacing: "0.12em",
-        textTransform: "uppercase",
-        padding: "0.25rem 0.6rem",
-        borderRadius: 999,
-        background: tone.bg,
-        border: `1px solid ${tone.bd}`,
-        color: tone.fg,
+        background: "var(--paper)",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: wide ? "flex-start" : "center",
+        justifyContent: "center",
+        padding: "clamp(40px, 8vw, 96px) 1.25rem",
       }}
     >
-      {status}
-    </span>
+      <div
+        style={{
+          width: "100%",
+          maxWidth: wide ? 880 : 460,
+          border: "1px solid var(--edge)",
+          borderRadius: 16,
+          background: "var(--panel)",
+          padding: "2rem",
+          boxShadow: "0 1px 2px rgba(15,23,42,.04), 0 24px 60px -30px rgba(15,23,42,.25)",
+        }}
+      >
+        {children}
+      </div>
+    </main>
   );
 }
 
-export default async function ClientEstimatePage({
+export default async function SecureEntry({
   params,
 }: {
-  // Next 16: params is a Promise and must be awaited.
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
 
+  // ---- 1. invitation tier (canonical) ----
+  const invite = await invitationStatus(token);
+  if (invite?.ok) {
+    return (
+      <Shell>
+        <p style={{ ...mono, color: "var(--brand)" }}>PODOS · Secure access</p>
+        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, marginTop: 10, color: "var(--ink-strong)" }}>
+          Private proposal{invite.company ? ` for ${invite.company}` : ""}
+        </h1>
+        <p style={{ color: "var(--ink-dim)", fontSize: 14, lineHeight: 1.6, marginTop: 10 }}>
+          This workspace is confidential and prepared for the authorized recipient{" "}
+          <strong style={{ color: "var(--ink-strong)" }}>{invite.masked_email}</strong>.
+          {invite.access_policy === "otp"
+            ? " We will email a six-digit code to that address to verify it is you."
+            : " Confirm the authorized email address to continue."}
+        </p>
+        <AccessForm token={token} policy={invite.access_policy} maskedEmail={invite.masked_email} />
+        <p style={{ ...mono, marginTop: "1.6rem", lineHeight: 1.7 }}>
+          Confidential — do not forward. Access is recorded.
+        </p>
+      </Shell>
+    );
+  }
+
+  // ---- 2. legacy link-possession tier (migration window) ----
   const h = await headers();
-  const estimate = await getEstimateByToken(token, {
-    userAgent: h.get("user-agent"),
+  const legacy = await getEstimateByToken(token, {
+    userAgent: `legacy-link ${h.get("user-agent") ?? ""}`.slice(0, 380),
     referrer: h.get("referer"),
   });
-
-  // One response for missing, revoked and expired alike — no information leak.
-  if (!estimate) notFound();
-
-  const mono: React.CSSProperties = {
-    fontFamily: "var(--font-mono)",
-    fontSize: 11,
-    letterSpacing: "0.14em",
-    textTransform: "uppercase",
-    color: "var(--ink-faint)",
-  };
-  const expires = estimate.expires_at ? new Date(estimate.expires_at) : null;
-
-  return (
-    <main style={{ background: "var(--paper)", minHeight: "100vh" }}>
-      <div className="container-site" style={{ paddingBlock: "clamp(48px, 8vw, 96px)", maxWidth: 900 }}>
-        <p style={mono}>
-          {estimate.estimate_no} · Prepared for {estimate.client_name}
-          {estimate.company ? ` · ${estimate.company}` : ""}
+  if (legacy) {
+    const expires = legacy.expires_at ? new Date(legacy.expires_at) : null;
+    return (
+      <Shell wide>
+        <p style={{ ...mono, color: "var(--brand)" }}>
+          {legacy.estimate_no} · Prepared for {legacy.client_name}
+          {legacy.company ? ` · ${legacy.company}` : ""}
         </p>
-
-        <h1 className="t-headline" style={{ marginTop: "0.8rem", maxWidth: "18ch" }}>
-          {estimate.project_name ?? "Your PODOS deployment estimate"}
+        <h1 className="t-headline" style={{ marginTop: "0.6rem" }}>
+          {legacy.project_name ?? "Your PODOS estimate"}
         </h1>
-
-        <div style={{ display: "flex", gap: "0.6rem", alignItems: "center", marginTop: "1rem", flexWrap: "wrap" }}>
-          <StatusPill status={estimate.status} />
-          <span style={mono}>Viewed {estimate.view_count}×</span>
-          {expires && <span style={mono}>Valid until {expires.toLocaleDateString("en-US")}</span>}
-        </div>
-
-        {/* ---- the numbers ---- */}
-        <section
-          style={{
-            marginTop: "2.4rem",
-            border: "1px solid var(--edge)",
-            borderRadius: 14,
-            background: "var(--panel)",
-            padding: "1.6rem",
-            boxShadow: "0 1px 2px rgba(15,23,42,.04), 0 18px 50px -30px rgba(15,23,42,.25)",
-          }}
-        >
-          <p style={mono}>Preliminary estimate</p>
-          <p
-            style={{
-              // Geist display, not mono: mono is this site's data face for small
-              // readouts and codes. The headline figure is a statement number,
-              // so it uses the same treatment as the site's giant stats
-              // (.t-number) — display weight with tabular figures so the digits
-              // still align.
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(2rem, 5vw, 3.1rem)",
-              fontWeight: 800,
-              letterSpacing: "-0.04em",
-              color: "var(--ink-strong)",
-              marginTop: "0.4rem",
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {usd(estimate.one_time_low_cents)} – {usd(estimate.one_time_high_cents)}
-          </p>
-          {estimate.recurring_cents > 0 && (
-            <p style={{ fontSize: 14, color: "var(--ink-dim)", marginTop: "0.5rem" }}>
-              + {usd(estimate.recurring_cents)} / year support
-            </p>
-          )}
-
-          {estimate.line_items?.length > 0 && (
-            <div style={{ marginTop: "1.4rem", borderTop: "1px solid var(--edge)", paddingTop: "1rem" }}>
-              <p style={mono}>Line items</p>
-              <div style={{ display: "grid", gap: "0.4rem", marginTop: "0.7rem" }}>
-                {estimate.line_items.map((li, i) => (
-                  <div
-                    key={`${li.label}-${i}`}
-                    style={{ display: "flex", justifyContent: "space-between", gap: "1rem", fontSize: 13.5 }}
-                  >
-                    <span style={{ color: "var(--ink-dim)" }}>{li.label}</span>
-                    <span style={{ fontFamily: "var(--font-mono)", fontVariantNumeric: "tabular-nums" }}>
-                      {usd(li.amount)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-
-        {estimate.signed_at && (
-          <p style={{ ...mono, marginTop: "1.2rem", color: "#15803D" }}>
-            Signed by {estimate.signer_name} on{" "}
-            {new Date(estimate.signed_at).toLocaleDateString("en-US")}
-          </p>
-        )}
-
         <p
           style={{
-            fontSize: 12.5,
-            lineHeight: 1.65,
-            color: "var(--ink-faint)",
-            marginTop: "2rem",
-            maxWidth: "70ch",
-            borderLeft: "2px solid var(--edge-bright)",
-            paddingLeft: "0.9rem",
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(1.7rem, 4vw, 2.6rem)",
+            fontWeight: 800,
+            letterSpacing: "-0.04em",
+            color: "var(--ink-strong)",
+            marginTop: "1.2rem",
+            fontVariantNumeric: "tabular-nums",
           }}
         >
-          Preliminary configuration estimate prepared for {estimate.client_name}. This is not a
-          quote, offer, or contract. Final pricing, schedule, performance and scope remain subject
-          to engineering review, site validation, equipment availability, applicable taxes, freight,
-          permitting requirements and the executed agreement.
+          {usd(legacy.one_time_low_cents)} – {usd(legacy.one_time_high_cents)}
         </p>
-
-        <p style={{ ...mono, marginTop: "2rem" }}>
+        {legacy.recurring_cents > 0 && (
+          <p style={{ fontSize: 14, color: "var(--ink-dim)", marginTop: "0.4rem" }}>
+            + {usd(legacy.recurring_cents)} / year support
+          </p>
+        )}
+        {legacy.line_items?.length > 0 && (
+          <div style={{ marginTop: "1.3rem", borderTop: "1px solid var(--edge)", paddingTop: "1rem", display: "grid", gap: "0.4rem" }}>
+            {legacy.line_items.map((li, i) => (
+              <div key={`${li.label}-${i}`} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", fontSize: 13.5 }}>
+                <span style={{ color: "var(--ink-dim)" }}>{li.label}</span>
+                <span style={{ fontVariantNumeric: "tabular-nums", color: "var(--ink-strong)" }}>{usd(li.amount)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {legacy.signed_at && (
+          <p style={{ ...mono, color: "#15803D", marginTop: "1rem" }}>
+            Signed by {legacy.signer_name} on {new Date(legacy.signed_at).toLocaleDateString("en-US")}
+          </p>
+        )}
+        <p style={{ fontSize: 12.5, lineHeight: 1.65, color: "var(--ink-faint)", marginTop: "1.6rem", maxWidth: "70ch", borderLeft: "2px solid var(--edge-bright)", paddingLeft: "0.9rem" }}>
+          Preliminary configuration estimate prepared for {legacy.client_name}. Not a quote, offer,
+          or contract. Final pricing, schedule, performance and scope remain subject to engineering
+          review, site validation, equipment availability, applicable taxes, freight, permitting
+          requirements and the executed agreement.
+          {expires && ` Valid until ${expires.toLocaleDateString("en-US")}.`}
+        </p>
+        <p style={{ ...mono, marginTop: "1.4rem" }}>
           Questions? <a href="mailto:info@podosai.com" style={{ color: "var(--brand)" }}>info@podosai.com</a>
         </p>
-      </div>
-    </main>
+      </Shell>
+    );
+  }
+
+  // ---- uniform not-active screen (no oracle) ----
+  return (
+    <Shell>
+      <p style={{ ...mono, color: "var(--brand)" }}>PODOS · Private</p>
+      <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, marginTop: 10, color: "var(--ink-strong)" }}>
+        This link is not active.
+      </h1>
+      <p style={{ color: "var(--ink-dim)", fontSize: 14, lineHeight: 1.6, marginTop: 10 }}>
+        The invitation may have expired or been replaced. Contact the PODOS team member who sent
+        it, or <a href="mailto:info@podosai.com" style={{ color: "var(--brand)" }}>info@podosai.com</a>.
+      </p>
+    </Shell>
   );
 }

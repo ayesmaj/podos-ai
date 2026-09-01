@@ -33,5 +33,5 @@ export function proxy() {
 }
 
 export const config = {
-  matcher: ["/e/:path*", "/proposal/:path*", "/admin/:path*", "/estimate"],
+  matcher: ["/e/:path*", "/proposal/:path*", "/client/:path*", "/admin/:path*", "/ops/:path*", "/estimate"],
 };

@@ -48,7 +48,7 @@ const mono: React.CSSProperties = {
 async function requireSession(): Promise<void> {
   const jar = await cookies();
   const tok = jar.get(ADMIN_COOKIE)?.value ?? "";
-  if (!tok || !(await adminSessionValid(tok))) redirect("/admin/login");
+  if (!tok || !(await adminSessionValid(tok))) redirect("/ops/login");
 }
 
 /* ------------------------------------------------------------ actions */
@@ -59,7 +59,7 @@ async function logout() {
   const tok = jar.get(ADMIN_COOKIE)?.value;
   if (tok) await adminLogout(tok);
   jar.delete(ADMIN_COOKIE);
-  redirect("/admin/login");
+  redirect("/ops/login");
 }
 
 async function invite(formData: FormData) {
@@ -80,11 +80,11 @@ async function invite(formData: FormData) {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      path: "/admin",
+      path: "/",
       maxAge: 300,
     });
   }
-  revalidatePath("/admin/estimates");
+  revalidatePath("/ops/proposals");
 }
 
 async function revoke(formData: FormData) {
@@ -92,7 +92,7 @@ async function revoke(formData: FormData) {
   await requireSession();
   const id = String(formData.get("invitationId") ?? "");
   if (id) await revokeInvitation(ADMIN_SECRET, id);
-  revalidatePath("/admin/estimates");
+  revalidatePath("/ops/proposals");
 }
 
 async function dismissInviteReveal() {
@@ -168,7 +168,7 @@ async function NewInviteReveal() {
         Invitation for {estimateNo} · copy now, shown only once
       </p>
       <code style={{ display: "block", marginTop: ".5rem", fontSize: 12.5, wordBreak: "break-all", color: "var(--ink-strong)" }}>
-        {SITE.baseUrl}/proposal/invite/{token}
+        {SITE.baseUrl}/e/{token}
       </code>
       <form action={dismissInviteReveal}>
         <button type="submit" style={{ ...mono, marginTop: ".6rem", padding: ".35rem .7rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer" }}>

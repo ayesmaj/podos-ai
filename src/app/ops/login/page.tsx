@@ -32,25 +32,25 @@ export const dynamic = "force-dynamic";
 async function login(formData: FormData) {
   "use server";
   const secret = String(formData.get("secret") ?? "");
-  if (!secret) redirect("/admin/login?e=1");
+  if (!secret) redirect("/ops/login?e=1");
 
   const h = await headers();
   const ip = (h.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
   const allowed = await adminRateCheck("admin-login", ip, 5, 900);
-  if (!allowed) redirect("/admin/login?e=2");
+  if (!allowed) redirect("/ops/login?e=2");
 
   const token = await adminLogin(secret, h.get("user-agent") ?? undefined);
-  if (!token) redirect("/admin/login?e=1");
+  if (!token) redirect("/ops/login?e=1");
 
   const jar = await cookies();
   jar.set(ADMIN_COOKIE, token, {
     httpOnly: true,
     secure: true,
     sameSite: "strict",
-    path: "/admin",
+    path: "/",
     maxAge: 60 * 60 * 12,
   });
-  redirect("/admin/estimates");
+  redirect("/ops/proposals");
 }
 
 export default async function AdminLoginPage({
@@ -63,7 +63,7 @@ export default async function AdminLoginPage({
   // Already signed in? Straight to the app.
   const jar = await cookies();
   const existing = jar.get(ADMIN_COOKIE)?.value;
-  if (existing && (await adminSessionValid(existing))) redirect("/admin/estimates");
+  if (existing && (await adminSessionValid(existing))) redirect("/ops/proposals");
 
   return (
     <main

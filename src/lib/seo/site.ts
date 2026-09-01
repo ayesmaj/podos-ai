@@ -10,7 +10,7 @@
  * slash. The apex 301/307s to www at the platform level.
  */
 
-import { PRICING } from "@/data/configuratorPricing";
+import { PRICING_APPROVED } from "@/data/pricingFlags";
 
 export const SITE = {
   baseUrl: "https://www.podosai.com",
@@ -37,7 +37,7 @@ export const INDEXABLE_ROUTES: IndexableRoute[] = [
   // /configure is indexable ONLY once a founder-approved price book is in
   // configuratorPricing.ts. Until then the estimator quotes placeholder
   // figures and must not be crawled, ranked, or linked from navigation.
-  ...(PRICING.approved
+  ...(PRICING_APPROVED
     ? [{ path: "/estimate", changeFrequency: "monthly", priority: 0.9, cluster: "core" } as IndexableRoute]
     : []),
   { path: "/", changeFrequency: "weekly", priority: 1, cluster: "core" },

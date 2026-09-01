@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
       // sitemap under that path. Permanent so any indexed URL or bookmark
       // consolidates onto /estimate rather than 404ing.
       { source: "/configure", destination: "/estimate", permanent: true },
+      // Admin moved to /ops (docs/estimator/03-ROUTE-ARCHITECTURE.md).
+      { source: "/admin/estimates", destination: "/ops/proposals", permanent: true },
+      { source: "/admin", destination: "/ops/proposals", permanent: true },
+      { source: "/admin/:path*", destination: "/ops/:path*", permanent: true },
     ];
   },
   // Turbopack is default in Next.js 16; empty config silences the warning

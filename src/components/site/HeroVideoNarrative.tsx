@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { PRICING } from "@/data/configuratorPricing";
+import { PRICING_APPROVED } from "@/data/pricingFlags";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -55,7 +55,7 @@ const CHAPTERS = [
 ];
 
 // The Estimator is deliberately NOT promoted in site navigation while
-// PRICING.approved is false: the figures in configuratorPricing.ts are
+// PRICING_APPROVED is false: the figures in configuratorPricing.ts are
 // placeholders, not a founder-approved price book. Flipping `approved`
 // to true in src/data/configuratorPricing.ts restores the nav entry,
 // the footer link, and indexability together — no one has to remember.
@@ -65,7 +65,7 @@ const SITE_NAV: NavItem[] = [
   { label: "Deploy", href: "#deployment" },
   { label: "Use Cases", href: "#use-cases" },
   { label: "Engineering", href: "#design" },
-  ...(PRICING.approved ? [{ label: "Estimate", href: "/estimate" }] : []),
+  ...(PRICING_APPROVED ? [{ label: "Estimate", href: "/estimate" }] : []),
   { label: "Invest", href: "/invest" },
   { label: "Contact", href: "#access" },
 ];

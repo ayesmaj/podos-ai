@@ -22,7 +22,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { isChromeless } from "@/lib/site/chromeless";
 import NavHeader, { type NavItem } from "@/components/ui/nav-header";
-import { PRICING } from "@/data/configuratorPricing";
+import { PRICING_APPROVED } from "@/data/pricingFlags";
 
 /**
  * Route-based nav. Every href here resolves to a real page.tsx.
@@ -37,7 +37,7 @@ const ROUTE_NAV: NavItem[] = [
   { label: "Use Cases", href: "/use-cases" },
   // Estimator appears only once a founder-approved price book exists —
   // same gate as the footer and the sitemap. See configuratorPricing.ts.
-  ...(PRICING.approved ? [{ label: "Estimator", href: "/estimate" }] : []),
+  ...(PRICING_APPROVED ? [{ label: "Estimator", href: "/estimate" }] : []),
   { label: "Invest", href: "/invest" },
   { label: "Contact", href: "/#access" },
 ];

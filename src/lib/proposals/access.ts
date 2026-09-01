@@ -78,9 +78,9 @@ export async function issueOtp(token: string): Promise<{ code: string; recipient
 export async function verifyInvitation(
   token: string,
   answer: string
-): Promise<{ session_token: string; estimate_id: string } | null> {
+): Promise<{ session_token: string; public_id: string } | null> {
   if (!looksLikeToken(token)) return null;
-  const rows = await rpc<{ session_token: string; estimate_id: string }[]>("verify_invitation", {
+  const rows = await rpc<{ session_token: string; public_id: string }[]>("verify_invitation", {
     p_token: token,
     p_answer: answer,
   });
@@ -89,6 +89,7 @@ export async function verifyInvitation(
 
 export interface SessionProposal {
   estimate_uuid: string;
+  public_id: string;
   estimate_no: string;
   client_name: string;
   company: string | null;

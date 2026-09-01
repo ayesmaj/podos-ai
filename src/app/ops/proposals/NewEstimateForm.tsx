@@ -17,7 +17,7 @@ async function create(formData: FormData) {
   // Server actions are publicly POSTable in Next 16 - re-check the session here.
   const jarAuth = await cookies();
   const sessTok = jarAuth.get(ADMIN_COOKIE)?.value ?? "";
-  if (!sessTok || !(await adminSessionValid(sessTok))) redirect("/admin/login");
+  if (!sessTok || !(await adminSessionValid(sessTok))) redirect("/ops/login");
   const clientName = String(formData.get("clientName") ?? "").trim();
   if (!clientName) return;
 
@@ -43,11 +43,11 @@ async function create(formData: FormData) {
   if (token) {
     const jar = await cookies();
     jar.set("podos_new_link", `${created?.[0]?.estimate_no}:${token}`, {
-      httpOnly: true, sameSite: "strict", path: "/admin", maxAge: 300,
+      httpOnly: true, sameSite: "strict", path: "/", maxAge: 300,
       secure: process.env.NODE_ENV === "production",
     });
   }
-  revalidatePath("/admin/estimates");
+  revalidatePath("/ops/proposals");
 }
 
 const input: React.CSSProperties = {

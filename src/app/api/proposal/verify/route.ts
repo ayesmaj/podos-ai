@@ -49,9 +49,9 @@ export async function POST(req: Request) {
     httpOnly: true,
     secure: true, // always — not gated on NODE_ENV (audit F10)
     sameSite: "lax", // email-link arrivals must carry it on top-level GET
-    path: "/proposal",
+    path: "/",
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  return Response.json({ ok: true, id: result.estimate_id });
+  return Response.json({ ok: true, id: result.public_id });
 }

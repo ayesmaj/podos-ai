@@ -4,7 +4,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { isChromeless } from "@/lib/site/chromeless";
 import Link from "next/link";
-import { PRICING } from "@/data/configuratorPricing";
+import { PRICING_APPROVED } from "@/data/pricingFlags";
 import styles from "./NewSections.module.css";
 
 /**
@@ -107,7 +107,7 @@ export default function Footer() {
         <div>
           <div className={styles.footerColTitle}>Explore</div>
           <ul className={styles.footerLinks}>
-            {PRICING.approved && (
+            {PRICING_APPROVED && (
               <li><a className={styles.footerLink} href="/estimate">Estimate</a></li>
             )}
             <li><a className={styles.footerLink} href="/platform">Platform</a></li>
