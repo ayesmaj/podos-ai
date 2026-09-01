@@ -1,9 +1,24 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { isChromeless } from "@/lib/site/chromeless";
 import Link from "next/link";
 import { PRICING } from "@/data/configuratorPricing";
 import styles from "./NewSections.module.css";
+
+/**
+ * Social accounts. EMPTY ON PURPOSE — PODOS has no published handles yet,
+ * and the footer previously rendered three icons pointing at href="#",
+ * which reads as a broken site to a visitor and as a dead link to a
+ * crawler. Add an entry here and the icon appears; the row hides itself
+ * while the list is empty.
+ *
+ * Example once a handle exists:
+ *   { label: "LinkedIn", href: "https://www.linkedin.com/company/…", icon: <LinkedinIcon /> },
+ */
+const SOCIALS: { label: string; href: string; icon: React.ReactNode }[] = [];
+
 
 /**
  * Premium footer — four columns over a dark-navy surface.
@@ -17,6 +32,10 @@ import styles from "./NewSections.module.css";
  * status pill (reuses the global .live-pulse utility from globals.css).
  */
 export default function Footer() {
+  // Match SiteChrome: no footer on private estimates or admin tools.
+  const pathname = usePathname();
+  if (isChromeless(pathname)) return null;
+
   return (
     <footer className={styles.footer} aria-label="Site footer">
       <div className={styles.footerInner}>
@@ -43,17 +62,22 @@ export default function Footer() {
           >
             info@podosai.com
           </a>
-          <div className={styles.footerSocials}>
-            <a href="#" className={styles.footerSocial} aria-label="LinkedIn">
-              <LinkedinIcon />
-            </a>
-            <a href="#" className={styles.footerSocial} aria-label="X (Twitter)">
-              <XIcon />
-            </a>
-            <a href="#" className={styles.footerSocial} aria-label="GitHub">
-              <GithubIcon />
-            </a>
-          </div>
+          {SOCIALS.length > 0 && (
+            <div className={styles.footerSocials}>
+              {SOCIALS.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  className={styles.footerSocial}
+                  aria-label={s.label}
+                  target="_blank"
+                  rel="noopener noreferrer me"
+                >
+                  {s.icon}
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* ── Product column ── */}
@@ -123,9 +147,9 @@ export default function Footer() {
             </button>
           </form>
           <div className={styles.footerLegal}>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">Cookies</a>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/cookies">Cookies</Link>
           </div>
         </div>
       </div>
@@ -145,6 +169,10 @@ export default function Footer() {
 
 /* ----------- inline icons ----------- */
 
+/* Retained for SOCIALS above: unused only while that list is empty.
+   Deleting these would mean re-authoring the SVGs when the first
+   handle is published. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function LinkedinIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -155,6 +183,10 @@ function LinkedinIcon() {
   );
 }
 
+/* Retained for SOCIALS above: unused only while that list is empty.
+   Deleting these would mean re-authoring the SVGs when the first
+   handle is published. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function XIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -163,6 +195,10 @@ function XIcon() {
   );
 }
 
+/* Retained for SOCIALS above: unused only while that list is empty.
+   Deleting these would mean re-authoring the SVGs when the first
+   handle is published. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function GithubIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

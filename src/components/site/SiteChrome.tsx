@@ -20,6 +20,7 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { isChromeless } from "@/lib/site/chromeless";
 import NavHeader, { type NavItem } from "@/components/ui/nav-header";
 import { PRICING } from "@/data/configuratorPricing";
 
@@ -41,11 +42,37 @@ const ROUTE_NAV: NavItem[] = [
   { label: "Contact", href: "/#access" },
 ];
 
+/**
+ * Routes that render their OWN primary navigation, so this header must
+ * stay out of the way or the two stack on top of each other in the same
+ * strip. /invest was missing here and shipped with the investor nav and
+ * the site nav overlapping.
+ *
+ * DISTINCT from CHROMELESS_PREFIXES in @/lib/site/chromeless:
+ *   chromeless        → no header AND no footer  (/admin, /e/)
+ *   own-chrome (here) → no site header, footer still wanted  (/, /invest)
+ * Do not list a route in both; chromeless is checked first and wins.
+ *
+ * A prefix match is used so nested routes inherit the exclusion.
+ */
+const ROUTES_WITH_OWN_CHROME = [
+  "/", //        HeroVideoNarrative mounts SITE_NAV inside the hero
+  "/invest", //  src/components/invest/InvestNav
+];
+
 export default function SiteChrome() {
   const pathname = usePathname();
 
-  // The homepage mounts its own anchor nav inside the hero.
-  if (pathname === "/") return null;
+  // Private client estimates and admin tools render without site chrome.
+  if (isChromeless(pathname)) return null;
+
+  if (
+    ROUTES_WITH_OWN_CHROME.some(
+      (r) => pathname === r || (r !== "/" && pathname.startsWith(r + "/")),
+    )
+  ) {
+    return null;
+  }
 
   // Longest matching prefix wins, so /engineering/thermal-enclosure
   // highlights "Engineering" rather than nothing.

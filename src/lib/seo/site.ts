@@ -82,6 +82,11 @@ export const INDEXABLE_ROUTES: IndexableRoute[] = [
   { path: "/insights/closed-loop-cooling-and-data-center-water-use", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
   { path: "/insights/how-to-evaluate-ai-infrastructure-claims", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
   { path: "/insights/ai-data-center-electricity-demand", changeFrequency: "monthly", priority: 0.7, cluster: "insights" },
+  /* Legal. Indexable but low priority — they exist to be findable and
+     linkable from the footer, not to rank. */
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.3, cluster: "core" },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.3, cluster: "core" },
+  { path: "/cookies", changeFrequency: "yearly", priority: 0.3, cluster: "core" },
 ];
 
 export const canonicalUrl = (path: string) =>
