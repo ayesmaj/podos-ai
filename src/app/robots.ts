@@ -7,6 +7,9 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: "/api/",
     },
-    sitemap: "https://www.podosai.com/sitemap.xml",
+    sitemap: [
+      "https://www.podosai.com/sitemap.xml",
+      "https://www.podosai.com/image-sitemap.xml",
+    ],
   };
 }
