@@ -12,7 +12,7 @@
  *
  * Kept in one place so the header and the footer can never disagree.
  */
-export const CHROMELESS_PREFIXES = ["/admin", "/e/"] as const;
+export const CHROMELESS_PREFIXES = ["/admin", "/e/", "/proposal", "/estimate"] as const;
 
 export function isChromeless(pathname: string | null): boolean {
   if (!pathname) return false;

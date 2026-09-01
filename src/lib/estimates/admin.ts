@@ -88,3 +88,58 @@ export const createEstimate = (secret: string, i: {
 
 export const usd = (c: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(c / 100);
+
+/** Cookie holding the opaque admin session token (never the secret itself). */
+export const ADMIN_COOKIE = "podos_admin_session";
+
+export async function adminLogin(secret: string, userAgent?: string): Promise<string | null> {
+  const tok = await rpc<string>("admin_login", { p_secret: secret, p_user_agent: userAgent ?? null });
+  return typeof tok === "string" && tok.length === 64 ? tok : null;
+}
+
+export async function adminSessionValid(sessionToken: string): Promise<boolean> {
+  if (!/^[a-f0-9]{64}$/.test(sessionToken)) return false;
+  const ok = await rpc<boolean>("admin_session_valid", { p_session: sessionToken });
+  return ok === true;
+}
+
+export async function adminLogout(sessionToken: string): Promise<void> {
+  await rpc<boolean>("admin_logout", { p_session: sessionToken });
+}
+
+export async function adminRateCheck(bucket: string, key: string, max: number, windowSeconds: number): Promise<boolean> {
+  const ok = await rpc<boolean>("rate_check", { p_bucket: bucket, p_key: key, p_max: max, p_window_seconds: windowSeconds });
+  return ok === true; // fail closed
+}
+
+export interface InvitationRow {
+  invitation_id: string;
+  recipient_email: string;
+  recipient_name: string | null;
+  access_policy: "otp" | "email-confirm";
+  issued_at: string;
+  expires_at: string;
+  revoked: boolean;
+  exchanged_at: string | null;
+  sessions: number;
+  last_seen: string | null;
+}
+
+export const listInvitations = (secret: string, estimateNo: string) =>
+  rpc<InvitationRow[]>("list_invitations", { p_admin_secret: secret, p_estimate_no: estimateNo });
+
+export const createInvitation = (secret: string, i: {
+  estimateNo: string; email: string; name?: string;
+  policy?: "otp" | "email-confirm"; expiresDays?: number;
+}) =>
+  rpc<{ invitation_id: string; token: string }[]>("create_invitation", {
+    p_admin_secret: secret,
+    p_estimate_no: i.estimateNo,
+    p_recipient_email: i.email,
+    p_recipient_name: i.name ?? null,
+    p_access_policy: i.policy ?? "email-confirm",
+    p_expires_days: i.expiresDays ?? 14,
+  });
+
+export const revokeInvitation = (secret: string, invitationId: string) =>
+  rpc<boolean>("revoke_invitation", { p_admin_secret: secret, p_invitation_id: invitationId });

@@ -1,5 +1,8 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import { isChromeless } from "@/lib/site/chromeless";
+
 import styles from "./GlobalEnergyLayer.module.css";
 
 /**
@@ -35,6 +38,10 @@ import styles from "./GlobalEnergyLayer.module.css";
  * handles it; no layout/paint work.
  */
 export default function GlobalEnergyLayer() {
+  // Private surfaces (proposals, admin) are documents/apps, not marketing —
+  // no ambient scan beams or sparks there.
+  const pathname = usePathname();
+  if (isChromeless(pathname)) return null;
   return (
     <div className={`${styles.root} global-energy-layer`} aria-hidden>
       {/*

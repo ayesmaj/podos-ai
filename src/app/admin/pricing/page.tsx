@@ -10,6 +10,9 @@
  * says so plainly so nobody mistakes a local preview for a live change.
  */
 
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { ADMIN_COOKIE, adminSessionValid } from "@/lib/estimates/admin";
 import type { Metadata } from "next";
 import AdminPricingClient from "@/components/configurator/AdminPricingClient";
 
@@ -18,7 +21,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminPricingPage() {
+export default async function AdminPricingPage() {
+  // Session gate (audit: this page previously rendered pricing content to
+  // anyone). No session -> login. Note: option values here are placeholders
+  // flagged NEEDS BUSINESS VERIFICATION, but the gate applies regardless.
+  const jar = await cookies();
+  const tok = jar.get(ADMIN_COOKIE)?.value ?? "";
+  if (!tok || !(await adminSessionValid(tok))) redirect("/admin/login");
+
   return (
     <main className="pageOverlay" style={{ marginTop: 0, borderRadius: 0, boxShadow: "none", background: "var(--paper)" }}>
       <div className="container-site" style={{ paddingBlock: "clamp(72px, 8vw, 104px)" }}>

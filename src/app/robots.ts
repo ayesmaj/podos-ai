@@ -5,9 +5,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // /admin has no auth yet, and /e/ holds private per-client estimates.
-      // Crawler hygiene — the secret token is what actually protects /e/.
-      disallow: ["/api/", "/admin/", "/e/"],
+      // Only /api/ is disallowed. Private prefixes (/e/, /proposal/, /admin/)
+      // are deliberately NOT listed: enumerating them in a public robots.txt
+      // advertises their existence. They are protected by an authoritative
+      // X-Robots-Tag header from proxy.ts instead (audit F5).
+      disallow: ["/api/"],
     },
     sitemap: [
       "https://www.podosai.com/sitemap.xml",

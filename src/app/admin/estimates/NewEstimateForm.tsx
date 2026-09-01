@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { ADMIN_SECRET, createEstimate } from "@/lib/estimates/admin";
+import { ADMIN_COOKIE, ADMIN_SECRET, adminSessionValid, createEstimate } from "@/lib/estimates/admin";
 import { SITE } from "@/lib/seo/site";
 
 /**
@@ -13,6 +14,10 @@ import { SITE } from "@/lib/seo/site";
 
 async function create(formData: FormData) {
   "use server";
+  // Server actions are publicly POSTable in Next 16 - re-check the session here.
+  const jarAuth = await cookies();
+  const sessTok = jarAuth.get(ADMIN_COOKIE)?.value ?? "";
+  if (!sessTok || !(await adminSessionValid(sessTok))) redirect("/admin/login");
   const clientName = String(formData.get("clientName") ?? "").trim();
   if (!clientName) return;
 
@@ -38,7 +43,7 @@ async function create(formData: FormData) {
   if (token) {
     const jar = await cookies();
     jar.set("podos_new_link", `${created?.[0]?.estimate_no}:${token}`, {
-      httpOnly: false, sameSite: "lax", path: "/admin", maxAge: 300,
+      httpOnly: true, sameSite: "strict", path: "/admin", maxAge: 300,
       secure: process.env.NODE_ENV === "production",
     });
   }

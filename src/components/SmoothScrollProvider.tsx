@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { isChromeless } from "@/lib/site/chromeless";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -14,7 +16,13 @@ export default function SmoothScrollProvider({
 }) {
   const lenisRef = useRef<Lenis | null>(null);
 
+  const pathname = usePathname();
+  const chromeless = isChromeless(pathname);
+
   useEffect(() => {
+    // Native scrolling on private surfaces: a proposal document or admin app
+    // should scroll like a document, and Lenis wheel-capture fights form UI.
+    if (chromeless) return;
     // Lenis tuning (2026-05-20 — second perf pass):
     //  - Switched from `duration` to `lerp`. duration: 0.9 meant every
     //    wheel tick triggered ~54 frames of interpolation, each running
@@ -128,7 +136,7 @@ export default function SmoothScrollProvider({
       gsap.ticker.remove((time) => lenis.raf(time * 1000));
       delete (window as unknown as { __lenis?: Lenis }).__lenis;
     };
-  }, []);
+  }, [chromeless]);
 
   return <>{children}</>;
 }
