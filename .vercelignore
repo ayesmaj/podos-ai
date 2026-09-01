@@ -1,0 +1,11 @@
+# Source videos kept locally for editing. They are not referenced by the site
+# (production transcodes live in /public/videos/), each exceeds Vercel's 100 MB
+# per-file limit, and together they made the upload 1.7 GB.
+/*.mp4
+
+# Not needed at runtime
+/docs
+/scripts
+/.claude
+*.psd
+*.aep
