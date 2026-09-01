@@ -5,7 +5,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: "/api/",
+      // /admin has no auth yet, and /e/ holds private per-client estimates.
+      // Crawler hygiene — the secret token is what actually protects /e/.
+      disallow: ["/api/", "/admin/", "/e/"],
     },
     sitemap: [
       "https://www.podosai.com/sitemap.xml",
