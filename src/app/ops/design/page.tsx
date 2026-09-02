@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 const mono = { fontFamily: "var(--font-display)", letterSpacing: ".08em", textTransform: "uppercase" as const };
-const USE: Record<string, string> = { cover: "Page 1 · cover hero (portrait)", cutaway: "Page 2 · technical illustration with SVG callouts", deployment: "Preliminary estimate · page 2 deployment visual" };
+const USE: Record<string, string> = { cover: "Estimate sheet · “Proposed system” image next to the project title", cutaway: "Not used by the current sheet layout (kept for technical appendices)", deployment: "Not used by the current sheet layout (kept for site documents)" };
 
 export default async function DesignPage() {
   await requireOps();

@@ -147,11 +147,8 @@ export async function saveDesignAction(formData: FormData) {
   const wm = String(formData.get("watermark") ?? "none");
   await setProposalDesign(ADMIN_SECRET, publicId, {
     page_mode: formData.get("page_mode") === "preliminary" ? "preliminary" : "formal",
-    visuals: { cover: on("v_cover"), cutaway: on("v_cutaway"), deployment: on("v_deployment") },
-    sections: {
-      exec_summary: on("s_exec_summary"), metrics: on("s_metrics"), spec_modules: on("s_spec_modules"), scope: on("s_scope"),
-      timeline: on("s_timeline"), responsibilities: on("s_responsibilities"), assumptions: on("s_assumptions"), next_step: on("s_next_step"),
-    },
+    visuals: { product: on("v_product") },
+    sections: { summary: on("s_summary"), notes: on("s_notes"), warranty: on("s_warranty"), trust_band: on("s_trust_band") },
     signature_block: on("signature_block"),
     validity_days: Number.isInteger(validity) && validity > 0 && validity <= 365 ? validity : null,
     watermark: ["none", "draft", "confidential", "preview"].includes(wm) ? wm : "none",

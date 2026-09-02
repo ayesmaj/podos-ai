@@ -27,9 +27,10 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T | nu
   } catch { return null; }
 }
 
-export interface PrintAssets { logo: string; cover: string | null; cutaway: string | null; deployment: string | null }
+export interface PrintAssets { logo: string; logoOnDark: string; cover: string | null; cutaway: string | null; deployment: string | null }
 export const STATIC_ASSETS: PrintAssets = {
   logo: "/logo.png",
+  logoOnDark: "/visuals/proposal/logo-lockup-white.png",
   cover: "/visuals/proposal/cover-pod-hero.webp",
   cutaway: "/visuals/proposal/system-cutaway.webp",
   deployment: "/visuals/proposal/deployment-site.webp",

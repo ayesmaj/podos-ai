@@ -48,11 +48,8 @@ export async function printUrlToPdf(url: string, cookies: PrintCookie[]): Promis
     if (!res || !res.ok()) throw new Error(`print route returned ${res?.status() ?? "no response"}`);
     await page.evaluate(() => (document as unknown as { fonts: { ready: Promise<unknown> } }).fonts.ready);
     await page.emulateMediaType("print");
-    const pdf = Buffer.from(await page.pdf({
-      format: "A4", printBackground: true, preferCSSPageSize: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
-      displayHeaderFooter: false,
-    }));
+    // Letter portrait; margins and the page-number footer come from the sheet's @page rules
+    const pdf = Buffer.from(await page.pdf({ format: "Letter", printBackground: true, preferCSSPageSize: true, displayHeaderFooter: false }));
     return { pdf, sha256: createHash("sha256").update(pdf).digest("hex"), bytes: pdf.length };
   } finally {
     await browser.close();

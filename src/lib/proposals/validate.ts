@@ -104,8 +104,10 @@ export function validateProposalForRelease(d: DocData, ctx: ValidationContext = 
     if (l.qty <= 0) err("invalid_qty", "lineItems", `"${l.name}" has quantity ${l.qty}.`);
   }
   if (d.lowCents < 0 || d.highCents < 0 || d.lowCents > d.highCents) err("totals_invalid", "totals", "Estimate range is inverted or negative.");
-  const oneTime = visible.filter((l) => !l.recurring && !l.optional).reduce((a, l) => a + l.extended_cents, 0);
-  const recurring = visible.filter((l) => l.recurring && !l.optional).reduce((a, l) => a + l.extended_cents, 0);
+  // optional items count only while the client has selected them (same rule as _recompute_totals)
+  const counted = (l: DocData["lineItems"][number]) => !l.optional || l.selected !== false;
+  const oneTime = visible.filter((l) => !l.recurring && counted(l)).reduce((a, l) => a + l.extended_cents, 0);
+  const recurring = visible.filter((l) => l.recurring && counted(l)).reduce((a, l) => a + l.extended_cents, 0);
   // totals come from the server snapshot; the visible items must sit inside the published range
   if (visible.length && !(oneTime >= d.lowCents - 1 && oneTime <= d.highCents + 1) && !(d.lowCents === 0 && d.highCents === 0))
     err("totals_mismatch", "totals", `Visible one-time items sum to ${oneTime} cents, outside the published range ${d.lowCents}–${d.highCents}.`);

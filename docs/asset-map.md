@@ -80,6 +80,7 @@ Generated with `scripts/generate-proposal-assets.mts` (GPT Image 2 **edits** of 
 
 | ID | Placement | Size | File | Alt |
 |---|---|---|---|---|
-| PROP-COVER | Proposal page 1 · framed hero (right column, 7/12) | 1024×1536 | `public/visuals/proposal/cover-pod-hero.webp` | PODOS modular AI data-center unit on an engineering platform in a bright studio environment |
-| PROP-CUTAWAY | Proposal page 2 · technical illustration with 6 SVG callouts | 1536×1024 | `public/visuals/proposal/system-cutaway.webp` | Technical cutaway of the PODOS unit showing rack positions, cooling distribution, power and fiber paths |
-| PROP-DEPLOY | Preliminary page 2 · full-width deployment figure | 1536×1024 | `public/visuals/proposal/deployment-site.webp` | PODOS unit placed on an engineered pad with power and fiber connection pathways |
+| PROP-COVER | Estimate sheet · "Proposed system" image beside the project title (200×132 crop) | 1024×1536 | `public/visuals/proposal/cover-pod-hero.webp` | PODOS modular AI data-center unit on an engineering platform in a bright studio environment |
+| PROP-CUTAWAY | Not used by the current sheet (kept for technical appendices) | 1536×1024 | `public/visuals/proposal/system-cutaway.webp` | Technical cutaway of the PODOS unit showing rack positions, cooling distribution, power and fiber paths |
+| PROP-DEPLOY | Not used by the current sheet (kept for site documents) | 1536×1024 | `public/visuals/proposal/deployment-site.webp` | PODOS unit placed on an engineered pad with power and fiber connection pathways |
+| PROP-LOGO-DARK | Sheet header band (white lockup, trimmed from `public/podos-logo-lockup.png`) | 1045×286 | `public/visuals/proposal/logo-lockup-white.png` | PODOS AI |

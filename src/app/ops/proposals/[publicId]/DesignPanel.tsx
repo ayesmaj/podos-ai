@@ -3,9 +3,9 @@ import type { ProposalDesign } from "@/lib/proposals/design";
 import { saveDesignAction } from "./actions";
 
 /**
- * Proposal Design panel (brief §16): per-proposal document settings. Plain
- * form → server action → estimates.design; the print route and the client
- * viewer read the same merged settings, so what is toggled here is what prints.
+ * Proposal Design panel: per-proposal settings for the estimate sheet. Plain
+ * form → server action → estimates.design; the sheet, the client view and the
+ * PDF read the same merged settings, so what is toggled here is what prints.
  */
 
 const mono = { fontFamily: "var(--font-display)", letterSpacing: ".06em", textTransform: "uppercase" as const };
@@ -23,17 +23,17 @@ export default function DesignPanel({ publicId, design }: { publicId: string; de
   return (
     <details style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", marginBottom: "1.2rem" }}>
       <summary style={{ ...mono, fontSize: 10, color: "var(--brand-deep)", padding: ".9rem 1.2rem", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, listStyle: "none" }}>
-        <Palette size={14} aria-hidden /> Proposal design · {design.page_mode} · {design.watermark === "none" ? "no watermark" : `${design.watermark} watermark`}{design.signature_block ? " · signature block" : ""}
+        <Palette size={14} aria-hidden /> Proposal design · {design.page_mode === "formal" ? "proposal" : "estimate"} · {design.watermark === "none" ? "no watermark" : `${design.watermark} watermark`}{design.signature_block ? " · signature line" : ""}
       </summary>
       <form action={saveDesignAction} style={{ padding: "0 1.2rem 1.2rem", display: "grid", gap: "1.1rem" }}>
         <input type="hidden" name="publicId" value={publicId} />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "1.2rem" }}>
           <div style={group}>
             <p style={head}>Document</p>
-            <label style={{ fontSize: 12.5, color: "var(--ink-dim)", display: "grid", gap: 4 }}>Page mode
+            <label style={{ fontSize: 12.5, color: "var(--ink-dim)", display: "grid", gap: 4 }}>Document type
               <select name="page_mode" defaultValue={design.page_mode} style={select}>
-                <option value="formal">Formal commercial proposal (3 pages)</option>
-                <option value="preliminary">Preliminary configuration estimate (2 pages)</option>
+                <option value="formal">Proposal (released, priced)</option>
+                <option value="preliminary">Estimate (indicative)</option>
               </select>
             </label>
             <label style={{ fontSize: 12.5, color: "var(--ink-dim)", display: "grid", gap: 4 }}>Watermark
@@ -46,27 +46,18 @@ export default function DesignPanel({ publicId, design }: { publicId: string; de
             </label>
           </div>
           <div style={group}>
-            <p style={head}>Visuals</p>
-            <Check name="v_cover" label="Cover pod hero" on={design.visuals.cover} />
-            <Check name="v_cutaway" label="Technical cutaway (page 2)" on={design.visuals.cutaway} />
-            <Check name="v_deployment" label="Deployment visual (preliminary)" on={design.visuals.deployment} />
-          </div>
-          <div style={group}>
-            <p style={head}>Sections</p>
-            <Check name="s_exec_summary" label="Executive summary" on={design.sections.exec_summary} />
-            <Check name="s_metrics" label="Key metrics" on={design.sections.metrics} />
-            <Check name="s_spec_modules" label="Specification modules" on={design.sections.spec_modules} />
-            <Check name="s_scope" label="Included scope" on={design.sections.scope} />
-            <Check name="s_timeline" label="Deployment timeline" on={design.sections.timeline} />
-            <Check name="s_responsibilities" label="Responsibilities" on={design.sections.responsibilities} />
-            <Check name="s_assumptions" label="Assumptions · exclusions · validity" on={design.sections.assumptions} />
-            <Check name="s_next_step" label="Next step band" on={design.sections.next_step} />
+            <p style={head}>Sheet sections</p>
+            <Check name="v_product" label="Proposed-system image" on={design.visuals.product} />
+            <Check name="s_summary" label="Project summary & key figures" on={design.sections.summary} />
+            <Check name="s_notes" label="Notes" on={design.sections.notes} />
+            <Check name="s_warranty" label="Warranty & support" on={design.sections.warranty} />
+            <Check name="s_trust_band" label="Trust band (footer)" on={design.sections.trust_band} />
+            <Check name="signature_block" label="Client signature line" on={design.signature_block} />
           </div>
           <div style={group}>
             <p style={head}>Client</p>
-            <Check name="signature_block" label="Signature block on last page" on={design.signature_block} />
             <Check name="allow_download" label="Allow PDF download" on={design.allow_download} />
-            <Check name="allow_comments" label="Allow comments / revision requests" on={design.allow_comments} />
+            <Check name="allow_comments" label="Allow questions / change requests" on={design.allow_comments} />
           </div>
         </div>
         <div>

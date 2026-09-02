@@ -48,13 +48,15 @@ export function specFromSelections(
 }
 
 interface RawLine {
+  id?: string;
   name: string; customer_description?: string | null; category_slug?: string | null;
-  qty: number; unit_price_cents: number; extended_cents?: number;
-  recurring: boolean; pending_review: boolean; optional?: boolean; client_visible?: boolean;
+  qty: number; unit?: string | null; unit_price_cents: number; extended_cents?: number;
+  recurring: boolean; pending_review: boolean; optional?: boolean; selected?: boolean; client_visible?: boolean;
 }
 const toLine = (l: RawLine): DocLine => ({
+  id: l.id, selected: l.selected !== false,
   name: l.name, customer_description: l.customer_description ?? null, category_slug: l.category_slug ?? null,
-  qty: Number(l.qty), unit_price_cents: Number(l.unit_price_cents),
+  qty: Number(l.qty), unit: l.unit ?? null, unit_price_cents: Number(l.unit_price_cents),
   extended_cents: l.extended_cents != null ? Number(l.extended_cents) : Math.round(Number(l.qty) * Number(l.unit_price_cents)),
   recurring: !!l.recurring, pending_review: !!l.pending_review, optional: !!l.optional,
 });

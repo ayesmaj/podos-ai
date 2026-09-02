@@ -26,6 +26,11 @@ export const VIEWER_COOKIE = "podos_proposal_session";
 
 /** Client comment / revision request from the secure viewer (recorded as an activity event for PODOS). */
 export const clientComment = (session: string, note: string) => rpc<boolean>("client_comment", { p_session: session, p_note: note });
+/** The client's own message history on this proposal. */
+export const clientComments = (session: string) => rpc<{ at: string; actor: string; note: string }[]>("client_comments", { p_session: session });
+/** Toggle an optional add-on on the released proposal (until signed); totals recompute in the DB. */
+export const clientSelectOptional = (session: string, itemId: string, selected: boolean) =>
+  rpc<boolean>("client_select_optional", { p_session: session, p_item_id: itemId, p_selected: selected });
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T | null> {
   try {

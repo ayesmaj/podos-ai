@@ -5,8 +5,11 @@
  */
 
 export interface DocLine {
+  id?: string;
   name: string; customer_description?: string | null; category_slug?: string | null;
-  qty: number; unit_price_cents: number; extended_cents: number;
+  /** optional items count toward totals only while selected (client add-ons) */
+  selected?: boolean;
+  qty: number; unit?: string | null; unit_price_cents: number; extended_cents: number;
   recurring: boolean; pending_review: boolean; optional?: boolean;
 }
 
