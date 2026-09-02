@@ -113,6 +113,12 @@ export default async function ProposalWorkspace({
         </span>
         <span style={{ ...mono, marginLeft: "auto" }}>{p.viewer_email}</span>
         {expires && <span style={mono}>Valid until {expires.toLocaleDateString("en-US")}</span>}
+        <a href={`/client/proposals/${publicId}/configure`} style={{ ...mono, color: "var(--brand)" }}>
+          Configure
+        </a>
+        <a href={`/api/proposal/${publicId}/pdf`} target="_blank" rel="noopener" style={{ ...mono, color: "var(--brand)" }}>
+          Download PDF
+        </a>
         <a href="mailto:info@podosai.com" style={{ ...mono, color: "var(--brand)" }}>
           Help
         </a>

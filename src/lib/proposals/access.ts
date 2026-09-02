@@ -169,3 +169,15 @@ export async function rateCheck(
   // Fail closed on limiter errors for auth-adjacent buckets.
   return ok === true;
 }
+
+/** Client workspace: persist one step's payload (autosave). */
+export async function saveSelection(session: string, step: string, payload: unknown): Promise<boolean> {
+  const ok = await rpc<boolean>("save_selection", { p_session: session, p_step: step, p_payload: payload });
+  return ok === true;
+}
+
+/** Client workspace: load all saved step payloads for the session's proposal. */
+export async function getSelections(session: string): Promise<Record<string, unknown>> {
+  const r = await rpc<Record<string, unknown>>("get_selections", { p_session: session });
+  return r ?? {};
+}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -236,7 +237,7 @@ export default async function AdminEstimatesPage() {
               <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" }}>
                 <div style={{ flex: "1 1 260px", minWidth: 0 }}>
                   <div style={{ display: "flex", gap: ".5rem", alignItems: "baseline", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 12.5, color: "var(--ink-strong)", fontWeight: 700 }}>{r.estimate_no}</span>
+                    <Link href={`/ops/proposals/${r.public_id}`} style={{ fontSize: 12.5, color: "var(--brand-deep)", fontWeight: 700, textDecoration: "none" }}>{r.estimate_no}</Link>
                     <span style={{ color: "var(--ink-dim)", fontSize: 14 }}>
                       — {r.client_name}
                       {r.company ? ` · ${r.company}` : ""}

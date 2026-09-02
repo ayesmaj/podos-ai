@@ -27,7 +27,20 @@
   deploying so code and prod cannot diverge.
 - No email provider: OTP path fails closed; email-confirm is default.
 
-## Later phases (unchanged sequence)
+## Delivered in wave 3 (2026-09-01)
+Phase 2 admin core: /ops shell (light sidebar, full width), dashboard (live
+KPIs, pipeline, activity feed), clients (list/detail/contacts/projects/notes),
+projects index, proposal detail with the categorized LINE-ITEM EDITOR
+(catalog + custom items, qty/price/optional/recurring/pending, server-side
+total recompute, locked-version immutability). Phase 4 core: 14-step client
+configurator with debounced autosave to proposal_selections (Saving/Saved/
+Failed), DB-backed option cards, sticky summary. Phase 6 core: server-rendered
+branded PDF (@react-pdf/renderer) with running footer + dynamic
+confidentiality watermark, dual-auth (viewer session bound to the proposal,
+or admin preview), private/no-store. Backfilled organizations/contacts/
+projects/versions/line items from existing proposals.
+
+## Remaining (unchanged sequence)
 Phase 2 admin core (/ops shell, dashboard, clients, projects, proposals
 detail tabs) -> Phase 3 catalog/pricing/rules editors + ortho image wave ->
 Phase 4 client workspace steps + autosave + uploads -> Phase 5 proposal
