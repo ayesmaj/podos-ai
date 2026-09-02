@@ -128,7 +128,7 @@ export default async function ProposalsPage() {
                           <span style={{ ...label, fontSize: 9, color: "var(--ink-faint)" }}>{i.access_policy}</span>
                           {!i.revoked && i.link_token && (
                             <span style={{ display: "inline-flex", gap: 10, flexWrap: "wrap", fontSize: 11.5 }}>
-                              {r.mode === "client_configured" && <a href={`${SITE.baseUrl}/e/${i.link_token}?to=configure`} target="_blank" rel="noopener" style={{ color: "var(--brand)" }}>Edit estimate link</a>}
+                              {r.mode === "client_configured" && <a href={`${SITE.baseUrl}/e/${i.link_token}?to=configure`} target="_blank" rel="noopener" style={{ color: "var(--brand)" }}>Build estimate link</a>}
                               <a href={`${SITE.baseUrl}/e/${i.link_token}?to=proposal`} target="_blank" rel="noopener" style={{ color: "var(--brand)" }}>View proposal link</a>
                             </span>
                           )}

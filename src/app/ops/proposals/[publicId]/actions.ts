@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireOps } from "@/lib/ops/session";
 import {
   ADMIN_SECRET, addCatalogLineItem, deleteLineItem, upsertLineItem,
-  importSelections, logEmail, releaseProposal, requestRevision, setProposalMode, setSignatureState,
+  importSelections, logEmail, releaseProposal, reopenProposal, requestRevision, setProposalMode, setSignatureState,
   type ProposalMode,
 } from "@/lib/estimates/admin";
 import { releasedEmail, sendProposalEmail } from "@/lib/email/proposals";
@@ -93,6 +93,14 @@ export async function setModeAction(formData: FormData) {
   const publicId = String(formData.get("publicId") ?? "");
   const mode: ProposalMode = formData.get("mode") === "admin_built" ? "admin_built" : "client_configured";
   if (publicId) await setProposalMode(ADMIN_SECRET, publicId, mode);
+  revalidatePath(`/ops/proposals/${publicId}`);
+}
+
+/** Undo an unsigned release so the client can build their estimate (unlocks the version). */
+export async function reopenForClientAction(formData: FormData) {
+  await requireOps();
+  const publicId = String(formData.get("publicId") ?? "");
+  if (publicId) await reopenProposal(ADMIN_SECRET, publicId);
   revalidatePath(`/ops/proposals/${publicId}`);
 }
 

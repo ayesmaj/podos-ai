@@ -304,3 +304,7 @@ export const setSignatureState = (secret: string, publicId: string, enabled: boo
 /** Send a submitted configuration back to the client for changes (re-opens editing). */
 export const requestRevision = (secret: string, publicId: string, note?: string) =>
   rpc<boolean>("request_revision", { p_admin_secret: secret, p_public_id: publicId, p_note: note ?? null });
+
+/** Undo an UNSIGNED release: unlock the version so the client can build again (signed proposals refuse). */
+export const reopenProposal = (secret: string, publicId: string) =>
+  rpc<boolean>("reopen_proposal", { p_admin_secret: secret, p_public_id: publicId });

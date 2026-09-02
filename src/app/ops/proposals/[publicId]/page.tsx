@@ -7,7 +7,7 @@ import { dismissInviteReveal, inviteContactAction, revokeInvitationAction } from
 import OpsShell from "@/components/ops/OpsShell";
 import LineItemEditor, { type Item, type CatalogOption } from "./LineItemEditor";
 import { cookies } from "next/headers";
-import { dismissReleaseReveal, importClientSelections, releaseToClient, sendBackForRevision, setModeAction, toggleSignature } from "./actions";
+import { dismissReleaseReveal, importClientSelections, releaseToClient, reopenForClientAction, sendBackForRevision, setModeAction, toggleSignature } from "./actions";
 import { Download, Eye, Import, ListChecks, Mail, PenLine, Send, Undo2, Wand2 } from "lucide-react";
 import { SITE } from "@/lib/seo/site";
 import { STEPS, STEP_CATEGORY } from "@/lib/proposals/steps";
@@ -85,11 +85,24 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
           <a href={`/api/proposal/${publicId}/pdf`} target="_blank" rel="noopener" style={{ ...mono, fontSize: 11, padding: ".5rem .8rem", borderRadius: 8, textDecoration: "none", border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", display: "inline-flex", alignItems: "center", gap: 6 }}>
             <Download size={13} aria-hidden /> PDF
           </a>
-          {!locked && (
-            <form action={releaseToClient}>
+          {!locked && (() => {
+            // Client-builds: releasing before the client has built anything locks an empty
+            // proposal (that is what happened to PODOS-1002). Require a submission or line items.
+            const blocked = clientMode && !submitted && line_items.length === 0;
+            return (
+              <form action={releaseToClient} title={blocked ? "In Client-builds mode the client must build and submit their estimate first (or switch to PODOS builds)." : "Lock this version and send the client their link"}>
+                <input type="hidden" name="publicId" value={publicId} />
+                <button type="submit" disabled={blocked} style={{ ...mono, fontSize: 11, padding: ".5rem .9rem", borderRadius: 8, border: "none", background: blocked ? "var(--edge-bright)" : "var(--brand-gradient)", color: blocked ? "var(--ink-faint)" : "#fff", cursor: blocked ? "not-allowed" : "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <Send size={13} aria-hidden /> {blocked ? "Release (waiting for client)" : "Release proposal"}
+                </button>
+              </form>
+            );
+          })()}
+          {released && !head.signed_at && (
+            <form action={reopenForClientAction} title="Undo this release so the client can build their estimate (allowed while unsigned)">
               <input type="hidden" name="publicId" value={publicId} />
-              <button type="submit" style={{ ...mono, fontSize: 11, padding: ".5rem .9rem", borderRadius: 8, border: "none", background: "var(--brand-gradient)", color: "#fff", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                <Send size={13} aria-hidden /> Release proposal
+              <button type="submit" style={{ ...mono, fontSize: 11, padding: ".5rem .9rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <Undo2 size={13} aria-hidden /> Reopen for client
               </button>
             </form>
           )}
@@ -283,7 +296,7 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
                   </div>
                   {!i.revoked && (base ? (
                     <div style={{ display: "grid", gap: 4, marginTop: 6 }}>
-                      {clientMode && <LinkRow label="Edit estimate" href={`${base}?to=configure`} />}
+                      {clientMode && <LinkRow label="Build estimate" href={`${base}?to=configure`} />}
                       <LinkRow label={released ? "View proposal" : "View (after release)"} href={`${base}?to=proposal`} />
                       <LinkRow label="Workspace" href={base} />
                     </div>
@@ -373,7 +386,11 @@ async function ReleaseReveal() {
           <p style={{ fontSize: 13, color: "var(--ink-dim)", marginTop: 6 }}>
             {sent ? "The client received this secure link. It is also shown here once in case you want to forward it yourself:" : "Send the client this secure link yourself (shown only once):"}
           </p>
-          <code style={{ display: "block", marginTop: 6, fontSize: 12.5, wordBreak: "break-all", color: "var(--ink-strong)" }}>{SITE.baseUrl}/e/{token}</code>
+          <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
+            <LinkRow label="Build estimate" href={`${SITE.baseUrl}/e/${token}?to=configure`} />
+            <LinkRow label="View proposal" href={`${SITE.baseUrl}/e/${token}?to=proposal`} />
+            <LinkRow label="Workspace" href={`${SITE.baseUrl}/e/${token}`} />
+          </div>
         </>
       ) : (
         <p style={{ fontSize: 13, color: "var(--ink-dim)", marginTop: 6 }}>Add a contact with an email to this client, then release again to issue their link.</p>
