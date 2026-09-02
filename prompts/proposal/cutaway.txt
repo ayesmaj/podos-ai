@@ -1,0 +1,30 @@
+Create a bright premium technical cutaway visualization of the supplied PODOS modular AI data-center unit
+for a commercial proposal.
+
+Preserve the exact exterior geometry and product proportions.
+
+Show a controlled partial cutaway through one side of the pod, revealing: organized rack positions, compute
+zones, cooling distribution, power path, network/fiber path, monitoring and controls. Use clean physically
+logical component organization.
+
+Visual style: high-end aerospace engineering illustration combined with realistic product rendering, bright
+white and pale cool-gray environment, thin cobalt and cyan technical pathways, subtle transparent layers,
+precise materials, no clutter.
+
+Camera: wide orthographic-style three-quarter side view with minimal perspective distortion.
+
+Background: clean white technical field with faint blueprint geometry and generous empty space for SVG labels
+added later in code.
+
+No text. No numbers. No fake labels. No people. No random cables. No impossible electrical or coolant
+geometry. No dark background. No exploded sci-fi particles. No changed pod shape.
+
+The image must remain understandable at A4 print size.
+
+Visual mode: bright technical-light premium. Porcelain-white studio, pale-blue architectural gradient,
+faint blueprint geometry, thin cobalt (#1B55F5) and cyan (#28C4EA) technical pathways only where meaningful.
+Materials: matte-black industrial shell with realistic metal, precise panel lines, restrained blue LED edge.
+Lighting: clean white key light, soft cobalt rim light, controlled reflections, no deep-black scene, no neon.
+Camera: low perspective distortion; product scale realistic and large; nothing cropped.
+Absolutely no text, numbers, invented logos, fake labels, people, server rooms, city skylines, sunsets,
+cyberpunk styling, sci-fi particles, shipping-container look, or distorted geometry.

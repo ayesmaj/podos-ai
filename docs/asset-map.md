@@ -73,3 +73,13 @@ Placement for all 16: the option card for that SKU in the client configurator (`
 - Which image sits where is a code decision owned by the src build; confirm each card is wired to its own SKU file (no double placement).
 - The illustrations are conceptual. Any page that presents them next to real delivery photos should caption them as illustrations.
 - Alt text above describes what is drawn and must not be edited to carry specs (GPU counts, kW, redundancy claims) that the picture cannot prove.
+
+## Proposal document assets (2026-09-01)
+
+Generated with `scripts/generate-proposal-assets.mts` (GPT Image 2 **edits** of `public/products/pod.png`; prompts in `src/lib/proposals/imagePrompts.ts`, sidecars in `prompts/proposal/`). Regenerable from `/ops/design` (DB-stored override served by `/api/proposal-assets/[type]`).
+
+| ID | Placement | Size | File | Alt |
+|---|---|---|---|---|
+| PROP-COVER | Proposal page 1 · framed hero (right column, 7/12) | 1024×1536 | `public/visuals/proposal/cover-pod-hero.webp` | PODOS modular AI data-center unit on an engineering platform in a bright studio environment |
+| PROP-CUTAWAY | Proposal page 2 · technical illustration with 6 SVG callouts | 1536×1024 | `public/visuals/proposal/system-cutaway.webp` | Technical cutaway of the PODOS unit showing rack positions, cooling distribution, power and fiber paths |
+| PROP-DEPLOY | Preliminary page 2 · full-width deployment figure | 1536×1024 | `public/visuals/proposal/deployment-site.webp` | PODOS unit placed on an engineered pad with power and fiber connection pathways |

@@ -1,4 +1,4 @@
-import type { DocData, DocLine, DocSpec } from "@/components/private/ProposalDocument";
+import type { DocData, DocLine, DocSpec } from "@/lib/proposals/types";
 import { HERO_IMAGE, menuImage } from "@/lib/proposals/menu-manifest";
 import type { SessionProposal } from "@/lib/proposals/access";
 import { STEPS, STEP_CATEGORY } from "@/lib/proposals/steps";
@@ -78,8 +78,9 @@ export interface ProposalFull {
     public_id: string; estimate_no: string; client_name: string; client_email: string | null; company: string | null;
     project_name: string | null; status: string; one_time_low_cents: number; one_time_high_cents: number;
     recurring_cents: number; expires_at: string | null; created_at: string; signed_at: string | null; signer_name: string | null;
+    mode?: "client_configured" | "admin_built"; design?: unknown;
   };
-  version: { id: string; rev: number; status: string; locked_at: string | null } | null;
+  version: { id: string; rev: number; status: string; locked_at: string | null; pdf_sha256?: string | null; pdf_generated_at?: string | null } | null;
   line_items: RawLine[];
   selections: Record<string, Payload>;
 }

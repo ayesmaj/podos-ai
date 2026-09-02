@@ -1,0 +1,30 @@
+Create a premium portrait-oriented product visualization for an A4 PODOS AI proposal cover.
+
+Preserve the exact PODOS modular data-center unit from the supplied reference: same proportions, long
+horizontal body, structural corners, access panels, vents, blue LED edge geometry, matte-black industrial
+finish, and hardware details.
+
+Place the full pod on a refined circular or low rectangular white engineering platform positioned toward the
+lower-right of the composition.
+
+Background: bright porcelain-white studio environment with a soft pale-blue architectural gradient, subtle
+blueprint floor lines, faint technical measurement geometry, and restrained cyan data paths.
+
+Lighting: bright premium product photography, clean white key light, soft cobalt rim light, controlled
+reflections, realistic matte metal, no deep black scene.
+
+Composition: large product scale, no cropping, enough negative space on the left and upper left for proposal
+typography, sophisticated depth, slightly elevated three-quarter view, realistic industrial scale.
+
+No text. No numbers. No invented logos. No people. No server room. No city skyline. No excessive glow.
+No dark cyberpunk style. No shipping-container appearance. No distorted geometry.
+
+The result must look like a custom $250,000 enterprise infrastructure proposal visual, not a stock image.
+
+Visual mode: bright technical-light premium. Porcelain-white studio, pale-blue architectural gradient,
+faint blueprint geometry, thin cobalt (#1B55F5) and cyan (#28C4EA) technical pathways only where meaningful.
+Materials: matte-black industrial shell with realistic metal, precise panel lines, restrained blue LED edge.
+Lighting: clean white key light, soft cobalt rim light, controlled reflections, no deep-black scene, no neon.
+Camera: low perspective distortion; product scale realistic and large; nothing cropped.
+Absolutely no text, numbers, invented logos, fake labels, people, server rooms, city skylines, sunsets,
+cyberpunk styling, sci-fi particles, shipping-container look, or distorted geometry.

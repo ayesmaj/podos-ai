@@ -8,6 +8,8 @@ import OpsShell from "@/components/ops/OpsShell";
 import LineItemEditor, { type Item, type CatalogOption } from "./LineItemEditor";
 import { cookies } from "next/headers";
 import { dismissReleaseReveal, importClientSelections, releaseToClient, reopenForClientAction, sendBackForRevision, setModeAction, toggleSignature } from "./actions";
+import DesignPanel from "./DesignPanel";
+import { resolveDesign } from "@/lib/proposals/design";
 import { Download, Eye, Import, ListChecks, Mail, PenLine, Send, Undo2, Wand2 } from "lucide-react";
 import { SITE } from "@/lib/seo/site";
 import { STEPS, STEP_CATEGORY } from "@/lib/proposals/steps";
@@ -38,12 +40,12 @@ interface ProposalFull {
     one_time_low_cents: number; one_time_high_cents: number; recurring_cents: number;
     signed_at: string | null; signer_name: string | null; expires_at: string | null;
   };
-  version: { id: string; rev: number; status: string; locked_at: string | null } | null;
+  version: { id: string; rev: number; status: string; locked_at: string | null; pdf_sha256?: string | null; pdf_generated_at?: string | null } | null;
   line_items: Item[];
   selections: Record<string, Record<string, unknown>>;
   invitations: { invitation_id: string; recipient_email: string; access_policy: string; issued_at: string; expires_at: string; revoked: boolean; exchanged_at: string | null }[];
   viewers: { email: string; total_sessions: number; last_view_at: string | null; first_view_at: string | null }[];
-  activity: { at: string; actor: string; event: string }[];
+  activity: { at: string; actor: string; event: string; metadata?: { note?: string; sha256?: string } | null }[];
 }
 
 export default async function ProposalDetail({ params }: { params: Promise<{ publicId: string }> }) {
@@ -85,6 +87,11 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
           <a href={`/api/proposal/${publicId}/pdf`} target="_blank" rel="noopener" style={{ ...mono, fontSize: 11, padding: ".5rem .8rem", borderRadius: 8, textDecoration: "none", border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", display: "inline-flex", alignItems: "center", gap: 6 }}>
             <Download size={13} aria-hidden /> PDF
           </a>
+          {version?.pdf_sha256 && (
+            <a href={`/api/proposal/${publicId}/pdf/stored`} target="_blank" rel="noopener" title={`Immutable PDF stored at release · sha256 ${version.pdf_sha256}`} style={{ ...mono, fontSize: 11, padding: ".5rem .8rem", borderRadius: 8, textDecoration: "none", border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Download size={13} aria-hidden /> Released PDF · {version.pdf_sha256.slice(0, 8)}
+            </a>
+          )}
           {!locked && (() => {
             // Client-builds: releasing before the client has built anything locks an empty
             // proposal (that is what happened to PODOS-1002). Require a submission or line items.
@@ -142,6 +149,7 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
       </div>
 
       <ReleaseReveal />
+      <DesignPanel publicId={publicId} design={resolveDesign((head as { design?: unknown }).design, head.status)} />
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(280px,1fr)", gap: "1.4rem", alignItems: "start" }}>
         {/* main column — driven by the build mode */}
@@ -338,10 +346,13 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
               <p style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>No activity yet.</p>
             ) : activity.slice(0, 15).map((a, i) => (
               <div key={i} style={{ fontSize: 12, padding: "0.25rem 0", borderTop: i === 0 ? "none" : "1px solid var(--edge-faint)" }}>
-                <span style={{ color: "var(--ink-strong)", textTransform: "capitalize" }}>{a.event.replace(/_/g, " ")}</span>
+                <span style={{ color: a.event === "client_comment" ? "var(--brand-deep)" : "var(--ink-strong)", textTransform: "capitalize", fontWeight: a.event === "client_comment" ? 600 : 400 }}>{a.event.replace(/_/g, " ")}</span>
                 <span style={{ ...mono, fontSize: 8, color: "var(--ink-faint)", marginLeft: 6 }}>
-                  {new Date(a.at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  {new Date(a.at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {a.actor}
                 </span>
+                {a.metadata?.note && (
+                  <p style={{ fontSize: 12.5, color: "var(--ink-dim)", margin: "4px 0 2px", padding: "6px 10px", borderLeft: "2px solid var(--brand)", background: "var(--brand-wash)", borderRadius: 6, whiteSpace: "pre-wrap" }}>{a.metadata.note}</p>
+                )}
               </div>
             ))}
           </section>
@@ -376,6 +387,18 @@ async function ReleaseReveal() {
   if (!raw) return null;
   const [token, status, detail] = raw.split("|");
   const sent = status === "sent";
+  if (status === "blocked") {
+    return (
+      <div style={{ marginBottom: "1.2rem", border: "1px solid rgba(185,28,28,.4)", borderRadius: 12, background: "rgba(185,28,28,.06)", padding: "1rem 1.2rem" }}>
+        <p style={{ ...mono, fontSize: 10, color: "#B91C1C", display: "flex", alignItems: "center", gap: 6 }}><Send size={13} aria-hidden /> Release blocked — nothing was locked or sent</p>
+        <p style={{ fontSize: 13, color: "var(--ink-dim)", marginTop: 6, lineHeight: 1.55 }}>{detail}</p>
+        <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 6 }}>Fix the data above (or ask the client to correct their configuration), check the preview, then release again.</p>
+        <form action={dismissReleaseReveal}>
+          <button type="submit" style={{ ...mono, marginTop: 8, fontSize: 9.5, padding: ".4rem .7rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer" }}>Done</button>
+        </form>
+      </div>
+    );
+  }
   return (
     <div style={{ marginBottom: "1.2rem", border: `1px solid ${sent ? "rgba(34,197,94,.45)" : "rgba(180,83,9,.4)"}`, borderRadius: 12, background: sent ? "rgba(34,197,94,.07)" : "rgba(180,83,9,.06)", padding: "1rem 1.2rem" }}>
       <p style={{ ...mono, fontSize: 10, color: sent ? "#15803D" : "#B45309", display: "flex", alignItems: "center", gap: 6 }}>

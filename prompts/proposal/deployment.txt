@@ -1,0 +1,28 @@
+Create a premium bright deployment visualization for a PODOS AI commercial proposal.
+
+Show the approved matte-black PODOS modular data-center unit placed on a clean, engineered concrete or modular
+pad at a credible enterprise deployment site.
+
+Use a straight side-to-three-quarter view with limited perspective distortion.
+
+Include only: prepared pad, power connection pathway, fiber connection pathway, cooling or thermal-module
+connection where appropriate, subtle approved external equipment, restrained landscaping or industrial context,
+enough environment to demonstrate deployment without becoming a hero landscape.
+
+Show the connections using thin cobalt and cyan technical overlays.
+
+Lighting: clear bright daylight, white-blue atmosphere, soft realistic shadows, high-end architectural
+visualization.
+
+No workers. No trucks. No dramatic sunset. No city fantasy. No wind turbines. No fake text. No labels.
+No distorted product. No excessive glow.
+
+Keep the visual clean, credible, modular, and engineering-led.
+
+Visual mode: bright technical-light premium. Porcelain-white studio, pale-blue architectural gradient,
+faint blueprint geometry, thin cobalt (#1B55F5) and cyan (#28C4EA) technical pathways only where meaningful.
+Materials: matte-black industrial shell with realistic metal, precise panel lines, restrained blue LED edge.
+Lighting: clean white key light, soft cobalt rim light, controlled reflections, no deep-black scene, no neon.
+Camera: low perspective distortion; product scale realistic and large; nothing cropped.
+Absolutely no text, numbers, invented logos, fake labels, people, server rooms, city skylines, sunsets,
+cyberpunk styling, sci-fi particles, shipping-container look, or distorted geometry.

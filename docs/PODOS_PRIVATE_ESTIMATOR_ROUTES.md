@@ -28,3 +28,14 @@ no-referrer · X-Frame-Options DENY · nosniff · HSTS.
 
 Identifiers: `publicId` = POD-EST-YYYY-NNNN (URL-safe, non-sequential per
 client, never the DB uuid). Tokens: 256-bit random, SHA-256 at rest, shown once.
+
+## Proposal document routes (added 2026-09-01)
+
+| Route | Auth | Purpose |
+|---|---|---|
+| `/ops/proposals/[publicId]/print?mode=formal\|preliminary&screen=0` | admin session | Semantic A4 print source (one design for all PDFs); `screen=0` = bare pages for the PDF service |
+| `/ops/proposals/[publicId]/preview?mode=` | admin session | Paginated viewer (fit-width/zoom) + release-readiness result |
+| `/client/proposals/[publicId]/print?screen=0` | viewer session bound to the proposal | Client print source; formal after release, preliminary after submission; refuses `screen=0` when downloads are disabled |
+| `/api/proposal/[publicId]/pdf?mode=` | viewer or admin session (forwarded to the print route) | Headless-Chrome PDF of the caller's own print route; `X-Document-SHA256` header |
+| `/api/proposal-assets/[type].webp?v=sha` | public (no client data) | Admin-generated document visual from the DB store; 404 → shipped file in `/public/visuals/proposal` |
+| `/ops/design` | admin session | Regenerate / revert the three controlled visuals (GPT Image 2 edits, server-side key) |

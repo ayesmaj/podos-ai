@@ -1,82 +1,61 @@
-import { cookies } from "next/headers";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { renderToBuffer } from "@react-pdf/renderer";
-import { ProposalPdf, type PdfData } from "@/lib/proposals/ProposalPdf";
-import { VIEWER_COOKIE, getSelections, sessionProposal } from "@/lib/proposals/access";
-import { ADMIN_COOKIE, ADMIN_SECRET, adminSessionValid, getProposalFull } from "@/lib/estimates/admin";
-import { docFromFull, docFromSession, skuNameMap, type ProposalFull } from "@/lib/proposals/document";
+import { cookies, headers } from "next/headers";
+import { VIEWER_COOKIE } from "@/lib/proposals/access";
+import { ADMIN_COOKIE, adminSessionValid } from "@/lib/estimates/admin";
+import { printUrlToPdf, type PrintCookie } from "@/lib/proposals/pdf";
 
 /**
- * GET /api/proposal/[publicId]/pdf — the six-page branded proposal PDF.
+ * GET /api/proposal/[publicId]/pdf — prints the caller's own print route with
+ * headless Chrome and streams the PDF. The print route does the authorization
+ * (viewer session bound to this proposal, or admin session) — this handler
+ * only decides WHICH route to print and forwards the caller's cookie to it,
+ * so there is exactly one document design and one auth path.
  *
- * Dual auth (files are private; master brief §26): a viewer session bound to
- * THIS proposal, or an admin session (staff preview). Neither → 404. The
- * document is built from the same DocData mapper as the web preview, so the
- * download matches what was read online. Wordmark + cover pod are read from
- * /public on the server (never fetched over HTTP). private, no-store.
+ * ?mode=formal|preliminary is honoured for admins only (clients get the
+ * released document).
  */
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 const PUBLIC_ID_RE = /^POD-EST-\d{4}-\d{4}$/;
 
-/**
- * PDF assets live in src/lib/proposals/assets (a small, explicitly traced
- * folder). Never read from public/ here: that made Vercel's output tracer
- * bundle the whole public/ tree (772 MB) into this function.
- */
-async function dataUri(name: string, mime: string): Promise<string | null> {
-  try {
-    const abs = path.join(process.cwd(), "src", "lib", "proposals", "assets", name);
-    return `data:${mime};base64,${(await readFile(abs)).toString("base64")}`;
-  } catch {
-    return null;
-  }
-}
-
-export async function GET(_req: Request, { params }: { params: Promise<{ publicId: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ publicId: string }> }) {
   const { publicId } = await params;
   if (!PUBLIC_ID_RE.test(publicId)) return new Response("Not found", { status: 404 });
 
   const jar = await cookies();
-  const names = await skuNameMap();
-  let data: PdfData | null = null;
-  const logo = (await dataUri("logo.png", "image/png")) ?? "";
-  const pod = await dataUri("pdf-cover-pod.png", "image/png");
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  if (!host) return new Response("Not found", { status: 404 });
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
+  const mode = new URL(req.url).searchParams.get("mode");
 
-  // 1) viewer session bound to this proposal
-  const session = jar.get(VIEWER_COOKIE)?.value ?? "";
-  if (session) {
-    const p = await sessionProposal(session);
-    if (p && p.public_id === publicId) {
-      const selections = (await getSelections(session)) as Record<string, Record<string, unknown>>;
-      data = { ...docFromSession(p, selections, names), logo, pod, viewerEmail: p.viewer_email };
-    }
+  let path: string | null = null;
+  let cookie: PrintCookie | null = null;
+  const viewer = jar.get(VIEWER_COOKIE)?.value;
+  const admin = jar.get(ADMIN_COOKIE)?.value;
+  if (viewer) { path = `/client/proposals/${publicId}/print`; cookie = { name: VIEWER_COOKIE, value: viewer }; }
+  else if (admin && (await adminSessionValid(admin))) {
+    path = `/ops/proposals/${publicId}/print${mode === "formal" || mode === "preliminary" ? `?mode=${mode}&` : "?"}`;
+    cookie = { name: ADMIN_COOKIE, value: admin };
   }
+  if (!path || !cookie) return new Response("Not found", { status: 404 });
 
-  // 2) admin session (staff preview)
-  if (!data) {
-    const adminTok = jar.get(ADMIN_COOKIE)?.value ?? "";
-    if (adminTok && (await adminSessionValid(adminTok))) {
-      const full = (await getProposalFull(ADMIN_SECRET, publicId)) as ProposalFull | null;
-      if (full?.head) data = { ...docFromFull(full, names), logo, pod, viewerEmail: "ADMIN PREVIEW" };
-    }
-  }
-
-  if (!data) return new Response("Not found", { status: 404 });
-
+  const target = `${proto}://${host}${path}${path.includes("?") ? "" : "?"}screen=0`;
   try {
-    const buffer = await renderToBuffer(ProposalPdf({ data }));
-    return new Response(new Uint8Array(buffer), {
+    const { pdf, sha256 } = await printUrlToPdf(target, [cookie]);
+    return new Response(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${data.estimateNo}-PODOS-proposal.pdf"`,
+        "Content-Disposition": `inline; filename="${publicId}-PODOS-proposal.pdf"`,
         "Cache-Control": "private, no-store",
         "X-Robots-Tag": "noindex, nofollow, noarchive, nosnippet",
+        "X-Document-SHA256": sha256,
       },
     });
   } catch (err) {
-    console.error("[proposal/pdf] render failed:", err instanceof Error ? err.message : "unknown");
-    return new Response("PDF unavailable", { status: 500 });
+    const msg = err instanceof Error ? err.message : "unknown";
+    console.error("[proposal/pdf] render failed:", msg);
+    if (/returned 404/.test(msg)) return new Response("Not found", { status: 404 });
+    return new Response("PDF unavailable", { status: 503 });
   }
 }

@@ -1,0 +1,30 @@
+{
+  "created_at": "2026-09-02T04:26:07.673Z",
+  "model": "gpt-image-2",
+  "endpoint": "images/edits",
+  "type": "cutaway",
+  "size": "1536x1024",
+  "quality": "high",
+  "references": [
+    "public/products/pod.png",
+    "public/optimus/optimus-pod-front.png"
+  ],
+  "outputs": [
+    "public/visuals/proposal/system-cutaway.png",
+    "public/visuals/proposal/system-cutaway.webp"
+  ],
+  "usage": {
+    "input_tokens": 2574,
+    "input_tokens_details": {
+      "image_tokens": 2215,
+      "text_tokens": 359
+    },
+    "output_tokens": 5488,
+    "output_tokens_details": {
+      "image_tokens": 5488,
+      "text_tokens": 0
+    },
+    "total_tokens": 8062
+  },
+  "revised_prompt": null
+}

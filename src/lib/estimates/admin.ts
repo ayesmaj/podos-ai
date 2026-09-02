@@ -89,6 +89,18 @@ export const createProposal = (secret: string, i: {
 export const setProposalMode = (secret: string, publicId: string, mode: ProposalMode) =>
   rpc<boolean>("set_proposal_mode", { p_admin_secret: secret, p_public_id: publicId, p_mode: mode });
 
+/** Merge partial document design settings into estimates.design (returns the merged object). */
+export const setProposalDesign = (secret: string, publicId: string, design: Record<string, unknown>) =>
+  rpc<Record<string, unknown>>("set_proposal_design", { p_admin_secret: secret, p_public_id: publicId, p_design: design });
+
+/** Store the immutable PDF (bytes + fingerprint) for a released version. */
+export const recordProposalPdf = (secret: string, publicId: string, rev: number, sha256: string, path: string, pdfB64?: string) =>
+  rpc<boolean>("record_proposal_pdf", { p_admin_secret: secret, p_public_id: publicId, p_rev: rev, p_sha256: sha256, p_path: path, p_pdf_b64: pdfB64 ?? null });
+
+/** The stored PDF of a released version (latest, or a given rev). */
+export const getStoredPdf = async (secret: string, publicId: string, rev?: number) =>
+  ((await rpc<{ rev: number; sha256: string; generated_at: string; pdf_b64: string }[]>("get_stored_pdf", { p_admin_secret: secret, p_public_id: publicId, p_rev: rev ?? null })) ?? [])[0] ?? null;
+
 /** Record an outbound client email (sent or not) for the audit trail + activity feed. */
 export const logEmail = (secret: string, i: {
   publicId: string; to: string; template: string; subject: string; status: "sent" | "not_sent"; providerId?: string; error?: string;

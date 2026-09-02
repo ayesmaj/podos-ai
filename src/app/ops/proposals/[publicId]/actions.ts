@@ -1,14 +1,16 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { requireOps } from "@/lib/ops/session";
 import {
-  ADMIN_SECRET, addCatalogLineItem, deleteLineItem, upsertLineItem,
-  importSelections, logEmail, releaseProposal, reopenProposal, requestRevision, setProposalMode, setSignatureState,
+  ADMIN_COOKIE, ADMIN_SECRET, addCatalogLineItem, deleteLineItem, upsertLineItem,
+  importSelections, logEmail, recordProposalPdf, releaseProposal, reopenProposal, requestRevision, setProposalDesign, setProposalMode, setSignatureState,
   type ProposalMode,
 } from "@/lib/estimates/admin";
 import { releasedEmail, sendProposalEmail } from "@/lib/email/proposals";
+import { adminRenderModel } from "@/lib/proposals/render";
+import { printUrlToPdf } from "@/lib/proposals/pdf";
 
 /**
  * Server actions for the proposal editor. Each re-checks the admin session
@@ -66,7 +68,29 @@ export async function releaseToClient(formData: FormData) {
   await requireOps();
   const publicId = String(formData.get("publicId") ?? "");
   if (!publicId) return;
+  // release gate (brief §19): blocking errors stop the release before anything is locked or emailed
+  const model = await adminRenderModel(publicId);
+  if (!model) return;
+  if (!model.validation.ok) {
+    const jar = await cookies();
+    jar.set("podos_release", ["", "blocked", model.validation.errors.map((e) => e.message).join(" ")].join("|"), { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 600 });
+    revalidatePath(`/ops/proposals/${publicId}`);
+    return;
+  }
   const r = await releaseProposal(ADMIN_SECRET, publicId);
+  // immutable PDF of the released version: printed now, bytes + sha stored on the version row
+  if (r?.ok) {
+    try {
+      const h = await headers();
+      const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+      const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+      const admin = (await cookies()).get(ADMIN_COOKIE)?.value ?? "";
+      const { pdf, sha256 } = await printUrlToPdf(`${proto}://${host}/ops/proposals/${publicId}/print?mode=formal&screen=0`, [{ name: ADMIN_COOKIE, value: admin }]);
+      await recordProposalPdf(ADMIN_SECRET, publicId, model.full.version?.rev ?? 1, sha256, "db:proposal_versions.pdf", pdf.toString("base64"));
+    } catch (e) {
+      console.error("[release] stored PDF failed:", e instanceof Error ? e.message : "unknown");
+    }
+  }
   let status = "notsent"; let detail = "no contact with an email on this client";
   if (r?.invited && r.token && r.recipient_email) {
     const msg = releasedEmail({ company: r.company ?? null, project: r.project ?? null, recipientName: r.recipient_name ?? null, token: r.token });
@@ -111,6 +135,31 @@ export async function toggleSignature(formData: FormData) {
   const enable = formData.get("enable") === "1";
   if (publicId) await setSignatureState(ADMIN_SECRET, publicId, enable);
   revalidatePath(`/ops/proposals/${publicId}`);
+}
+
+/** Proposal Design panel: page mode, visuals, sections, signature, validity, watermark, permissions. */
+export async function saveDesignAction(formData: FormData) {
+  await requireOps();
+  const publicId = String(formData.get("publicId") ?? "");
+  if (!publicId) return;
+  const on = (k: string) => formData.get(k) === "on";
+  const validity = Number(formData.get("validity_days"));
+  const wm = String(formData.get("watermark") ?? "none");
+  await setProposalDesign(ADMIN_SECRET, publicId, {
+    page_mode: formData.get("page_mode") === "preliminary" ? "preliminary" : "formal",
+    visuals: { cover: on("v_cover"), cutaway: on("v_cutaway"), deployment: on("v_deployment") },
+    sections: {
+      exec_summary: on("s_exec_summary"), metrics: on("s_metrics"), spec_modules: on("s_spec_modules"), scope: on("s_scope"),
+      timeline: on("s_timeline"), responsibilities: on("s_responsibilities"), assumptions: on("s_assumptions"), next_step: on("s_next_step"),
+    },
+    signature_block: on("signature_block"),
+    validity_days: Number.isInteger(validity) && validity > 0 && validity <= 365 ? validity : null,
+    watermark: ["none", "draft", "confidential", "preview"].includes(wm) ? wm : "none",
+    allow_download: on("allow_download"),
+    allow_comments: on("allow_comments"),
+  });
+  revalidatePath(`/ops/proposals/${publicId}`);
+  revalidatePath(`/ops/proposals/${publicId}/preview`);
 }
 
 /** Send a submitted configuration back to the client for changes. */

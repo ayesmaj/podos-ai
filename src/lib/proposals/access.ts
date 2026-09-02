@@ -24,6 +24,9 @@ const ANON_KEY =
 /** Client-route session cookie. HttpOnly, Secure, SameSite=Lax, path-scoped. */
 export const VIEWER_COOKIE = "podos_proposal_session";
 
+/** Client comment / revision request from the secure viewer (recorded as an activity event for PODOS). */
+export const clientComment = (session: string, note: string) => rpc<boolean>("client_comment", { p_session: session, p_note: note });
+
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T | null> {
   try {
     const res = await fetch(`${URL_BASE}/rest/v1/rpc/${fn}`, {
@@ -96,6 +99,8 @@ export interface SessionProposal {
   public_id: string;
   /** client_configured = the client builds via the menu; admin_built = PODOS builds, client reviews/signs */
   mode: "client_configured" | "admin_built";
+  /** partial document design settings (src/lib/proposals/design.ts) */
+  design?: unknown;
   estimate_no: string;
   client_name: string;
   company: string | null;

@@ -20,6 +20,7 @@ const MODULES: { label: string; href: string; ready: boolean }[] = [
   { label: "Projects", href: "/ops/projects", ready: true },
   { label: "Proposals", href: "/ops/proposals", ready: true },
   { label: "Catalog & Pricing", href: "/ops/pricing", ready: true },
+  { label: "Document Design", href: "/ops/design", ready: true },
   { label: "Engineering Review", href: "/ops/engineering-review", ready: false },
   { label: "Signatures", href: "/ops/signatures", ready: false },
   { label: "Activity", href: "/ops/activity", ready: false },
