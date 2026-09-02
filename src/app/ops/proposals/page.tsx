@@ -126,11 +126,18 @@ export default async function ProposalsPage() {
                         <div key={i.invitation_id} style={{ display: "flex", gap: "0.7rem", alignItems: "baseline", flexWrap: "wrap", fontSize: 12.5 }}>
                           <span style={{ color: "var(--ink-strong)" }}>{i.recipient_name ? `${i.recipient_name} · ` : ""}{i.recipient_email}</span>
                           <span style={{ ...label, fontSize: 9, color: "var(--ink-faint)" }}>{i.access_policy}</span>
+                          {!i.revoked && i.link_token && (
+                            <span style={{ display: "inline-flex", gap: 10, flexWrap: "wrap", fontSize: 11.5 }}>
+                              {r.mode === "client_configured" && <a href={`${SITE.baseUrl}/e/${i.link_token}?to=configure`} target="_blank" rel="noopener" style={{ color: "var(--brand)" }}>Edit estimate link</a>}
+                              <a href={`${SITE.baseUrl}/e/${i.link_token}?to=proposal`} target="_blank" rel="noopener" style={{ color: "var(--brand)" }}>View proposal link</a>
+                            </span>
+                          )}
                           {i.revoked ? <span className={`${s.chip} ${s.chipDanger}`}>revoked</span> : (
                             <>
                               <span className={s.help} style={{ marginTop: 0 }}>{i.exchanged_at ? `verified · last seen ${fmt(i.last_seen)}` : `not opened · expires ${fmt(i.expires_at)}`}</span>
                               <form action={revokeInvitationAction} style={{ display: "inline" }}>
                                 <input type="hidden" name="invitationId" value={i.invitation_id} />
+                                <input type="hidden" name="publicId" value={r.public_id} />
                                 <button type="submit" className={s.btnGhost} style={{ ...label, fontSize: 9, color: "#B91C1C", background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4 }}><Trash2 size={11} aria-hidden /> Revoke</button>
                               </form>
                             </>

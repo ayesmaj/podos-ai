@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { headers } from "next/headers";
-import { invitationStatus } from "@/lib/proposals/access";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { VIEWER_COOKIE, invitationStatus, sessionProposal } from "@/lib/proposals/access";
 import { getEstimateByToken, usd } from "@/lib/estimates/store";
 import AccessForm from "./AccessForm";
 
@@ -65,14 +66,31 @@ function Shell({ children, wide }: { children: React.ReactNode; wide?: boolean }
 
 export default async function SecureEntry({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ to?: string }>;
 }) {
   const { token } = await params;
+  const { to: toRaw } = await searchParams;
+  // deep-link intent from the admin's "Edit estimate" / "View proposal" links
+  const to: "configure" | "proposal" | null = toRaw === "configure" || toRaw === "proposal" ? toRaw : null;
 
   // ---- 1. invitation tier (canonical) ----
   const invite = await invitationStatus(token);
   if (invite?.ok) {
+    // Returning client who already verified this proposal: skip the access
+    // screen and go straight where the link points (edit / view / workspace).
+    const session = (await cookies()).get(VIEWER_COOKIE)?.value ?? "";
+    if (session) {
+      const p = await sessionProposal(session);
+      if (p && p.public_id === invite.public_id) {
+        const releasedStates = ["released", "signature_requested", "client_signed", "signed", "countersigned", "completed"];
+        if (to === "configure" && p.mode === "client_configured") redirect(`/client/proposals/${p.public_id}/configure`);
+        if (to === "proposal" && releasedStates.includes(p.status)) redirect(`/client/proposals/${p.public_id}/proposal`);
+        redirect(`/client/proposals/${p.public_id}`);
+      }
+    }
     return (
       <Shell>
         <p style={{ ...mono, color: "var(--brand)" }}>PODOS · Secure access</p>
@@ -86,7 +104,14 @@ export default async function SecureEntry({
             ? " We will email a six-digit code to that address to verify it is you."
             : " Confirm the authorized email address to continue."}
         </p>
-        <AccessForm token={token} policy={invite.access_policy} maskedEmail={invite.masked_email} />
+        <AccessForm
+          token={token}
+          policy={invite.access_policy}
+          maskedEmail={invite.masked_email}
+          to={to === "configure" && invite.mode === "client_configured" ? "configure"
+            : to === "proposal" && ["released", "signature_requested", "client_signed", "signed", "countersigned", "completed"].includes(invite.status) ? "proposal"
+            : null}
+        />
         <p style={{ ...mono, marginTop: "1.6rem", lineHeight: 1.7 }}>
           Confidential — do not forward. Access is recorded.
         </p>

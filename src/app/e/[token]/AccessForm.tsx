@@ -29,10 +29,13 @@ export default function AccessForm({
   token,
   policy,
   maskedEmail,
+  to = null,
 }: {
   token: string;
   policy: "otp" | "email-confirm";
   maskedEmail: string;
+  /** where to land after verification: the configurator, the released proposal, or the workspace hub */
+  to?: "configure" | "proposal" | null;
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<"start" | "code" | "busy">(policy === "otp" ? "start" : "code");
@@ -80,7 +83,7 @@ export default function AccessForm({
         setPhase("code");
         return;
       }
-      router.replace(`/client/proposals/${json.id}`);
+      router.replace(`/client/proposals/${json.id}${to === "configure" ? "/configure" : to === "proposal" ? "/proposal" : ""}`);
     } catch {
       setError("Network problem — try again.");
       setPhase("code");

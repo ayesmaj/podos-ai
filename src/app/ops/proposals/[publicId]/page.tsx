@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOps } from "@/lib/ops/session";
-import { ADMIN_SECRET, getProposalFull, listCatalog, usd } from "@/lib/estimates/admin";
+import { ADMIN_SECRET, getProposalFull, listCatalog, listContacts, listInvitations, usd } from "@/lib/estimates/admin";
+import { dismissInviteReveal, inviteContactAction, revokeInvitationAction } from "../actions";
 import OpsShell from "@/components/ops/OpsShell";
 import LineItemEditor, { type Item, type CatalogOption } from "./LineItemEditor";
 import { cookies } from "next/headers";
@@ -31,7 +32,7 @@ const PUBLIC_ID_RE = /^POD-EST-\d{4}-\d{4}$/;
 
 interface ProposalFull {
   head: {
-    public_id: string; estimate_no: string; client_name: string; company: string | null;
+    public_id: string; estimate_no: string; organization_id: string; client_name: string; company: string | null;
     project_name: string | null; status: string; view_count: number;
     mode: "client_configured" | "admin_built";
     one_time_low_cents: number; one_time_high_cents: number; recurring_cents: number;
@@ -52,7 +53,7 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
 
   const data = (await getProposalFull(ADMIN_SECRET, publicId)) as ProposalFull | null;
   if (!data?.head) notFound();
-  const { head, version, line_items, invitations, viewers, activity } = data;
+  const { head, version, line_items, activity } = data;
   const selections = data.selections ?? {};
   const released = ["released", "signature_requested", "client_signed", "signed", "countersigned", "completed"].includes(head.status);
   const chosen = Object.entries(STEP_CATEGORY).flatMap(([step]) => {
@@ -61,6 +62,11 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
   });
   const stepsSaved = Object.keys(selections).length;
   const catalog = (await listCatalog(ADMIN_SECRET)) ?? [];
+  const [allContacts, invitesWithLinks] = await Promise.all([listContacts(ADMIN_SECRET), listInvitations(ADMIN_SECRET, head.estimate_no)]);
+  const orgContacts = (allContacts ?? []).filter((c) => c.organization_id === head.organization_id && c.email);
+  const skuName = new Map(catalog.map((c) => [c.sku ?? "", c.name]));
+  const clientMode = head.mode === "client_configured";
+  const submitted = ["client_submitted", "engineering_review", "commercial_review", "approved"].includes(head.status);
   // add-from-catalog is keyed by SKU; items saved without one are edited in /ops/pricing first
   const catalogOptions: CatalogOption[] = catalog
     .filter((c): c is typeof c & { sku: string } => !!c.sku)
@@ -125,11 +131,71 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
       <ReleaseReveal />
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(280px,1fr)", gap: "1.4rem", alignItems: "start" }}>
-        {/* editor */}
-        <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.2rem" }}>
-          <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)", marginBottom: "0.9rem" }}>Line items</p>
-          <LineItemEditor publicId={publicId} items={line_items} catalog={catalogOptions} locked={locked} />
-        </section>
+        {/* main column — driven by the build mode */}
+        <div style={{ display: "grid", gap: "1.2rem" }}>
+          {clientMode && (
+            <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.2rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+                <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)" }}>Client configuration</p>
+                <span style={{ ...mono, fontSize: 9, color: "var(--ink-faint)" }}>{stepsSaved} / {STEPS.length - 1} steps saved · {head.status.replace(/_/g, " ")}</span>
+              </div>
+              {stepsSaved === 0 ? (
+                <div style={{ marginTop: "0.9rem", padding: "1rem 1.1rem", borderRadius: 10, background: "var(--brand-wash)", border: "1px solid rgba(37,99,235,.2)" }}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink-strong)" }}>Waiting for the client to configure.</p>
+                  <p style={{ fontSize: 12.5, color: "var(--ink-dim)", marginTop: 4, lineHeight: 1.55 }}>
+                    The client builds this proposal from the menu configurator. Invite a contact below if you have not yet — their selections and live estimate will appear here as they save. Switch to <strong>PODOS builds</strong> if you want to add the line items yourself.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ marginTop: "0.9rem", display: "grid", gap: "0.9rem" }}>
+                  {Object.entries(selections).filter(([step]) => step !== "review").map(([step, payload]) => {
+                    const stepDef = STEPS.find((x) => x.id === step);
+                    const sku = payload.sku as string | undefined;
+                    const facts = Object.entries(payload).filter(([k, v]) => k !== "sku" && v !== "" && v != null && !(Array.isArray(v) && v.length === 0));
+                    return (
+                      <div key={step} style={{ borderTop: "1px solid var(--edge-faint)", paddingTop: "0.7rem" }}>
+                        <p style={{ ...mono, fontSize: 9, color: "var(--brand-deep)" }}>{stepDef?.no} · {stepDef?.title ?? step}</p>
+                        {sku && <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink-strong)", marginTop: 4 }}>{skuName.get(sku) ?? sku} <span style={{ ...mono, fontSize: 9, color: "var(--ink-faint)", marginLeft: 6 }}>{sku}</span></p>}
+                        {facts.length > 0 && (
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "4px 16px", marginTop: 4 }}>
+                            {facts.map(([k, v]) => (
+                              <div key={k} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 12.5 }}>
+                                <span style={{ color: "var(--ink-faint)", textTransform: "capitalize" }}>{k.replace(/_/g, " ")}</span>
+                                <span style={{ color: "var(--ink-strong)", textAlign: "right" }}>{Array.isArray(v) ? v.join(", ") : String(v)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {!locked && chosen.length > 0 && (
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", padding: "0.9rem 1rem", borderRadius: 10, background: submitted ? "rgba(34,197,94,.08)" : "var(--brand-wash)", border: `1px solid ${submitted ? "rgba(34,197,94,.45)" : "rgba(37,99,235,.2)"}` }}>
+                      <p style={{ fontSize: 13, color: "var(--ink-strong)", flex: "1 1 240px" }}>
+                        {submitted ? "The client submitted this configuration." : "The client is still configuring."} Import their selections to turn them into line items you can adjust and release.
+                      </p>
+                      <form action={importClientSelections}>
+                        <input type="hidden" name="publicId" value={publicId} />
+                        <button type="submit" style={{ ...mono, fontSize: 10, padding: ".55rem .9rem", borderRadius: 8, border: "none", background: "var(--brand-gradient)", color: "#fff", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                          <Import size={13} aria-hidden /> Import selections as line items
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
+
+          {(!clientMode || line_items.length > 0) && (
+            <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.2rem" }}>
+              <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)", marginBottom: "0.9rem" }}>
+                Line items{clientMode ? " · imported from the client's configuration" : ""}
+              </p>
+              <LineItemEditor publicId={publicId} items={line_items} catalog={catalogOptions} locked={locked} />
+            </section>
+          )}
+        </div>
 
         {/* right rail */}
         <div style={{ display: "grid", gap: "1.2rem", position: "sticky", top: "1rem" }}>
@@ -194,27 +260,63 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
           </section>
 
           <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.1rem 1.2rem" }}>
-            <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)", marginBottom: "0.6rem" }}>Secure access</p>
-            {invitations.length === 0 && viewers.length === 0 ? (
-              <p style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>No invitations yet — create one from the proposals list.</p>
-            ) : (
-              <>
-                {invitations.map((i) => (
-                  <div key={i.invitation_id} style={{ fontSize: 12.5, padding: "0.3rem 0", borderTop: "1px solid var(--edge-faint)" }}>
-                    <span style={{ color: "var(--ink-strong)" }}>{i.recipient_email}</span>
-                    <span style={{ ...mono, fontSize: 8.5, color: i.revoked ? "#B91C1C" : "var(--ink-faint)", marginLeft: 6 }}>
-                      {i.revoked ? "revoked" : i.exchanged_at ? "verified" : "not opened"}
-                    </span>
-                  </div>
-                ))}
-                {viewers.map((v) => (
-                  <div key={v.email} style={{ fontSize: 12, color: "var(--ink-faint)", padding: "0.2rem 0" }}>
-                    {v.email} · {v.total_sessions} session{v.total_sessions === 1 ? "" : "s"}
-                    {v.last_view_at && ` · last ${new Date(v.last_view_at).toLocaleDateString("en-US")}`}
-                  </div>
-                ))}
-              </>
+            <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)", marginBottom: "0.6rem" }}>Secure access · client links</p>
+            {(invitesWithLinks ?? []).length === 0 && (
+              <p style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>No client links yet. Invite a contact below — each person gets their own secret link.</p>
             )}
+            {(invitesWithLinks ?? []).map((i) => {
+              const base = i.link_token ? `${SITE.baseUrl}/e/${i.link_token}` : null;
+              return (
+                <div key={i.invitation_id} style={{ padding: "0.6rem 0", borderTop: "1px solid var(--edge-faint)" }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap", fontSize: 12.5 }}>
+                    <span style={{ color: "var(--ink-strong)", fontWeight: 600 }}>{i.recipient_name ? `${i.recipient_name} · ` : ""}{i.recipient_email}</span>
+                    <span style={{ ...mono, fontSize: 8.5, color: i.revoked ? "#B91C1C" : i.exchanged_at ? "#15803D" : "var(--ink-faint)" }}>
+                      {i.revoked ? "revoked" : i.exchanged_at ? `verified · ${i.sessions} session${Number(i.sessions) === 1 ? "" : "s"}` : `not opened · expires ${new Date(i.expires_at).toLocaleDateString("en-US")}`}
+                    </span>
+                    {!i.revoked && (
+                      <form action={revokeInvitationAction} style={{ display: "inline", marginLeft: "auto" }}>
+                        <input type="hidden" name="invitationId" value={i.invitation_id} />
+                        <input type="hidden" name="publicId" value={publicId} />
+                        <button type="submit" style={{ ...mono, fontSize: 8.5, color: "#B91C1C", background: "none", border: "none", cursor: "pointer" }}>Revoke</button>
+                      </form>
+                    )}
+                  </div>
+                  {!i.revoked && (base ? (
+                    <div style={{ display: "grid", gap: 4, marginTop: 6 }}>
+                      {clientMode && <LinkRow label="Edit estimate" href={`${base}?to=configure`} />}
+                      <LinkRow label={released ? "View proposal" : "View (after release)"} href={`${base}?to=proposal`} />
+                      <LinkRow label="Workspace" href={base} />
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 11.5, color: "var(--ink-faint)", marginTop: 4 }}>Link issued before link storage existed — revoke and invite again to get a visible link.</p>
+                  ))}
+                </div>
+              );
+            })}
+            {orgContacts.length === 0 ? (
+              <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 8 }}>Add a contact with an email to <Link href={`/ops/clients/${head.organization_id}`} style={{ color: "var(--brand)" }}>this client</Link> to create a link.</p>
+            ) : (
+              <form action={inviteContactAction} style={{ display: "grid", gap: 6, marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--edge)" }}>
+                <input type="hidden" name="estimateNo" value={head.estimate_no} />
+                <input type="hidden" name="publicId" value={publicId} />
+                <input type="hidden" name="mode" value={head.mode} />
+                <input type="hidden" name="company" value={head.company ?? ""} />
+                <input type="hidden" name="project" value={head.project_name ?? ""} />
+                <select name="contactId" required defaultValue="" style={{ padding: "0.45rem 0.6rem", borderRadius: 8, border: "1px solid var(--edge-bright)", fontSize: 12.5, fontFamily: "inherit" }}>
+                  <option value="" disabled>Choose a contact…</option>
+                  {orgContacts.map((c) => <option key={c.id} value={c.id}>{[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email} · {c.email}</option>)}
+                </select>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <select name="policy" defaultValue="email-confirm" style={{ padding: "0.45rem 0.6rem", borderRadius: 8, border: "1px solid var(--edge-bright)", fontSize: 12.5, fontFamily: "inherit", flex: 1 }}>
+                    <option value="email-confirm">Email confirm</option><option value="otp">Email OTP</option>
+                  </select>
+                  <button type="submit" style={{ ...mono, fontSize: 9.5, padding: ".5rem .8rem", borderRadius: 8, border: "1px solid var(--brand)", background: "var(--brand-wash)", color: "var(--brand-deep)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <Send size={12} aria-hidden /> New link
+                  </button>
+                </div>
+              </form>
+            )}
+            <InviteOutcome />
           </section>
 
           <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.1rem 1.2rem" }}>
@@ -278,6 +380,33 @@ async function ReleaseReveal() {
       )}
       <form action={dismissReleaseReveal}>
         <button type="submit" style={{ ...mono, marginTop: 8, fontSize: 9.5, padding: ".4rem .7rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer" }}>Done</button>
+      </form>
+    </div>
+  );
+}
+
+/** One client link with its purpose — selectable text so it can be copied in one click. */
+function LinkRow({ label, href }: { label: string; href: string }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "96px 1fr", gap: 8, alignItems: "baseline" }}>
+      <span style={{ ...mono, fontSize: 8.5, color: "var(--brand-deep)" }}>{label}</span>
+      <a href={href} target="_blank" rel="noopener" style={{ fontSize: 11.5, color: "var(--ink-dim)", wordBreak: "break-all", textDecoration: "none", borderBottom: "1px dotted var(--edge-bright)" }}>{href}</a>
+    </div>
+  );
+}
+
+/** After "New link": whether the invitation email went out (one-shot cookie set by the action). */
+async function InviteOutcome() {
+  const jar = await cookies();
+  const raw = jar.get("podos_new_invite")?.value;
+  if (!raw) return null;
+  const [, , status, detail] = raw.split("|");
+  const sent = status === "sent";
+  return (
+    <div style={{ marginTop: 10, padding: "0.6rem 0.8rem", borderRadius: 8, fontSize: 12, border: `1px solid ${sent ? "rgba(34,197,94,.45)" : "rgba(180,83,9,.4)"}`, background: sent ? "rgba(34,197,94,.07)" : "rgba(180,83,9,.06)", color: sent ? "#15803D" : "#B45309" }}>
+      {sent ? `Link created and emailed to ${detail}.` : `Link created — email NOT sent (${detail}). Copy the link above and send it yourself.`}
+      <form action={dismissInviteReveal} style={{ display: "inline", marginLeft: 8 }}>
+        <button type="submit" style={{ ...mono, fontSize: 8.5, background: "none", border: "none", cursor: "pointer", color: "var(--ink-faint)" }}>dismiss</button>
       </form>
     </div>
   );

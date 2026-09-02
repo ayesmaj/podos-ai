@@ -55,6 +55,10 @@ export interface InvitationStatus {
   access_policy: "otp" | "email-confirm";
   masked_email: string;
   company: string | null;
+  /** clean route segment of the proposal this invitation belongs to (not secret) */
+  public_id: string;
+  mode: "client_configured" | "admin_built";
+  status: string;
 }
 
 /** Validate an invitation link. Reveals only the access screen's needs. */

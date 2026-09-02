@@ -149,6 +149,8 @@ export interface InvitationRow {
   exchanged_at: string | null;
   sessions: number;
   last_seen: string | null;
+  /** raw link token, decrypted for the admin; null for invitations issued before link storage */
+  link_token: string | null;
 }
 
 export const listInvitations = (secret: string, estimateNo: string) =>

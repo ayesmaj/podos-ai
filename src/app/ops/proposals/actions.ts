@@ -64,13 +64,16 @@ export async function inviteContactAction(formData: FormData) {
     httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 300,
   });
   revalidatePath("/ops/proposals");
+  if (publicId) revalidatePath(`/ops/proposals/${publicId}`);
 }
 
 export async function revokeInvitationAction(formData: FormData) {
   await requireOps();
   const id = String(formData.get("invitationId") ?? "");
+  const publicId = String(formData.get("publicId") ?? "");
   if (id) await revokeInvitation(ADMIN_SECRET, id);
   revalidatePath("/ops/proposals");
+  if (publicId) revalidatePath(`/ops/proposals/${publicId}`);
 }
 
 export async function dismissInviteReveal() {
