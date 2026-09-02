@@ -75,6 +75,8 @@ export default async function ConfigurePage({ params, searchParams }: { params: 
   if (!session) notFound();
   const p = await sessionProposal(session);
   if (!p || p.public_id !== publicId) notFound();
+  // admin_built proposals are assembled by PODOS; the client never sees the configurator
+  if (p.mode === "admin_built") notFound();
 
   const [selections, catalog, estimate] = await Promise.all([getSelections(session), publicCatalog(), previewEstimate(session)]);
   const images = imageMap(catalog);

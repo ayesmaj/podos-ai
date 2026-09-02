@@ -37,6 +37,13 @@ export default function NewProposalForm({ orgs, projects, contacts }: { orgs: Or
 
   return (
     <form id="new" action={createProposalAction} className={s.panel} style={{ padding: "1.1rem 1.2rem", display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: "0.7rem", alignItems: "end" }}>
+      <label style={{ display: "grid", gap: 4, gridColumn: "1 / -1" }}>
+        <span className={s.label}>How is this proposal built?</span>
+        <select name="mode" defaultValue="client_configured" style={field}>
+          <option value="client_configured">The client builds it — guided menu configurator, then I review</option>
+          <option value="admin_built">I build it — I add the line items, the client only reviews and signs</option>
+        </select>
+      </label>
       <label style={{ display: "grid", gap: 4 }}>
         <span className={s.label}>Client</span>
         <select name="orgId" value={orgId} onChange={(e) => setOrgId(e.target.value)} style={field} required>

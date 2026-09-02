@@ -1,11 +1,14 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { requireOps } from "@/lib/ops/session";
 import {
   ADMIN_SECRET, addCatalogLineItem, deleteLineItem, upsertLineItem,
-  importSelections, releaseProposal, requestRevision, setSignatureState,
+  importSelections, logEmail, releaseProposal, requestRevision, setProposalMode, setSignatureState,
+  type ProposalMode,
 } from "@/lib/estimates/admin";
+import { releasedEmail, sendProposalEmail } from "@/lib/email/proposals";
 
 /**
  * Server actions for the proposal editor. Each re-checks the admin session
@@ -53,11 +56,43 @@ export async function importClientSelections(formData: FormData) {
   revalidatePath(`/ops/proposals/${publicId}`);
 }
 
-/** Snapshot + lock this version and make the formal proposal visible to the client. */
+/**
+ * Release = snapshot + lock this version, issue a fresh secure invitation for
+ * the client's contact, and email them the link. If no email provider is
+ * configured (or the send fails) the release still happens and the link is
+ * revealed once to the admin to send by hand — nothing stalls silently.
+ */
 export async function releaseToClient(formData: FormData) {
   await requireOps();
   const publicId = String(formData.get("publicId") ?? "");
-  if (publicId) await releaseProposal(ADMIN_SECRET, publicId);
+  if (!publicId) return;
+  const r = await releaseProposal(ADMIN_SECRET, publicId);
+  let status = "notsent"; let detail = "no contact with an email on this client";
+  if (r?.invited && r.token && r.recipient_email) {
+    const msg = releasedEmail({ company: r.company ?? null, project: r.project ?? null, recipientName: r.recipient_name ?? null, token: r.token });
+    const sent = await sendProposalEmail(r.recipient_email, msg);
+    status = sent.sent ? "sent" : "notsent";
+    detail = sent.sent ? r.recipient_email : (sent.reason ?? "send failed");
+    await logEmail(ADMIN_SECRET, { publicId, to: r.recipient_email, template: "proposal_released", subject: msg.subject, status: sent.sent ? "sent" : "not_sent", providerId: sent.id, error: sent.reason });
+  }
+  const jar = await cookies();
+  // one-shot, HttpOnly reveal for the editor: token | sent/notsent | detail
+  jar.set("podos_release", [r?.token ?? "", status, detail].join("|"), { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 600 });
+  revalidatePath(`/ops/proposals/${publicId}`);
+}
+
+export async function dismissReleaseReveal() {
+  await requireOps();
+  const jar = await cookies();
+  jar.delete("podos_release");
+}
+
+/** Client builds via the menu, or PODOS builds the line items. */
+export async function setModeAction(formData: FormData) {
+  await requireOps();
+  const publicId = String(formData.get("publicId") ?? "");
+  const mode: ProposalMode = formData.get("mode") === "admin_built" ? "admin_built" : "client_configured";
+  if (publicId) await setProposalMode(ADMIN_SECRET, publicId, mode);
   revalidatePath(`/ops/proposals/${publicId}`);
 }
 

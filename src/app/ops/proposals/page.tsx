@@ -39,11 +39,15 @@ async function NewInviteReveal() {
   const jar = await cookies();
   const raw = jar.get("podos_new_invite")?.value;
   if (!raw) return null;
-  const idx = raw.indexOf(":");
+  const [estimateNo, token, status, detail] = raw.split("|");
+  const sent = status === "sent";
   return (
-    <div className={s.panel} style={{ marginTop: "1rem", padding: "1rem 1.2rem", borderColor: "rgba(34,211,238,.45)", background: "rgba(34,211,238,.07)" }}>
-      <p className={`${s.label} ${s.labelBrand}`}>Invitation for {raw.slice(0, idx)} · copy now, shown only once</p>
-      <code style={{ display: "block", marginTop: ".5rem", fontSize: 12.5, wordBreak: "break-all", color: "var(--ink-strong)" }}>{SITE.baseUrl}/e/{raw.slice(idx + 1)}</code>
+    <div className={s.panel} style={{ marginTop: "1rem", padding: "1rem 1.2rem", borderColor: sent ? "rgba(34,197,94,.45)" : "rgba(180,83,9,.4)", background: sent ? "rgba(34,197,94,.07)" : "rgba(180,83,9,.06)" }}>
+      <p className={s.label} style={{ color: sent ? "#15803D" : "#B45309" }}>
+        Invitation for {estimateNo} · {sent ? `emailed to ${detail}` : `email NOT sent — ${detail}`}
+      </p>
+      <p className={s.help} style={{ marginTop: 4 }}>{sent ? "The link is also shown here once, in case you want to forward it yourself:" : "Send the client this personal link yourself (shown only once):"}</p>
+      <code style={{ display: "block", marginTop: ".5rem", fontSize: 12.5, wordBreak: "break-all", color: "var(--ink-strong)" }}>{SITE.baseUrl}/e/{token}</code>
       <form action={dismissInviteReveal}><button type="submit" className={`${s.btn} ${s.btnSecondary}`} style={{ marginTop: ".6rem", minHeight: 34, fontSize: 12 }}>I have copied it</button></form>
     </div>
   );
@@ -109,6 +113,7 @@ export default async function ProposalsPage() {
                     {r.one_time_high_cents > 0 ? `${usd(r.one_time_low_cents)} – ${usd(r.one_time_high_cents)}` : "—"}
                   </span>
                   <StatusPill r={r} />
+                  <span className={s.chip} title="How this proposal is built">{r.mode === "admin_built" ? "PODOS builds" : "Client builds"}</span>
                   <Link href={`/ops/proposals/${r.public_id}`} className={`${s.btn} ${s.btnSecondary}`} style={{ minHeight: 34, fontSize: 12.5 }}>Open</Link>
                 </div>
 
@@ -139,6 +144,10 @@ export default async function ProposalsPage() {
                   ) : (
                     <form action={inviteContactAction} style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.7rem", alignItems: "center" }}>
                       <input type="hidden" name="estimateNo" value={r.estimate_no} />
+                      <input type="hidden" name="publicId" value={r.public_id} />
+                      <input type="hidden" name="mode" value={r.mode} />
+                      <input type="hidden" name="company" value={orgName.get(r.organization_id) ?? r.company ?? ""} />
+                      <input type="hidden" name="project" value={r.project_name ?? ""} />
                       <select name="contactId" required defaultValue="" style={{ padding: "0.45rem 0.6rem", borderRadius: 8, border: "1px solid var(--edge-bright)", fontSize: 13, fontFamily: "inherit", minWidth: 240 }}>
                         <option value="" disabled>Choose a contact…</option>
                         {orgContacts.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}

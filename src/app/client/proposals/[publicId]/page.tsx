@@ -51,13 +51,17 @@ export default async function ClientWelcome({ params }: { params: Promise<{ publ
   const heroExists = true; // generated asset registered in menu-manifest.ts
   const preparedFor = p.company ? `${p.client_name} / ${p.company}` : p.client_name;
 
+  const adminBuilt = p.mode === "admin_built";
+  // admin_built: PODOS builds the proposal; the client never configures — only reviews/signs once released
   const cta = released
     ? { href: `/client/proposals/${publicId}/proposal`, label: "View your proposal" }
-    : submitted
-      ? { href: `/client/proposals/${publicId}/configure?step=review`, label: "Review your submission" }
-      : done > 0
-        ? { href: `/client/proposals/${publicId}/configure`, label: "Resume configuration" }
-        : { href: `/client/proposals/${publicId}/configure`, label: "Begin configuration" };
+    : adminBuilt
+      ? null
+      : submitted
+        ? { href: `/client/proposals/${publicId}/configure?step=review`, label: "Review your submission" }
+        : done > 0
+          ? { href: `/client/proposals/${publicId}/configure`, label: "Resume configuration" }
+          : { href: `/client/proposals/${publicId}/configure`, label: "Begin configuration" };
 
   return (
     <div className={`${s.root} ${s.field}`}>
@@ -116,9 +120,19 @@ export default async function ClientWelcome({ params }: { params: Promise<{ publ
               </Tile>
             </div>
 
-            <Link href={cta.href} className={`${s.btn} ${s.btnPrimary}`} style={{ marginTop: "1.8rem", width: "100%", minHeight: 56, fontSize: "1.05rem" }}>
-              <ArrowRight size={20} strokeWidth={2} aria-hidden /> {cta.label}
-            </Link>
+            {cta ? (
+              <Link href={cta.href} className={`${s.btn} ${s.btnPrimary}`} style={{ marginTop: "1.8rem", width: "100%", minHeight: 56, fontSize: "1.05rem" }}>
+                <ArrowRight size={20} strokeWidth={2} aria-hidden /> {cta.label}
+              </Link>
+            ) : (
+              <div className={s.docBand} style={{ marginTop: "1.8rem", display: "flex", alignItems: "center", gap: 12 }}>
+                <span className={s.iconTile}><FileText size={18} strokeWidth={1.75} /></span>
+                <div>
+                  <p className={s.title} style={{ fontSize: "1rem" }}>PODOS is preparing your proposal</p>
+                  <p className={s.help}>Your PODOS team is building the configuration and commercial scope. You will be notified when it is released for review.</p>
+                </div>
+              </div>
+            )}
             <p className={s.help} style={{ textAlign: "center", marginTop: "0.8rem", display: "flex", justifyContent: "center", alignItems: "center", gap: 6 }}>
               <Lock size={12} strokeWidth={2} aria-hidden /> Secure private link — configuration data is encrypted and confidential.
             </p>

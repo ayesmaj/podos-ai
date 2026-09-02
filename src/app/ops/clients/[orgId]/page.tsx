@@ -143,6 +143,10 @@ export default async function ClientDetail({ params }: { params: Promise<{ orgId
                 <form action={createProposalAction} style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <input type="hidden" name="orgId" value={orgId} />
                   <input type="hidden" name="projectId" value={p.id} />
+                  <select name="mode" defaultValue="client_configured" style={{ ...input, minHeight: 34 }} aria-label="How the proposal is built">
+                    <option value="client_configured">Client builds (menu)</option>
+                    <option value="admin_built">I build the line items</option>
+                  </select>
                   {contacts.length > 0 && (
                     <select name="contactId" defaultValue={contacts[0]?.id ?? ""} style={{ ...input, minHeight: 34 }} aria-label="Primary contact">
                       {contacts.map((c) => <option key={c.id} value={c.id}>{[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email}</option>)}

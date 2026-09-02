@@ -22,6 +22,7 @@ export interface EstimateRow {
   estimate_no: string;
   organization_id: string;
   project_id: string;
+  mode: ProposalMode;
   client_name: string;
   company: string | null;
   project_name: string | null;
@@ -73,13 +74,36 @@ export const revokeEstimate = (secret: string, estimateNo: string) =>
  * database enforces it (NOT NULL organization_id/project_id, create_proposal
  * verifies the project belongs to the client).
  */
+export type ProposalMode = "client_configured" | "admin_built";
+
 export const createProposal = (secret: string, i: {
-  orgId: string; projectId: string; contactId?: string | null; expiresDays?: number;
+  orgId: string; projectId: string; contactId?: string | null; expiresDays?: number; mode?: ProposalMode;
 }) =>
   rpc<{ estimate_no: string; public_id: string }[]>("create_proposal", {
     p_admin_secret: secret, p_org_id: i.orgId, p_project_id: i.projectId,
     p_contact_id: i.contactId ?? null, p_expires_days: i.expiresDays ?? 30,
+    p_mode: i.mode ?? "client_configured",
   });
+
+/** Switch how a proposal is built: the client configures via the menu, or the admin adds line items. */
+export const setProposalMode = (secret: string, publicId: string, mode: ProposalMode) =>
+  rpc<boolean>("set_proposal_mode", { p_admin_secret: secret, p_public_id: publicId, p_mode: mode });
+
+/** Record an outbound client email (sent or not) for the audit trail + activity feed. */
+export const logEmail = (secret: string, i: {
+  publicId: string; to: string; template: string; subject: string; status: "sent" | "not_sent"; providerId?: string; error?: string;
+}) =>
+  rpc<boolean>("log_email", {
+    p_admin_secret: secret, p_public_id: i.publicId, p_to: i.to, p_template: i.template, p_subject: i.subject,
+    p_status: i.status, p_provider_id: i.providerId ?? null, p_error: i.error ?? null,
+  });
+
+/** Result of release_proposal: the version is locked + released; a fresh invitation may have been issued. */
+export interface ReleaseResult {
+  ok: boolean; public_id: string; invited: boolean; reason?: string;
+  recipient_email?: string; recipient_name?: string | null; token?: string;
+  company?: string | null; project?: string | null; mode?: ProposalMode;
+}
 
 export interface ContactRow {
   id: string; organization_id: string; first_name: string | null; last_name: string | null;
@@ -269,7 +293,7 @@ export const importSelections = (secret: string, publicId: string) =>
 
 /** Snapshot + lock the current version and release the formal proposal to the client. */
 export const releaseProposal = (secret: string, publicId: string) =>
-  rpc<boolean>("release_proposal", { p_admin_secret: secret, p_public_id: publicId });
+  rpc<ReleaseResult>("release_proposal", { p_admin_secret: secret, p_public_id: publicId, p_access_policy: "email-confirm" });
 
 /** Show/hide the client's Sign CTA (signature_requested <-> released). */
 export const setSignatureState = (secret: string, publicId: string, enabled: boolean) =>

@@ -5,8 +5,10 @@ import { requireOps } from "@/lib/ops/session";
 import { ADMIN_SECRET, getProposalFull, listCatalog, usd } from "@/lib/estimates/admin";
 import OpsShell from "@/components/ops/OpsShell";
 import LineItemEditor, { type Item, type CatalogOption } from "./LineItemEditor";
-import { importClientSelections, releaseToClient, sendBackForRevision, toggleSignature } from "./actions";
-import { Download, Eye, Import, PenLine, Send, Undo2 } from "lucide-react";
+import { cookies } from "next/headers";
+import { dismissReleaseReveal, importClientSelections, releaseToClient, sendBackForRevision, setModeAction, toggleSignature } from "./actions";
+import { Download, Eye, Import, ListChecks, Mail, PenLine, Send, Undo2, Wand2 } from "lucide-react";
+import { SITE } from "@/lib/seo/site";
 import { STEPS, STEP_CATEGORY } from "@/lib/proposals/steps";
 
 /**
@@ -31,6 +33,7 @@ interface ProposalFull {
   head: {
     public_id: string; estimate_no: string; client_name: string; company: string | null;
     project_name: string | null; status: string; view_count: number;
+    mode: "client_configured" | "admin_built";
     one_time_low_cents: number; one_time_high_cents: number; recurring_cents: number;
     signed_at: string | null; signer_name: string | null; expires_at: string | null;
   };
@@ -102,11 +105,24 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
         <span style={{ ...mono, fontSize: 11, color: "var(--brand-deep)" }}>{head.estimate_no}</span>
         <span style={{ ...mono, fontSize: 10, color: "var(--ink-faint)" }}>v{version?.rev ?? 1}{locked ? " · locked" : ""}</span>
         <StatusPill status={head.signed_at ? "signed" : head.status} />
+        {/* how this proposal is built — the client picks from the menu, or PODOS builds the line items */}
+        <form action={setModeAction} style={{ display: "inline-flex", gap: 4, alignItems: "center", border: "1px solid var(--edge)", borderRadius: 999, padding: 2 }}>
+          <input type="hidden" name="publicId" value={publicId} />
+          {([["client_configured", "Client builds (menu)", <ListChecks key="a" size={12} aria-hidden />], ["admin_built", "PODOS builds", <Wand2 key="b" size={12} aria-hidden />]] as const).map(([m, lbl, icon]) => (
+            <button key={m} type="submit" name="mode" value={m} disabled={locked} aria-pressed={head.mode === m}
+              style={{ ...mono, fontSize: 9.5, padding: ".3rem .65rem", borderRadius: 999, border: "none", cursor: locked ? "default" : "pointer", display: "inline-flex", alignItems: "center", gap: 5,
+                background: head.mode === m ? "var(--brand)" : "transparent", color: head.mode === m ? "#fff" : "var(--ink-dim)" }}>
+              {icon} {lbl}
+            </button>
+          ))}
+        </form>
         <span style={{ fontSize: 13.5, color: "var(--ink-dim)" }}>{head.project_name ?? "No project name"}</span>
         <span style={{ ...mono, fontSize: 10, color: "var(--ink-faint)", marginLeft: "auto" }}>
           viewed {head.view_count}×
         </span>
       </div>
+
+      <ReleaseReveal />
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(280px,1fr)", gap: "1.4rem", alignItems: "start" }}>
         {/* editor */}
@@ -143,7 +159,7 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
             )}
             {!locked && (
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
-                {chosen.length > 0 && (
+                {head.mode === "client_configured" && chosen.length > 0 && (
                   <form action={importClientSelections}>
                     <input type="hidden" name="publicId" value={publicId} />
                     <button type="submit" style={{ ...mono, fontSize: 9.5, padding: ".45rem .7rem", borderRadius: 8, border: "1px solid var(--brand)", background: "var(--brand-wash)", color: "var(--brand-deep)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -230,5 +246,39 @@ function StatusPill({ status }: { status: string }) {
     <span style={{ fontSize: 9.5, letterSpacing: "0.1em", textTransform: "uppercase", padding: ".22rem .55rem", borderRadius: 999, color: tone.c, border: `1px solid ${tone.b}`, background: tone.bg }}>
       {status.replace(/_/g, " ")}
     </span>
+  );
+}
+
+/**
+ * After "Release proposal": what happened next. Shows whether the client was
+ * emailed and reveals the fresh secure link ONCE (HttpOnly cookie, read
+ * server-side) so the admin can send it by hand when no email provider is
+ * configured or the send failed.
+ */
+async function ReleaseReveal() {
+  const jar = await cookies();
+  const raw = jar.get("podos_release")?.value;
+  if (!raw) return null;
+  const [token, status, detail] = raw.split("|");
+  const sent = status === "sent";
+  return (
+    <div style={{ marginBottom: "1.2rem", border: `1px solid ${sent ? "rgba(34,197,94,.45)" : "rgba(180,83,9,.4)"}`, borderRadius: 12, background: sent ? "rgba(34,197,94,.07)" : "rgba(180,83,9,.06)", padding: "1rem 1.2rem" }}>
+      <p style={{ ...mono, fontSize: 10, color: sent ? "#15803D" : "#B45309", display: "flex", alignItems: "center", gap: 6 }}>
+        <Mail size={13} aria-hidden /> Proposal released · {sent ? `email sent to ${detail}` : `email NOT sent — ${detail}`}
+      </p>
+      {token ? (
+        <>
+          <p style={{ fontSize: 13, color: "var(--ink-dim)", marginTop: 6 }}>
+            {sent ? "The client received this secure link. It is also shown here once in case you want to forward it yourself:" : "Send the client this secure link yourself (shown only once):"}
+          </p>
+          <code style={{ display: "block", marginTop: 6, fontSize: 12.5, wordBreak: "break-all", color: "var(--ink-strong)" }}>{SITE.baseUrl}/e/{token}</code>
+        </>
+      ) : (
+        <p style={{ fontSize: 13, color: "var(--ink-dim)", marginTop: 6 }}>Add a contact with an email to this client, then release again to issue their link.</p>
+      )}
+      <form action={dismissReleaseReveal}>
+        <button type="submit" style={{ ...mono, marginTop: 8, fontSize: 9.5, padding: ".4rem .7rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer" }}>Done</button>
+      </form>
+    </div>
   );
 }

@@ -90,6 +90,8 @@ export async function verifyInvitation(
 export interface SessionProposal {
   estimate_uuid: string;
   public_id: string;
+  /** client_configured = the client builds via the menu; admin_built = PODOS builds, client reviews/signs */
+  mode: "client_configured" | "admin_built";
   estimate_no: string;
   client_name: string;
   company: string | null;
