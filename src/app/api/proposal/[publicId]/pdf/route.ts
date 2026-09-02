@@ -56,6 +56,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ publicId
     const msg = err instanceof Error ? err.message : "unknown";
     console.error("[proposal/pdf] render failed:", msg);
     if (/returned 404/.test(msg)) return new Response("Not found", { status: 404 });
-    return new Response("PDF unavailable", { status: 503 });
+    // admins see the cause (clients never do) — the PDF service has no other observable surface
+    const detail = cookie.name === ADMIN_COOKIE ? ` — ${msg.slice(0, 400)}` : "";
+    return new Response(`PDF unavailable${detail}`, { status: 503, headers: { "Cache-Control": "no-store" } });
   }
 }

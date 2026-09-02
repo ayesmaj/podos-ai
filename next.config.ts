@@ -30,7 +30,14 @@ const nextConfig: NextConfig = {
   outputFileTracingExcludes: { "*": ["./public/**"] },
   // The PDF function prints the /print route with headless Chrome; the packed
   // Chromium binary is read from disk at runtime, so it must be traced in.
-  outputFileTracingIncludes: { "/api/proposal/[publicId]/pdf": ["./node_modules/@sparticuz/chromium/bin/**"] },
+  // Keys are globs: `[publicId]` would be a character class, so use `*` for the
+  // dynamic segment. The release action (ops proposal page) also prints a PDF.
+  outputFileTracingIncludes: {
+    "/api/proposal/*/pdf": ["./node_modules/@sparticuz/chromium/bin/**"],
+    "/api/proposal/*/pdf/route": ["./node_modules/@sparticuz/chromium/bin/**"],
+    "/ops/proposals/*/page": ["./node_modules/@sparticuz/chromium/bin/**"],
+    "/ops/proposals/*": ["./node_modules/@sparticuz/chromium/bin/**"],
+  },
   serverExternalPackages: ["puppeteer-core", "@sparticuz/chromium"],
   // Turbopack is default in Next.js 16; empty config silences the warning
   turbopack: {
