@@ -1,5 +1,21 @@
 # Decision log — private proposal platform
 
+## 2026-09-01 — No verification gate; the founder edits prices directly
+- Context: imported prices carried needs_business_verification=true and the
+  UI surfaced "needs verification" chips; the founder does not want a gate.
+- Decision: the flag is dormant (default false, never surfaced). /ops/pricing
+  is a full editor: every price/name/description/billing/unit/visibility,
+  add/delete items and categories, volume tiers and range spread — all via
+  SECURITY DEFINER RPCs that validate and snapshot history
+  (catalog_item_versions).
+- Consequence: BUSINESS_DATA_REQUIRED "approve prices" items are closed by
+  the editor itself; released proposals stay immutable snapshots.
+
+## 2026-09-01 — Logo scale on private surfaces
+- Decision: wordmark at 40–48px in bars/sidebar/login, 60px on the document
+  cover, 90×31pt in the PDF running header (was 26–34px / 62×21pt) —
+  founder request.
+
 ## 2026-09-01 — Client configurator is intake-only (no approval/sign)
 - Context: the first workspace showed a "Sign and accept" form on the client's
   configuration page; the founder's redesign brief corrects the flow.

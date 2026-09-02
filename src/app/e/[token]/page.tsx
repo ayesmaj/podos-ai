@@ -56,7 +56,7 @@ function Shell({ children, wide }: { children: React.ReactNode; wide?: boolean }
           boxShadow: "0 1px 2px rgba(15,23,42,.04), 0 24px 60px -30px rgba(15,23,42,.25)",
         }}
       >
-        <Image src="/logo.png" alt="PODOS AI" width={82} height={28} priority sizes="82px" style={{ height: 28, width: "auto", marginBottom: "1.1rem" }} />
+        <Image src="/logo.png" alt="PODOS AI" width={128} height={44} priority sizes="128px" style={{ height: 44, width: "auto", marginBottom: "1.1rem" }} />
         {children}
       </div>
     </main>

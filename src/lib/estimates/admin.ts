@@ -221,10 +221,39 @@ export interface ProjectRow {
   target_golive: string | null; proposals: number;
 }
 export interface CatalogItemRow {
-  category: string | null; sku: string; name: string; short_description: string | null;
-  price_mode: string; price_cents: number | null; billing_frequency: string;
+  id: string; category_slug: string | null; category: string | null; sku: string | null; name: string;
+  short_description: string | null; price_mode: string; price_cents: number | null;
+  billing_frequency: string; unit: string | null; client_visible: boolean;
   needs_business_verification: boolean; published: boolean;
 }
+export interface CatalogCategoryRow { id: string; slug: string; name: string; sort_order: number; }
+export interface PricingRuleRow { id: string; kind: string; name: string | null; params: unknown; active: boolean; }
+
+/* ---- catalog editor (founder edits every price directly; no verification gate) ---- */
+export const listCatalogCategories = (secret: string) =>
+  rpc<CatalogCategoryRow[]>("list_catalog_categories", { p_admin_secret: secret });
+
+export const upsertCatalogItem = (secret: string, i: {
+  id?: string | null; categorySlug: string; sku?: string; name: string; shortDescription?: string;
+  priceCents: number | null; billingFrequency: "one_time" | "per_year"; unit?: string; clientVisible?: boolean;
+}) =>
+  rpc<string>("upsert_catalog_item", {
+    p_admin_secret: secret, p_id: i.id ?? null, p_category_slug: i.categorySlug, p_sku: i.sku ?? null,
+    p_name: i.name, p_short_description: i.shortDescription ?? null, p_price_cents: i.priceCents,
+    p_billing_frequency: i.billingFrequency, p_unit: i.unit ?? null, p_client_visible: i.clientVisible ?? true,
+  });
+
+export const deleteCatalogItem = (secret: string, id: string) =>
+  rpc<boolean>("delete_catalog_item", { p_admin_secret: secret, p_id: id });
+
+export const upsertCatalogCategory = (secret: string, slug: string, name: string) =>
+  rpc<string>("upsert_catalog_category", { p_admin_secret: secret, p_slug: slug, p_name: name });
+
+export const listPricingRules = (secret: string) =>
+  rpc<PricingRuleRow[]>("list_pricing_rules", { p_admin_secret: secret });
+
+export const setPricingRule = (secret: string, kind: "QUANTITY_TIER" | "RANGE", params: unknown) =>
+  rpc<boolean>("set_pricing_rule", { p_admin_secret: secret, p_kind: kind, p_params: params });
 export interface LineItemRow {
   id: string; name: string; customer_description: string | null; category_slug: string | null;
   qty: number; unit: string | null; unit_price_cents: number;

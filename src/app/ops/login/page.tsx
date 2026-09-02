@@ -92,7 +92,7 @@ export default async function AdminLoginPage({
         }}
       >
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <Image src="/logo.png" alt="PODOS AI" width={99} height={34} priority sizes="99px" style={{ height: 34, width: "auto" }} />
+          <Image src="/logo.png" alt="PODOS AI" width={140} height={48} priority sizes="140px" style={{ height: 48, width: "auto" }} />
           <span style={{ fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--brand)" }}>Internal</span>
         </div>
         <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20, color: "var(--ink-strong)" }}>

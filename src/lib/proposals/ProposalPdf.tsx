@@ -75,7 +75,7 @@ function Chrome({ d, title }: { d: PdfData; title: string }) {
     <>
       <View style={s.header} fixed>
         {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf primitive, not a DOM <img>; has no alt prop */}
-        <Image src={d.logo} style={{ width: 62, height: 21 }} />
+        <Image src={d.logo} style={{ width: 90, height: 31 }} />
         <Text style={s.headerText}>{title}</Text>
         <Text style={s.headerText}>{d.estimateNo} · v{d.rev}</Text>
       </View>

@@ -71,7 +71,7 @@ export default function OpsShell({
         }}
       >
         <Link href="/ops" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 8, padding: "0 0.4rem" }}>
-          <Image src="/logo.png" alt="PODOS AI" width={76} height={26} priority sizes="76px" style={{ height: 26, width: "auto" }} />
+          <Image src="/logo.png" alt="PODOS AI" width={116} height={40} priority sizes="116px" style={{ height: 40, width: "auto" }} />
           <span style={{ ...mono, fontSize: 9, color: "var(--brand)" }}>Ops</span>
         </Link>
 

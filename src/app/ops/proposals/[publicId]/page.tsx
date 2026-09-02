@@ -58,7 +58,10 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
   });
   const stepsSaved = Object.keys(selections).length;
   const catalog = (await listCatalog(ADMIN_SECRET)) ?? [];
-  const catalogOptions: CatalogOption[] = catalog.map((c) => ({ sku: c.sku, name: c.name, category: c.category, price_cents: c.price_cents }));
+  // add-from-catalog is keyed by SKU; items saved without one are edited in /ops/pricing first
+  const catalogOptions: CatalogOption[] = catalog
+    .filter((c): c is typeof c & { sku: string } => !!c.sku)
+    .map((c) => ({ sku: c.sku, name: c.name, category: c.category, price_cents: c.price_cents }));
   const locked = !!version?.locked_at;
 
   return (

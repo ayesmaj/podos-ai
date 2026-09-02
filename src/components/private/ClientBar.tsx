@@ -27,7 +27,7 @@ export default function ClientBar({
   return (
     <header className={s.bar} role="banner">
       <Link href={`/client/proposals/${publicId}`} aria-label="PODOS AI — your proposal workspace" style={{ display: "inline-flex", alignItems: "center" }}>
-        <Image src="/logo.png" alt="PODOS AI" width={82} height={28} priority sizes="82px" style={{ height: 28, width: "auto" }} />
+        <Image src="/logo.png" alt="PODOS AI" width={128} height={44} priority sizes="128px" style={{ height: 44, width: "auto" }} />
       </Link>
       <span className={s.barSep} aria-hidden />
       <span className={`${s.chip} ${s.chipBrand}`}>

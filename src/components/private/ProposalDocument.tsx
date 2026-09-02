@@ -64,7 +64,7 @@ export default function ProposalDocument({ d, mode }: { d: DocData; mode: "admin
       {/* ---- cover ---- */}
       <header style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 0.9fr)", gap: "2rem", alignItems: "center" }}>
         <div>
-          <Image src="/logo.png" alt="PODOS AI" width={150} height={52} sizes="150px" style={{ height: 44, width: "auto" }} />
+          <Image src="/logo.png" alt="PODOS AI" width={175} height={60} sizes="175px" style={{ height: 60, width: "auto" }} />
           {heroImg && (
             <div style={{ position: "relative", aspectRatio: "3 / 2", marginTop: "1.4rem", borderRadius: 14, overflow: "hidden", background: "var(--canvas)", border: "1px solid var(--edge-faint)" }}>
               <Image src={heroImg} alt="Technical elevation of the configured PODOS pod" fill priority sizes="(max-width: 900px) 100vw, 45vw" style={{ objectFit: "contain" }} />
