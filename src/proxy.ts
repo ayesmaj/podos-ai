@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 /**
  * proxy.ts — security headers for the private surfaces (Next 16: proxy
@@ -24,10 +24,18 @@ const PRIVATE_HEADERS: Record<string, string> = {
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
 };
 
-export function proxy() {
+// The only frameable private page: the admin print source, embedded by /ops/design
+// (same origin only). The admin session is still required to render it.
+const SAME_ORIGIN_FRAME = /^\/ops\/proposals\/[^/]+\/print$/;
+
+export function proxy(request: NextRequest) {
   const response = NextResponse.next();
   for (const [k, v] of Object.entries(PRIVATE_HEADERS)) {
     response.headers.set(k, v);
+  }
+  if (SAME_ORIGIN_FRAME.test(request.nextUrl.pathname)) {
+    response.headers.set("X-Frame-Options", "SAMEORIGIN");
+    response.headers.set("Content-Security-Policy", "frame-ancestors 'self'");
   }
   return response;
 }

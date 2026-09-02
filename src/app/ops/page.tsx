@@ -52,8 +52,8 @@ export default async function OpsDashboard() {
 
       <KpiGrid>
         <KpiCard icon={<UserPlus size={20} strokeWidth={1.8} />} label="Active invitations" value={d.active_invitations ?? 0} context="personal secure links that can still be opened" href="/ops/proposals" />
-        <KpiCard icon={<Settings2 size={20} strokeWidth={1.8} />} label="Configurations in progress" value={byStage("configuring").length + byStage("invited").length} context="clients building or invited to build" tone="cyan" href="/ops/proposals?stage=configuring" />
-        <KpiCard icon={<Inbox size={20} strokeWidth={1.8} />} label="Submitted for review" value={byStage("submitted").length + byStage("review").length} context="waiting on engineering or commercial review" tone="amber" href="/ops/proposals?stage=submitted" />
+        <KpiCard icon={<Settings2 size={20} strokeWidth={1.8} />} label="Configuring" value={byStage("configuring").length + byStage("invited").length} context="clients building or invited to build" tone="cyan" href="/ops/proposals?stage=configuring" />
+        <KpiCard icon={<Inbox size={20} strokeWidth={1.8} />} label="In review" value={byStage("submitted").length + byStage("review").length} context="submitted, waiting on engineering or commercial review" tone="amber" href="/ops/proposals?stage=submitted" />
         <KpiCard icon={<Send size={20} strokeWidth={1.8} />} label="Proposals sent" value={byStage("sent").length + byStage("signature").length} context={`${d.viewed_today ?? 0} viewed in the last 24 h`} tone="electric" href="/ops/proposals?stage=sent" />
         <KpiCard icon={<DollarSign size={20} strokeWidth={1.8} />} label="Open pipeline" value={compact(pipeline)} context={pipeline ? usd(pipeline) : "no priced proposals yet"} tone="green" />
         <KpiCard icon={<PenLine size={20} strokeWidth={1.8} />} label="Signed" value={byStage("signed").length} context={byStage("signed").length ? usd(byStage("signed").reduce((a, r) => a + r.one_time_high_cents, 0)) : "no signatures yet"} tone="purple" href="/ops/proposals?stage=signed" />
@@ -87,11 +87,11 @@ export default async function OpsDashboard() {
               <div className={s.empty} style={{ padding: 28 }}><span className={s.emptyIcon}><Building2 size={20} /></span><p className={s.emptyTitle}>No clients yet</p><p className={s.emptyText}>Create the first client to start a proposal.</p><Link href="/ops/clients" className={`${s.btn} ${s.btnPrimary} ${s.btnSm}`}>Go to Clients</Link></div>
             ) : (
               <div>
-                <div className={s.listRow} style={{ paddingTop: 0 }}><span className={s.label}>Client</span><span className={s.label} style={{ display: "grid", gridTemplateColumns: "90px 120px", textAlign: "right" }}><span>Proposals</span><span>Open value</span></span></div>
+                <div className={s.listRow} style={{ paddingTop: 0 }}><span className={s.label}>Client</span><span className={s.label} style={{ display: "flex", gap: 20, justifyContent: "flex-end" }}><span>Proposals</span><span>Open value</span></span></div>
                 {[...orgs].sort((a, b) => b.open_value_cents - a.open_value_cents).slice(0, 6).map((o) => (
                   <Link key={o.id} href={`/ops/clients/${o.id}`} className={s.listRow} style={{ textDecoration: "none" }}>
-                    <span style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}><Avatar name={o.name} /><span style={{ minWidth: 0 }}><span style={{ display: "block", fontWeight: 600, fontSize: 14 }}>{o.name}</span><span className={s.muted} style={{ fontSize: 12.5 }}>{o.primary_contact?.name ?? "No primary contact"}</span></span></span>
-                    <span style={{ display: "grid", gridTemplateColumns: "90px 120px", textAlign: "right" }}><span className={s.num}>{o.active_proposals}<span className={s.muted}> / {o.proposals}</span></span><span className={s.num} style={{ fontWeight: 700 }}>{o.open_value_cents ? compact(o.open_value_cents) : "—"}</span></span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}><Avatar name={o.name} /><span style={{ minWidth: 0 }}><span className={s.ellipsis} style={{ fontWeight: 600, fontSize: 14 }}>{o.name}</span><span className={`${s.muted} ${s.ellipsis}`} style={{ fontSize: 12.5 }}>{o.primary_contact?.name ?? "No primary contact"}</span></span></span>
+                    <span style={{ display: "flex", gap: 20, justifyContent: "flex-end", alignItems: "baseline" }}><span className={s.num}>{o.active_proposals}<span className={s.muted}> / {o.proposals}</span></span><span className={s.num} style={{ fontWeight: 700 }}>{o.open_value_cents ? compact(o.open_value_cents) : "—"}</span></span>
                   </Link>
                 ))}
               </div>

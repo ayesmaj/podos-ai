@@ -102,3 +102,7 @@ aria-live for autosave + estimate updates, reduced motion.
 Public nav/footer; dark mode; orange/purple; mono labels; generic tables as
 pages; cursor followers; particles; hover-only content; placeholder mock
 data (ORION-7 etc.) shipping as real content.
+
+## 2026-09-02 — Operations app design system
+
+The `/ops` application now has its own universal system (bright porcelain / cobalt, one shell, one scale, one card language). Source of truth: `docs/ops-design/` (audit, layout tokens, typography, cards, status, page archetypes, 21st component sources) and the implementation in `src/components/ops/ui/`. Visual QA: `scripts/ops-qa.mjs` (1920/1440/1366/390 screenshots with overflow, KPI-wrap and console checks).

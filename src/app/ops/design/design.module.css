@@ -1,0 +1,42 @@
+/* /ops/design — route-specific styles on top of the ops primitives (tokens only). */
+
+/* Level 4 featured panel (OPS_CARD_SYSTEM §4) — the one hero item on the page */
+.featured {
+  position: relative;
+  border-color: var(--ops-border-strong);
+  background:
+    radial-gradient(60% 50% at 100% 0%, rgba(22, 141, 255, 0.12), transparent 70%),
+    linear-gradient(180deg, #f7faff 0%, var(--ops-surface-selected) 100%);
+  box-shadow: var(--ops-shadow-active);
+  border-radius: var(--ops-radius-xl);
+}
+.featured::before { content: ""; position: absolute; left: -1px; top: 16px; bottom: 16px; width: 3px; border-radius: 2px; background: var(--ops-gradient-primary); }
+
+/* live estimate sheet: letter proportions, never narrower than a readable page */
+.preview { display: block; width: 100%; aspect-ratio: 8.5 / 11; min-height: 720px; border: 1px solid var(--ops-border); border-radius: var(--ops-radius-md); background: #fff; box-shadow: var(--ops-shadow-sm); }
+.previewMeta { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; font-size: 12.5px; color: var(--ops-ink-muted); }
+
+/* asset panel body: thumbnail + facts */
+.asset { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 18px; align-items: start; }
+.thumb { display: grid; place-items: center; overflow: hidden; border-radius: 12px; border: 1px solid var(--ops-border); background: var(--ops-bg-elevated); }
+.thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.facts { display: grid; gap: 8px; min-width: 0; }
+.fact { display: grid; gap: 3px; }
+.factValue { font-size: 13.5px; line-height: 1.4; color: var(--ops-ink); }
+.factMeta { font-family: var(--ops-display); font-size: 12px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; color: var(--ops-ink-secondary); }
+.prompt { margin-top: 4px; }
+.prompt > summary { list-style: none; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ops-cobalt); }
+.prompt > summary::-webkit-details-marker { display: none; }
+.prompt pre { white-space: pre-wrap; font: inherit; font-size: 12.5px; line-height: 1.55; color: var(--ops-ink-secondary); margin-top: 8px; padding: 12px 14px; border-radius: 10px; background: var(--ops-bg-elevated); border: 1px solid var(--ops-border); }
+.actions { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding-top: 14px; border-top: 1px solid var(--ops-border); }
+
+.options { display: grid; gap: 10px; }
+.option { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; font-size: 13.5px; line-height: 1.45; color: var(--ops-ink-secondary); }
+.option svg { color: var(--ops-cobalt); margin-top: 2px; flex: none; }
+.option b { color: var(--ops-ink); font-weight: 600; }
+
+@media (max-width: 560px) {
+  .asset { grid-template-columns: 1fr; }
+  .thumb { max-width: 220px; }
+  .preview { min-height: 480px; }
+}

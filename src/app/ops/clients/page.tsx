@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AlertTriangle, Archive, ArchiveRestore, Building2, Clock, DollarSign, FolderKanban, Mail, TrendingUp, Users } from "lucide-react";
 import { requireOps } from "@/lib/ops/session";
+import { nowMs } from "@/lib/ops/clock";
 import { ADMIN_SECRET, listOrganizations, opsDashboard } from "@/lib/estimates/admin";
 import { AppShell, Avatar, Cell, Chip, EmptyState, KpiCard, KpiGrid, PageHeader, Panel, PanelLink, StatusChip, Toolbar, ago, compact, fmtDate, ops as s, usd } from "@/components/ops/ui";
 import AdminResult from "@/components/ops/AdminResult";
@@ -40,7 +41,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
   const openValue = live.reduce((a, o) => a + o.open_value_cents, 0);
   const activeOpps = live.reduce((a, o) => a + o.active_proposals, 0);
   const awaiting = live.reduce((a, o) => a + o.awaiting, 0);
-  const newThisMonth = live.filter((o) => Date.now() - new Date(o.created_at).getTime() < 30 * 86_400_000).length;
+  const newThisMonth = live.filter((o) => nowMs() - new Date(o.created_at).getTime() < 30 * 86_400_000).length;
   const attention = live.flatMap((o) => {
     const items: { o: OrgRow; why: string; tone: "amber" | "red" | "cobalt" }[] = [];
     if (o.contacts === 0 || !o.primary_contact?.email) items.push({ o, why: "No contact with an email — nobody can be invited", tone: "red" });
@@ -122,7 +123,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
               </Link>
             ))}
           </Panel>
-          <Panel title="Top pipeline accounts" icon={<TrendingUp size={18} aria-hidden />} tight action={<PanelLink href="/ops/proposals">Proposals</PanelLink>}>
+          <Panel title="Top accounts" icon={<TrendingUp size={18} aria-hidden />} tight action={<PanelLink href="/ops/proposals">Proposals</PanelLink>}>
             {top.filter((o) => o.open_value_cents > 0).length === 0 ? <p className={s.muted} style={{ fontSize: 13.5 }}>No priced proposals yet.</p> : top.filter((o) => o.open_value_cents > 0).map((o) => (
               <Link key={o.id} href={`/ops/clients/${o.id}`} className={s.listRow} style={{ textDecoration: "none" }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}><Avatar name={o.name} /><span style={{ minWidth: 0 }}><span style={{ display: "block", fontWeight: 600, fontSize: 13.5 }}>{o.name}</span><span className={s.muted} style={{ fontSize: 12.5 }}>{o.active_proposals} active proposal{o.active_proposals === 1 ? "" : "s"}</span></span></span>

@@ -1,0 +1,8 @@
+/* loading.tsx tweaks: skeletons sitting on the bare canvas need more contrast, and row
+   skeletons collapse in narrow containers like real rows do. */
+.canvasSkel [aria-hidden] { background: rgba(27, 85, 245, 0.07); }
+div.rowSkel { grid-template-columns: auto minmax(0, 1fr) auto auto; }
+@container rows (max-width: 620px) {
+  div.rowSkel { grid-template-columns: auto minmax(0, 1fr); }
+  div.rowSkel > :nth-child(n + 3) { display: none; }
+}

@@ -2,42 +2,43 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { Archive, ArchiveRestore, Pencil, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, DollarSign, FileText, FolderKanban, Info, MoreHorizontal, ShieldCheck, StickyNote, Trash2, Users } from "lucide-react";
 import { requireOps } from "@/lib/ops/session";
-import { ADMIN_SECRET, addOrgNote, createContact, createProject, getOrganization, usd } from "@/lib/estimates/admin";
-import OpsShell from "@/components/ops/OpsShell";
+import { ADMIN_SECRET, addOrgNote, createContact, createProject, getOrganization } from "@/lib/estimates/admin";
+import { AppShell, Avatar, Chip, KpiCard, KpiGrid, Panel, PanelLink, StatusChip, compact, fmtDate, ops as s, usd } from "@/components/ops/ui";
+import { isOpenProposal } from "@/components/ops/ui/status";
 import AdminResult from "@/components/ops/AdminResult";
 import ConfirmDelete from "@/components/ops/ConfirmDelete";
-import { createProposalAction } from "../../proposals/actions";
-import { archiveOrgAction, deleteContactAction, deleteNoteAction, deleteOrgAction, deleteProjectAction, updateContactAction, updateOrgAction, updateProjectAction } from "./actions";
+import { deleteContactAction, deleteNoteAction, deleteOrgAction, deleteProjectAction, archiveOrgAction } from "./actions";
+import { EditClientDrawer, EditContactDrawer, EditProjectDrawer, NewContactDrawer, NewNoteDrawer, NewProjectDrawer, NewProposalDrawer } from "./ClientDrawers";
+import c from "./client.module.css";
 
 /**
- * /ops/clients/[orgId] — client detail with FULL control: edit / archive /
- * delete the client, edit / remove contacts and projects, delete notes, create
- * proposals under a project. Safety rules are enforced by the database
- * functions and echoed in the UI (delete disabled with the reason).
+ * /ops/clients/[orgId] — client detail (archetype 3): identity header · 4 KPIs ·
+ * 8/4 split. Main panel = proposals, contacts, projects, notes as compact rows;
+ * every create/edit form lives in a drawer posting to the same server actions.
+ * Rail = facts, secure-access summary, internal notes. Safety rules are enforced
+ * by the database functions and echoed in the UI (typed-name guards).
  */
 
 export const metadata: Metadata = { title: "Client · PODOS ops", robots: { index: false, follow: false, nocache: true } };
 export const dynamic = "force-dynamic";
 
-const mono: React.CSSProperties = { fontSize: 10.5, letterSpacing: "0.12em", textTransform: "uppercase" };
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const input: React.CSSProperties = { padding: "0.45rem 0.6rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", fontSize: 13, fontFamily: "inherit", minWidth: 0 };
-const btn: React.CSSProperties = { ...mono, fontSize: 10, padding: ".5rem .8rem", borderRadius: 8, border: "1px solid var(--brand)", background: "var(--brand-wash)", color: "var(--brand-deep)", cursor: "pointer" };
-const ghost: React.CSSProperties = { ...mono, fontSize: 9.5, padding: ".35rem .6rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 };
-const danger: React.CSSProperties = { ...ghost, color: "#B91C1C", borderColor: "rgba(185,28,28,.35)" };
 const RELEASED = new Set(["released", "signature_requested", "client_signed", "signed", "countersigned", "completed", "won"]);
-const ROLES = ["commercial", "technical", "procurement", "legal", "signer", "billing"];
 
 interface Contact { id: string; first_name: string | null; last_name: string | null; title: string | null; email: string | null; phone: string | null; contact_roles: string[] }
 interface Project { id: string; name: string; description: string | null; pod_quantity: number | null; required_capacity_mw: number | null; expected_gpus: number | null; workload: string | null; target_golive: string | null }
 interface Proposal { public_id: string; estimate_no: string; project_name: string | null; project_id: string | null; status: string; revoked: boolean; locked: boolean; view_count: number; one_time_low_cents: number; one_time_high_cents: number; signed_at: string | null }
 interface Note { id: string; body: string; author: string; created_at: string }
-interface Org { id: string; name: string; legal_name: string | null; website: string | null; industry: string | null; country: string | null; notes: string | null; archived_at: string | null }
+interface Org { id: string; name: string; legal_name: string | null; website: string | null; industry: string | null; country: string | null; notes: string | null; archived_at: string | null; created_at: string }
 interface OrgFull { org: Org; contacts: Contact[]; projects: Project[]; proposals: Proposal[]; notes: Note[] }
 
 const released = (p: Proposal) => p.signed_at != null || p.locked || RELEASED.has(p.status);
+const fullName = (x: Contact) => [x.first_name, x.last_name].filter(Boolean).join(" ") || x.email || "Contact";
+const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const host = (u: string | null) => u?.replace(/^https?:\/\//, "").replace(/\/$/, "") ?? null;
+const range = (p: Proposal) => p.one_time_high_cents > 0 ? (p.one_time_low_cents === p.one_time_high_cents ? usd(p.one_time_high_cents) : `${usd(p.one_time_low_cents)} – ${usd(p.one_time_high_cents)}`) : "—";
 
 export default async function ClientDetail({ params }: { params: Promise<{ orgId: string }> }) {
   await requireOps();
@@ -46,7 +47,14 @@ export default async function ClientDetail({ params }: { params: Promise<{ orgId
   const data = (await getOrganization(ADMIN_SECRET, orgId)) as OrgFull | null;
   if (!data?.org) notFound();
   const { org, contacts, projects, proposals, notes } = data;
-  const hasReleased = proposals.some(released);
+  const releasedCount = proposals.filter(released).length;
+  const open = proposals.filter(isOpenProposal);
+  const openValue = open.reduce((a, p) => a + p.one_time_high_cents, 0);
+  const withEmail = contacts.filter((x) => x.email).length;
+  const pods = projects.reduce((a, p) => a + (p.pod_quantity ?? 0), 0);
+  const contactOpts = contacts.map((x) => ({ id: x.id, label: `${fullName(x)}${x.email ? ` · ${x.email}` : ""}` }));
+  const projectOpts = projects.map((p) => ({ id: p.id, name: p.name }));
+  const meta = [host(org.website), org.industry, org.country, `client since ${fmtDate(org.created_at)}`].filter(Boolean).join(" · ");
 
   async function addContact(formData: FormData) {
     "use server";
@@ -80,191 +88,174 @@ export default async function ClientDetail({ params }: { params: Promise<{ orgId
   }
 
   return (
-    <OpsShell
-      active="/ops/clients"
-      title={org.name}
-      actions={
-        <>
-          {org.archived_at && <span style={{ ...mono, fontSize: 9.5, color: "#B45309", border: "1px solid rgba(180,83,9,.4)", borderRadius: 999, padding: ".25rem .6rem" }}>Archived</span>}
-          <Link href="/ops/clients" style={{ ...mono, fontSize: 11, color: "var(--ink-faint)", textDecoration: "none" }}>← All clients</Link>
-        </>
-      }
-    >
-      <AdminResult />
-
-      {/* client record: edit + archive + delete */}
-      <details style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", marginBottom: "1.4rem" }}>
-        <summary style={{ ...mono, fontSize: 10, color: "var(--brand-deep)", padding: ".9rem 1.2rem", cursor: "pointer", listStyle: "none", display: "flex", alignItems: "center", gap: 8 }}>
-          <Pencil size={13} aria-hidden /> Client details · {org.website ?? "no website"} · {org.country ?? "country not set"}
-        </summary>
-        <div style={{ padding: "0 1.2rem 1.2rem", display: "grid", gap: "1rem" }}>
-          <form action={updateOrgAction} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.6rem" }}>
-            <input type="hidden" name="orgId" value={orgId} />
-            <Field label="Company name"><input style={input} name="name" required defaultValue={org.name} /></Field>
-            <Field label="Legal name"><input style={input} name="legal_name" defaultValue={org.legal_name ?? ""} /></Field>
-            <Field label="Website"><input style={input} name="website" defaultValue={org.website ?? ""} /></Field>
-            <Field label="Industry"><input style={input} name="industry" defaultValue={org.industry ?? ""} /></Field>
-            <Field label="Country"><input style={input} name="country" defaultValue={org.country ?? ""} /></Field>
-            <Field label="Internal notes" wide><textarea style={{ ...input, resize: "vertical" }} name="notes" rows={2} defaultValue={org.notes ?? ""} /></Field>
-            <div><button type="submit" style={btn}>Save client</button></div>
-          </form>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", paddingTop: "0.8rem", borderTop: "1px solid var(--edge)" }}>
-            <form action={archiveOrgAction}>
-              <input type="hidden" name="orgId" value={orgId} />
-              <input type="hidden" name="archived" value={org.archived_at ? "0" : "1"} />
-              <button type="submit" style={ghost}>{org.archived_at ? <><ArchiveRestore size={13} aria-hidden /> Restore client</> : <><Archive size={13} aria-hidden /> Archive client</>}</button>
-            </form>
-            <ConfirmDelete
-              action={deleteOrgAction} hidden={{ orgId }} label="Delete client"
-              text={`Permanently deletes ${org.name}, its ${contacts.length} contact(s), ${projects.length} project(s) and ${proposals.length} proposal(s).`}
-              guard={hasReleased ? { reason: `${proposals.filter(released).length} proposal(s) were released or signed.`, expectName: org.name, what: "the company name" } : null}
-            />
+    <AppShell active="/ops/clients" crumbs={[{ label: "Clients", href: "/ops/clients" }, { label: org.name }]}>
+      <header className={s.pageHeader}>
+        <div style={{ minWidth: 0 }}>
+          <p className={c.crumb}><Link href="/ops/clients">Clients</Link> / {org.name}</p>
+          <div className={c.identity}>
+            <Avatar name={org.name} />
+            <div style={{ minWidth: 0 }}>
+              <div className={c.titleRow}>
+                <h1 className={s.pageTitle}>{org.name}</h1>
+                {org.archived_at && <Chip tone="muted" title={`Archived ${fmtDate(org.archived_at)}`}><Archive size={12} aria-hidden /> Archived</Chip>}
+              </div>
+              <p className={c.metaLine}>{meta}</p>
+            </div>
           </div>
         </div>
-      </details>
+        <div className={s.pageActions}>
+          <NewProposalDrawer orgId={orgId} orgName={org.name} projects={projectOpts} contacts={contactOpts} />
+          <EditClientDrawer org={org} />
+          <details className={c.menu}>
+            <summary className={`${s.btn} ${s.btnSecondary}`} aria-label="More actions" title="Archive or delete"><MoreHorizontal size={18} aria-hidden /></summary>
+            <div className={c.menuBody}>
+              <form action={archiveOrgAction} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                <input type="hidden" name="orgId" value={orgId} />
+                <input type="hidden" name="archived" value={org.archived_at ? "0" : "1"} />
+                <span className={c.railText}>{org.archived_at ? "Restore the client to the pickers." : "Hide from new-proposal pickers; existing proposals untouched."}</span>
+                <button type="submit" className={`${s.btn} ${s.btnSecondary} ${s.btnSm}`}>{org.archived_at ? <><ArchiveRestore size={14} aria-hidden /> Restore</> : <><Archive size={14} aria-hidden /> Archive</>}</button>
+              </form>
+              <ConfirmDelete
+                action={deleteOrgAction} hidden={{ orgId }} label="Delete client"
+                text={`Permanently deletes ${org.name}, its ${contacts.length} contact(s), ${projects.length} project(s) and ${proposals.length} proposal(s).`}
+                guard={releasedCount > 0 ? { reason: `${releasedCount} proposal(s) were released or signed.`, expectName: org.name, what: "the company name" } : null}
+              />
+            </div>
+          </details>
+        </div>
+      </header>
+      <AdminResult />
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(0,1fr)", gap: "1.4rem", alignItems: "start" }}>
-        <div style={{ display: "grid", gap: "1.4rem" }}>
-          <Panel label="Proposals">
-            {proposals.length === 0 ? <Empty>No proposals yet.</Empty> : proposals.map((p) => (
-              <Link key={p.public_id} href={`/ops/proposals/${p.public_id}`} style={{ display: "flex", gap: "0.8rem", alignItems: "baseline", padding: "0.5rem 0", borderTop: "1px solid var(--edge-faint)", textDecoration: "none", flexWrap: "wrap", opacity: p.revoked ? 0.6 : 1 }}>
-                <span style={{ ...mono, fontSize: 9.5, color: "var(--ink-faint)", width: 120 }}>{p.estimate_no}</span>
-                <span style={{ flex: "1 1 120px", fontSize: 13.5, color: "var(--ink-strong)" }}>{p.project_name ?? "—"}</span>
-                <StatusPill status={p.revoked ? "withdrawn" : p.signed_at ? "signed" : p.status} />
-                <span style={{ fontVariantNumeric: "tabular-nums", fontSize: 13, color: "var(--ink-dim)" }}>{p.one_time_high_cents > 0 ? `${usd(p.one_time_low_cents)}–${usd(p.one_time_high_cents)}` : "—"}</span>
-              </Link>
-            ))}
-          </Panel>
+      <div className={c.kpi4}>
+        <KpiGrid>
+          <KpiCard icon={<DollarSign size={20} strokeWidth={1.8} />} label="Open value" value={openValue > 0 ? compact(openValue) : "—"} context={openValue > 0 ? usd(openValue) : "no priced open proposal"} tone="green" />
+          <KpiCard icon={<FileText size={20} strokeWidth={1.8} />} label="Proposals" value={proposals.length} context={`${open.length} open · ${releasedCount} released or signed`} />
+          <KpiCard icon={<FolderKanban size={20} strokeWidth={1.8} />} label="Projects" value={projects.length} context={pods > 0 ? `${plural(pods, "pod")} requested in total` : "no pod count yet"} tone="cyan" />
+          <KpiCard icon={<Users size={20} strokeWidth={1.8} />} label="Contacts" value={contacts.length} context={`${withEmail} with an email address`} tone="purple" />
+        </KpiGrid>
+      </div>
 
-          <Panel label="Contacts">
-            {contacts.map((c) => (
-              <details key={c.id} style={{ borderTop: "1px solid var(--edge-faint)" }}>
-                <summary style={{ display: "flex", gap: "0.7rem", alignItems: "baseline", padding: "0.5rem 0", flexWrap: "wrap", cursor: "pointer", listStyle: "none" }}>
-                  <span style={{ fontSize: 13.5, color: "var(--ink-strong)", fontWeight: 500 }}>{[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email}</span>
-                  {c.title && <span style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>{c.title}</span>}
-                  {c.email && <span style={{ fontSize: 12.5, color: "var(--brand)" }}>{c.email}</span>}
-                  {c.phone && <span style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>{c.phone}</span>}
-                  <span style={{ ...mono, fontSize: 8.5, color: "var(--ink-faint)", marginLeft: "auto" }}>{c.contact_roles.join(" · ")} · edit</span>
-                </summary>
-                <form action={updateContactAction} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.5rem", padding: "0.4rem 0 0.8rem" }}>
-                  <input type="hidden" name="id" value={c.id} /><input type="hidden" name="orgId" value={orgId} />
-                  <input style={input} name="first" required defaultValue={c.first_name ?? ""} placeholder="First" />
-                  <input style={input} name="last" defaultValue={c.last_name ?? ""} placeholder="Last" />
-                  <input style={input} name="title" defaultValue={c.title ?? ""} placeholder="Title" />
-                  <input style={input} name="email" type="email" defaultValue={c.email ?? ""} placeholder="Email" />
-                  <input style={input} name="phone" type="tel" defaultValue={c.phone ?? ""} placeholder="Phone" />
-                  <div style={{ gridColumn: "1 / -1", display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-                    {ROLES.map((r) => <label key={r} style={{ fontSize: 12, color: "var(--ink-dim)", display: "flex", gap: 4, alignItems: "center" }}><input type="checkbox" name="roles" value={r} defaultChecked={c.contact_roles.includes(r)} /> {r}</label>)}
-                    <button type="submit" style={{ ...btn, marginLeft: "auto" }}>Save contact</button>
-                  </div>
-                </form>
-                <div style={{ paddingBottom: "0.8rem" }}>
-                  <ConfirmDelete action={deleteContactAction} hidden={{ id: c.id, orgId }} label="Remove contact" text={`Removes ${[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email} and revokes every secure link issued to ${c.email ?? "them"}.`} guard={null} />
+      <div className={s.split84}>
+        <Panel tight>
+          <nav className={c.tabs} aria-label="Sections">
+            <a href="#proposals">Proposals <b>{proposals.length}</b></a>
+            <a href="#contacts">Contacts <b>{contacts.length}</b></a>
+            <a href="#projects">Projects <b>{projects.length}</b></a>
+            <a href="#notes">Notes <b>{notes.length}</b></a>
+          </nav>
+
+          <section id="proposals" className={c.section}>
+            <div className={c.sectionHead}>
+              <h3>Proposals <span>{proposals.length}</span></h3>
+              <PanelLink href="/ops/proposals">All proposals</PanelLink>
+            </div>
+            {proposals.length === 0 ? <p className={c.sectionEmpty}>No proposals yet — use “New proposal” above{projects.length === 0 ? " once a project exists" : ""}.</p> : proposals.map((p) => (
+              <div key={p.public_id} className={c.row} style={p.revoked ? { opacity: 0.65 } : undefined}>
+                <div className={c.rowMain}>
+                  <Link href={`/ops/proposals/${p.public_id}`} className={c.rowTitle}><span>{p.project_name ?? "Untitled project"}</span></Link>
+                  <p className={c.rowSub}><span className={s.mono}>{p.public_id}</span><span className={s.mono}>{p.estimate_no}</span>{p.view_count > 0 ? <span>viewed {p.view_count}×</span> : <span className={s.muted}>not opened yet</span>}</p>
                 </div>
-              </details>
+                <div className={c.rowSide}>
+                  <StatusChip status={p.status} revoked={p.revoked} signedAt={p.signed_at} />
+                  <span className={c.money}>{range(p)}</span>
+                </div>
+              </div>
             ))}
-            <form action={addContact} style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.7rem", paddingTop: "0.7rem", borderTop: "1px solid var(--edge)" }}>
-              <input style={{ ...input, flex: "1 1 90px" }} name="first" required placeholder="First" />
-              <input style={{ ...input, flex: "1 1 90px" }} name="last" placeholder="Last" />
-              <input style={{ ...input, flex: "1 1 100px" }} name="title" placeholder="Title" />
-              <input style={{ ...input, flex: "1 1 140px" }} name="email" type="email" placeholder="Email" />
-              <input style={{ ...input, flex: "1 1 110px" }} name="phone" type="tel" placeholder="Phone" />
-              <select style={input} name="role" defaultValue="commercial">{ROLES.map((r) => <option key={r} value={r}>{r}</option>)}</select>
-              <button type="submit" style={btn}>+ Contact</button>
-            </form>
-          </Panel>
+          </section>
 
-          <Panel label="Projects">
-            {projects.length === 0 && <Empty>No projects yet — a proposal needs a project, add one below.</Empty>}
-            {projects.map((p) => {
+          <section id="contacts" className={c.section}>
+            <div className={c.sectionHead}>
+              <h3>Contacts <span>{contacts.length}</span></h3>
+              <NewContactDrawer action={addContact} />
+            </div>
+            {contacts.length === 0 ? <p className={c.sectionEmpty}>No contacts yet. Someone with an email address is needed before a proposal can be shared.</p> : contacts.map((x) => (
+              <div key={x.id} className={c.row}>
+                <div className={c.rowMain}>
+                  <p className={c.rowTitle}><span>{fullName(x)}</span>{x.title && <span className={s.muted} style={{ fontWeight: 450 }}>· {x.title}</span>}</p>
+                  <p className={c.rowSub}>
+                    {x.email ? <a href={`mailto:${x.email}`}>{x.email}</a> : <span className={s.muted}>no email — cannot be invited</span>}
+                    {x.phone && <span>{x.phone}</span>}
+                    {x.contact_roles.length > 0 && <span className={c.roles}>{x.contact_roles.map((r) => <span key={r} className={c.role}>{r}</span>)}</span>}
+                  </p>
+                </div>
+                <div className={c.rowSide}>
+                  <EditContactDrawer orgId={orgId} contact={x} />
+                  <ConfirmDelete compact action={deleteContactAction} hidden={{ id: x.id, orgId }} label="Remove" text={`Removes ${fullName(x)} and revokes every secure link issued to ${x.email ?? "them"}.`} guard={null} />
+                </div>
+              </div>
+            ))}
+          </section>
+
+          <section id="projects" className={c.section}>
+            <div className={c.sectionHead}>
+              <h3>Projects <span>{projects.length}</span></h3>
+              <NewProjectDrawer action={addProject} />
+            </div>
+            {projects.length === 0 ? <p className={c.sectionEmpty}>No projects yet — a proposal needs a project; add one to get started.</p> : projects.map((p) => {
               const own = proposals.filter((x) => x.project_id === p.id);
-              const blocked = own.some(released);
+              const blocked = own.filter(released).length;
+              const facts = [p.pod_quantity ? plural(p.pod_quantity, "pod") : null, p.required_capacity_mw ? `${p.required_capacity_mw} MW` : null, p.expected_gpus ? `${p.expected_gpus.toLocaleString("en-US")} GPUs` : null, p.target_golive ? `go-live ${fmtDate(p.target_golive)}` : null, plural(own.length, "proposal")].filter(Boolean);
               return (
-                <details key={p.id} id={`project-${p.id}`} style={{ borderTop: "1px solid var(--edge-faint)" }}>
-                  <summary style={{ display: "flex", gap: "0.8rem", alignItems: "center", flexWrap: "wrap", padding: "0.5rem 0", cursor: "pointer", listStyle: "none" }}>
-                    <div style={{ flex: "1 1 200px", minWidth: 0 }}>
-                      <span style={{ fontSize: 13.5, color: "var(--ink-strong)", fontWeight: 500 }}>{p.name}</span>
-                      {p.pod_quantity ? <span style={{ ...mono, fontSize: 9, color: "var(--ink-faint)", marginLeft: 8 }}>{p.pod_quantity} pods</span> : null}
-                      {p.required_capacity_mw ? <span style={{ ...mono, fontSize: 9, color: "var(--ink-faint)", marginLeft: 8 }}>{p.required_capacity_mw} MW</span> : null}
-                      {p.description && <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 2 }}>{p.description}</p>}
-                    </div>
-                    <span style={{ ...mono, fontSize: 8.5, color: "var(--ink-faint)" }}>{own.length} proposal{own.length === 1 ? "" : "s"} · edit</span>
-                  </summary>
-                  <form action={updateProjectAction} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.5rem", padding: "0.4rem 0 0.8rem" }}>
-                    <input type="hidden" name="id" value={p.id} /><input type="hidden" name="orgId" value={orgId} />
-                    <Field label="Name" wide><input style={input} name="name" required defaultValue={p.name} /></Field>
-                    <Field label="Pods"><input style={input} name="pods" type="number" min={1} defaultValue={p.pod_quantity ?? ""} /></Field>
-                    <Field label="Capacity (MW)"><input style={input} name="capacity_mw" type="number" step="0.1" min={0} defaultValue={p.required_capacity_mw ?? ""} /></Field>
-                    <Field label="GPU positions"><input style={input} name="gpus" type="number" min={0} defaultValue={p.expected_gpus ?? ""} /></Field>
-                    <Field label="Workload"><input style={input} name="workload" defaultValue={p.workload ?? ""} /></Field>
-                    <Field label="Target go-live"><input style={input} name="golive" type="date" defaultValue={p.target_golive ?? ""} /></Field>
-                    <Field label="Description" wide><input style={input} name="description" defaultValue={p.description ?? ""} /></Field>
-                    <div><button type="submit" style={btn}>Save project</button></div>
-                  </form>
-                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", paddingBottom: "0.8rem" }}>
-                    <form action={createProposalAction} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-                      <input type="hidden" name="orgId" value={orgId} /><input type="hidden" name="projectId" value={p.id} />
-                      <select name="mode" defaultValue="client_configured" style={{ ...input, minHeight: 34 }} aria-label="How the proposal is built">
-                        <option value="client_configured">Client builds (menu)</option><option value="admin_built">I build the line items</option>
-                      </select>
-                      {contacts.length > 0 && (
-                        <select name="contactId" defaultValue={contacts[0]?.id ?? ""} style={{ ...input, minHeight: 34 }} aria-label="Primary contact">
-                          {contacts.map((c) => <option key={c.id} value={c.id}>{[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email}</option>)}
-                        </select>
-                      )}
-                      <button type="submit" style={btn}>+ New proposal</button>
-                    </form>
-                    <ConfirmDelete action={deleteProjectAction} hidden={{ id: p.id, orgId }} label="Delete project" text={`Deletes ${p.name} and its ${own.length} proposal(s).`} guard={blocked ? { reason: `${own.filter(released).length} proposal(s) were released or signed.`, expectName: p.name, what: "the project name" } : null} />
+                <div key={p.id} id={`project-${p.id}`} className={c.row} style={{ scrollMarginTop: 80 }}>
+                  <div className={c.rowMain}>
+                    <p className={c.rowTitle}><span>{p.name}</span></p>
+                    <p className={c.rowSub}>{facts.map((f, i) => <span key={i}>{f}</span>)}</p>
+                    {p.description && <p className={c.rowSub} style={{ display: "block" }}>{p.description}</p>}
                   </div>
-                </details>
+                  <div className={c.rowSide}>
+                    <NewProposalDrawer orgId={orgId} orgName={org.name} projects={projectOpts} contacts={contactOpts} projectId={p.id} variant="xs" />
+                    <EditProjectDrawer orgId={orgId} project={p} />
+                    <ConfirmDelete compact action={deleteProjectAction} hidden={{ id: p.id, orgId }} label="Delete" text={`Deletes ${p.name} and its ${own.length} proposal(s).`} guard={blocked > 0 ? { reason: `${blocked} proposal(s) were released or signed.`, expectName: p.name, what: "the project name" } : null} />
+                  </div>
+                </div>
               );
             })}
-            <form action={addProject} style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.7rem", paddingTop: "0.7rem", borderTop: "1px solid var(--edge)" }}>
-              <input style={{ ...input, flex: "1 1 160px" }} name="name" required placeholder="Project name" />
-              <input style={{ ...input, width: 80 }} name="pods" type="number" min="1" placeholder="Pods" />
-              <input style={{ ...input, flex: "1 1 100%" }} name="description" placeholder="Description (optional)" />
-              <button type="submit" style={btn}>+ Project</button>
-            </form>
-          </Panel>
-        </div>
+          </section>
 
-        <Panel label="Internal notes">
-          <form action={addNote} style={{ display: "grid", gap: "0.5rem", marginBottom: "0.9rem" }}>
-            <textarea name="body" rows={3} placeholder="Add a private note…" style={{ ...input, resize: "vertical" }} />
-            <button type="submit" style={{ ...btn, justifySelf: "start" }}>Save note</button>
-          </form>
-          {notes.length === 0 ? <Empty>No notes.</Empty> : notes.map((n) => (
-            <div key={n.id} style={{ padding: "0.5rem 0", borderTop: "1px solid var(--edge-faint)" }}>
-              <p style={{ fontSize: 13, color: "var(--ink-strong)", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{n.body}</p>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
-                <p style={{ ...mono, fontSize: 8.5, color: "var(--ink-faint)" }}>{n.author} · {new Date(n.created_at).toLocaleDateString("en-US")}</p>
-                <form action={deleteNoteAction} style={{ marginLeft: "auto" }}>
+          <section id="notes" className={c.section}>
+            <div className={c.sectionHead}>
+              <h3>Notes <span>{notes.length}</span></h3>
+              <NewNoteDrawer action={addNote} />
+            </div>
+            {notes.length === 0 ? <p className={c.sectionEmpty}>No notes yet. Notes are private to PODOS.</p> : notes.map((n) => (
+              <div key={n.id} className={c.note}>
+                <div style={{ minWidth: 0 }}>
+                  <p className={c.noteBody}>{n.body}</p>
+                  <p className={c.noteMeta}>{n.author} · <span title={new Date(n.created_at).toISOString()}>{fmtDate(n.created_at)}</span></p>
+                </div>
+                <form action={deleteNoteAction}>
                   <input type="hidden" name="id" value={n.id} /><input type="hidden" name="orgId" value={orgId} />
-                  <button type="submit" style={{ ...danger, padding: ".2rem .5rem", fontSize: 8.5 }} aria-label="Delete note"><Trash2 size={11} aria-hidden /> Delete</button>
+                  <button type="submit" className={`${s.btn} ${s.btnGhost} ${s.btnXs}`} aria-label="Delete note"><Trash2 size={13} aria-hidden /> Delete</button>
                 </form>
               </div>
-            </div>
-          ))}
+            ))}
+          </section>
         </Panel>
+
+        <aside className={s.rail}>
+          <Panel title="Facts" icon={<Info size={18} aria-hidden />} tight action={<EditClientDrawer org={org} variant="xs" />}>
+            <dl className={c.facts}>
+              <div><dt>Legal name</dt><dd>{org.legal_name ?? <span className={s.muted}>—</span>}</dd></div>
+              <div><dt>Website</dt><dd>{org.website ? <a href={org.website.startsWith("http") ? org.website : `https://${org.website}`} target="_blank" rel="noopener">{host(org.website)}</a> : <span className={s.muted}>—</span>}</dd></div>
+              <div><dt>Industry</dt><dd>{org.industry ?? <span className={s.muted}>—</span>}</dd></div>
+              <div><dt>Country</dt><dd>{org.country ?? <span className={s.muted}>—</span>}</dd></div>
+              <div><dt>Created</dt><dd>{fmtDate(org.created_at)}</dd></div>
+              {org.archived_at && <div><dt>Archived</dt><dd>{fmtDate(org.archived_at)}</dd></div>}
+            </dl>
+          </Panel>
+
+          <Panel title="Secure access" icon={<ShieldCheck size={18} aria-hidden />} tight action={<PanelLink href="/ops/proposals">Proposals</PanelLink>}>
+            <p className={c.railBig}>{withEmail}</p>
+            <p className={c.railText} style={{ marginTop: 4 }}>{withEmail === 1 ? "contact can be invited" : "contacts can be invited"} · {contacts.length - withEmail} without an email</p>
+            <p className={c.railText} style={{ marginTop: 14 }}>Secure links are issued per proposal and are not loaded on this page. Grant or revoke access from each proposal in Proposals.</p>
+          </Panel>
+
+          <Panel title="Internal notes" icon={<StickyNote size={18} aria-hidden />} tight action={<a href="#notes" className={s.panelAction}>Timeline</a>}>
+            {org.notes ? <p className={c.noteBody}>{org.notes}</p> : <p className={c.railText}>No standing note on this client. Add one via Edit; dated notes live in the timeline.</p>}
+            <p className={c.noteMeta} style={{ marginTop: 10 }}>Company record · {plural(notes.length, "dated note")}</p>
+          </Panel>
+        </aside>
       </div>
-    </OpsShell>
+    </AppShell>
   );
-}
-
-function Field({ label, children, wide }: { label: string; children: React.ReactNode; wide?: boolean }) {
-  return <label style={{ display: "grid", gap: 3, fontSize: 11, color: "var(--ink-faint)", gridColumn: wide ? "1 / -1" : undefined }}>{label}{children}</label>;
-}
-
-function Panel({ label, children }: { label: string; children: React.ReactNode }) {
-  return <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.1rem 1.2rem" }}><p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)", marginBottom: "0.6rem" }}>{label}</p>{children}</section>;
-}
-function Empty({ children }: { children: React.ReactNode }) { return <p style={{ fontSize: 13, color: "var(--ink-faint)" }}>{children}</p>; }
-function StatusPill({ status }: { status: string }) {
-  const tone = status === "signed" || status === "client_signed" || status === "won"
-    ? { c: "#15803D", b: "rgba(34,197,94,.45)", bg: "rgba(34,197,94,.08)" }
-    : status === "withdrawn" || status === "lost" || status === "declined"
-      ? { c: "#B91C1C", b: "rgba(185,28,28,.35)", bg: "rgba(185,28,28,.06)" }
-      : status === "viewed" ? { c: "var(--cyan-deep)", b: "rgba(34,211,238,.45)", bg: "rgba(34,211,238,.08)" }
-      : { c: "var(--ink-dim)", b: "var(--edge-bright)", bg: "var(--glass-bg-strong)" };
-  return <span style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", padding: ".2rem .5rem", borderRadius: 999, color: tone.c, border: `1px solid ${tone.b}`, background: tone.bg, whiteSpace: "nowrap" }}>{status.replace(/_/g, " ")}</span>;
 }

@@ -20,6 +20,15 @@ export interface ContactOpt { id: string; organization_id: string; label: string
 
 const STEPS = ["Type", "Client", "Project", "Contact", "Build mode", "Access", "Review"];
 
+function Choice({ active, onClick, icon, title, text }: { active: boolean; onClick: () => void; icon: React.ReactNode; title: string; text: string }) {
+  return (
+    <button type="button" onClick={onClick} className={`${s.choice}${active ? ` ${s.choiceActive}` : ""}`} aria-pressed={active}>
+      <span className={`${s.kpiIcon} ${active ? s.toneCobalt : ""}`} style={{ width: 38, height: 38 }}>{icon}</span>
+      <span style={{ textAlign: "left" }}><span className={s.choiceTitle}>{title}</span><span className={s.choiceText} style={{ display: "block" }}>{text}</span></span>
+    </button>
+  );
+}
+
 export default function NewProposalWizard({ orgs, projects, contacts, initialOrgId }: { orgs: OrgOpt[]; projects: ProjectOpt[]; contacts: ContactOpt[]; initialOrgId?: string }) {
   const [step, setStep] = useState(0);
   const [pageMode, setPageMode] = useState<"preliminary" | "formal">("preliminary");
@@ -35,13 +44,6 @@ export default function NewProposalWizard({ orgs, projects, contacts, initialOrg
   const contact = orgContacts.find((c) => c.id === contactId);
   const org = orgs.find((o) => o.id === orgId);
   const canNext = step === 1 ? !!orgId : step === 2 ? !!project : true;
-
-  const Choice = ({ active, onClick, icon, title, text }: { active: boolean; onClick: () => void; icon: React.ReactNode; title: string; text: string }) => (
-    <button type="button" onClick={onClick} className={`${s.choice}${active ? ` ${s.choiceActive}` : ""}`} aria-pressed={active}>
-      <span className={`${s.kpiIcon} ${active ? s.toneCobalt : ""}`} style={{ width: 38, height: 38 }}>{icon}</span>
-      <span style={{ textAlign: "left" }}><span className={s.choiceTitle}>{title}</span><span className={s.choiceText} style={{ display: "block" }}>{text}</span></span>
-    </button>
-  );
 
   return (
     <Drawer

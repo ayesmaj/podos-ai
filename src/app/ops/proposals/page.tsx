@@ -5,6 +5,7 @@ import {
   AlertTriangle, CheckCircle2, Clock, DollarSign, Eye, FilePlus2, FileText, Inbox, KeyRound, Link2, PenLine, Send, Settings2, ShieldCheck, Trash2, UserPlus, Wrench,
 } from "lucide-react";
 import { requireOps } from "@/lib/ops/session";
+import { nowMs } from "@/lib/ops/clock";
 import {
   ADMIN_SECRET, listContacts, listEstimates, listInvitations, listOrganizations, listProjects, opsDashboard,
   type EstimateRow, type InvitationRow,
@@ -96,7 +97,7 @@ export default async function ProposalsPage({ searchParams }: { searchParams: Pr
     if (["client_submitted", "engineering_review", "commercial_review"].includes(r.status)) items.push({ r, why: "Awaiting your review", tone: "amber" });
     if (r.status === "signature_requested" && !r.signed_at) items.push({ r, why: `Signature pending${r.last_viewed_at ? ` · last viewed ${ago(r.last_viewed_at)}` : ""}`, tone: "violet" });
     const d = days(r.expires_at); if (isActive(r) && d != null && d < 7) items.push({ r, why: d < 0 ? "Validity expired" : `Expires in ${Math.max(1, Math.ceil(d))} day${Math.ceil(d) === 1 ? "" : "s"}`, tone: d < 0 ? "red" : "amber" });
-    if (["released", "sent", "client_invited"].includes(r.status) && !r.first_viewed_at && (Date.now() - new Date(r.created_at).getTime()) / 86_400_000 > 3) items.push({ r, why: "Sent 3+ days ago, not opened", tone: "cobalt" });
+    if (["released", "sent", "client_invited"].includes(r.status) && !r.first_viewed_at && (nowMs() - new Date(r.created_at).getTime()) / 86_400_000 > 3) items.push({ r, why: "Sent 3+ days ago, not opened", tone: "cobalt" });
     return items;
   }).slice(0, 8);
 
@@ -122,8 +123,8 @@ export default async function ProposalsPage({ searchParams }: { searchParams: Pr
       <KpiGrid>
         <KpiCard icon={<FileText size={20} strokeWidth={1.8} />} label="Active proposals" value={active.length} context={`${all.length} total · ${all.filter((r) => r.revoked).length} withdrawn`} href={href({ show: "active", stage: null })} />
         <KpiCard icon={<DollarSign size={20} strokeWidth={1.8} />} label="Open pipeline" value={compact(openPipeline)} context={openPipeline ? usd(openPipeline) : "no open value yet"} tone="green" />
-        <KpiCard icon={<Settings2 size={20} strokeWidth={1.8} />} label="Configurations in progress" value={byStage("configuring").length + byStage("invited").length} context={`${dash.active_invitations ?? 0} active links`} tone="cyan" href={href({ stage: "configuring", show: "all" })} />
-        <KpiCard icon={<Inbox size={20} strokeWidth={1.8} />} label="Submitted for review" value={byStage("submitted").length + byStage("review").length} context="needs engineering or commercial review" tone="amber" href={href({ stage: "submitted", show: "all" })} />
+        <KpiCard icon={<Settings2 size={20} strokeWidth={1.8} />} label="Configuring" value={byStage("configuring").length + byStage("invited").length} context={`${dash.active_invitations ?? 0} active links · invited or building`} tone="cyan" href={href({ stage: "configuring", show: "all" })} />
+        <KpiCard icon={<Inbox size={20} strokeWidth={1.8} />} label="In review" value={byStage("submitted").length + byStage("review").length} context="submitted · engineering or commercial review" tone="amber" href={href({ stage: "submitted", show: "all" })} />
         <KpiCard icon={<Send size={20} strokeWidth={1.8} />} label="Proposals sent" value={byStage("sent").length + byStage("signature").length} context={`${dash.viewed_today ?? 0} viewed in the last 24 h`} tone="electric" href={href({ stage: "sent", show: "all" })} />
         <KpiCard icon={<PenLine size={20} strokeWidth={1.8} />} label="Signed" value={signedCount} context={signedCount ? usd(byStage("signed").reduce((a, r) => a + r.one_time_high_cents, 0)) : "no signatures yet"} tone="purple" href={href({ stage: "signed", show: "all" })} />
       </KpiGrid>

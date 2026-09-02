@@ -18,6 +18,19 @@ was normalized into the PODOS token system — none is used verbatim.
 
 Searches also run (no source adopted): "multi-step product configurator with live price summary" (results were SaaS pricing tables — wrong job), "dashboard KPI stat card grid" (id 7461 chosen from this set).
 
+## Ops overlays & list chrome (2026-09-02)
+
+Full candidate matrices, normalized TSX/CSS, accessibility and responsive notes: `docs/ops-design/COMPONENT_SOURCES_overlays.md`.
+
+| Project component | 21st search intent | Selected source | Why selected | Dependencies | License/attribution | Major modifications | Status |
+|---|---|---|---|---|---|---|---|
+| `OpsDrawer` | right side drawer sheet panel slide over | ddoemonn **Drawer** (demo 23558) | zero deps; inert siblings, return focus, gutter-safe scroll lock | motion (installed) | 21st community registry | drag-to-dismiss removed; CSS module + ops tokens; lucide X; sticky footer; full-bleed < 720px | documented |
+| `WizardSteps` + `NewProposalWizard` | multi-step form wizard stepper with progress and next back | ddoemonn **Wizard Steps** (demo 23576) | typed `useWizard`, roving-tabindex rail, live region, reduced motion | motion (installed) | 21st community registry | actions lifted to drawer footer; `canAdvance` gate; final step is a real server-action form; replaces inline `NewProposalForm` | documented |
+| `Segmented` | segmented control toggle group icon buttons grid list view switch | ddoemonn **Segmented Control** (demo 23552) | correct radiogroup with sliding thumb | motion (installed) | 21st community registry | native radios (form-GET), single `layoutId` thumb, icon-only mode | documented |
+| `ListToolbar` | data table toolbar search filter sort view toggle | custom (19516 Base UI Toolbar, 22162 TanStack table rejected: new deps, wrong architecture) | native GET form; state = `searchParams` | none | — | composed from `Segmented` + native controls + `<output>` count | documented |
+| `Tabs` / `TabPanel` | tabs animated underline indicator | educalvolpz **Animated Tabs** (demo 24930) | tablist keyboard model + `layoutId` indicator, no deps | motion (installed) | 21st community registry | `TabPanel` + ARIA wiring added; variants dropped; count badge | documented |
+| `CommandSearch` | command menu palette search cmdk | ddoemonn **Command Palette** (demo 23522) | combobox/listbox ARIA + ranking, no deps (cmdk/Radix rejected) | motion (installed) | 21st community registry | grouped results, router navigation, lucide, Geist tabular kbd, mobile sheet | documented |
+
 ## Ops data patterns (2026-09-02)
 
 Full scout report with candidate matrices, adapted TSX/CSS and a11y/responsive notes: `docs/ops-design/COMPONENT_SOURCES_data.md`. 21st searched via `21st-global` MCP; ten sources fetched with `get_component`. Zero new dependencies — Radix/cva/Base UI stripped from every candidate.

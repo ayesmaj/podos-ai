@@ -26,7 +26,8 @@ export interface ValidationContext {
 }
 
 const PLACEHOLDER_WORDS = new Set(["tbd", "tba", "test", "testing", "asdf", "qwerty", "n/a", "na", "none", "xxx", "lorem", "ipsum", "placeholder", "sample", "demo", "todo", "fff", "ggg", "sss", "aaa"]);
-const INTERNAL_MARKERS = /\b(internal|cost basis|cogs|margin|markup|pending[_ ]review|do not send|draft only|vendor price)\b/i;
+// wording that must never reach a client — phrases, not bare words ("internal loop" is legitimate product copy)
+const INTERNAL_MARKERS = /\b(internal (?:only|use|note|notes|pricing|price|cost|memo)|cost basis|cogs|margin|markup|pending[_ ]review|do not send|draft only|vendor price|our cost)\b/i;
 const PUBLIC_ID_RE = /^POD-EST-\d{4}-\d{4}$/;
 
 /** True when free text is obviously not a real value (too short, no vowels, repeated chars, blocklisted). */

@@ -1,0 +1,60 @@
+/* /ops/settings — archetype 5: 3/9 split, sticky sub-nav, stacked form panels (max 760). */
+
+/* centred on wide canvases so the right quarter never sits empty */
+.grid { display: grid; grid-template-columns: minmax(220px, 3fr) minmax(0, 9fr); gap: var(--ops-section-gap); align-items: start; max-width: 1240px; margin-inline: auto; width: 100%; }
+.stack { display: grid; gap: var(--ops-panel-gap); max-width: 880px; min-width: 0; }
+.section { scroll-margin-top: 80px; }
+
+/* sub-nav: 36px items, 3px left accent on the active one (CSS :target scroll-spy — no JS) */
+.subnav { position: sticky; top: 72px; }
+.subnavList { display: grid; gap: 2px; margin-top: 12px; }
+.subnavItem { display: flex; align-items: center; min-height: 36px; padding: 0 12px; border-radius: 10px; font-size: 14px; font-weight: 550; color: var(--ops-ink-secondary); text-decoration: none; transition: background var(--ops-dur) var(--ops-ease), color var(--ops-dur) var(--ops-ease); }
+.subnavItem:hover { background: var(--ops-surface-soft); color: var(--ops-ink); }
+.grid:not(:has(:target)) .subnavItem:first-child,
+.grid:has(#company:target) .subnavItem[href="#company"],
+.grid:has(#texts:target) .subnavItem[href="#texts"],
+.grid:has(#notifications:target) .subnavItem[href="#notifications"],
+.grid:has(#email:target) .subnavItem[href="#email"],
+.grid:has(#access:target) .subnavItem[href="#access"],
+.grid:has(#design:target) .subnavItem[href="#design"] { background: var(--ops-surface-selected); color: var(--ops-cobalt-deep); font-weight: 650; box-shadow: inset 3px 0 0 var(--ops-cobalt); }
+
+/* 2-col form grid: label 200px + control; hairline between rows */
+.rows { display: grid; }
+.frow { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 6px 24px; align-items: start; padding: 16px 0; border-top: 1px solid var(--ops-border); }
+.frow:first-child { border-top: none; padding-top: 0; }
+.frow:last-child { padding-bottom: 0; }
+.frowLabel { padding-top: 14px; min-width: 0; }
+.frowLabel .hint { margin-top: 4px; font-size: 12.5px; line-height: 1.4; color: var(--ops-ink-muted); }
+.frowLabelTall { padding-top: 10px; }
+.trust { display: grid; gap: 10px; }
+.trustItem { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 10px; }
+
+/* panel footer: helper text left, Save right */
+.foot { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--ops-border); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.footText { font-size: 13px; line-height: 1.4; color: var(--ops-ink-muted); max-width: 52ch; }
+
+/* facts inside the access / design panels */
+.fact { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 6px 24px; align-items: center; padding: 12px 0; border-top: 1px solid var(--ops-border); font-size: 14px; }
+.fact:first-child { border-top: none; padding-top: 0; }
+.factValue { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; color: var(--ops-ink); }
+.masked { font-family: var(--ops-display); font-size: 16px; letter-spacing: 0.16em; color: var(--ops-ink); }
+.body { font-size: 14px; line-height: 22px; color: var(--ops-ink-secondary); max-width: 76ch; }
+.body a { color: var(--ops-cobalt); font-weight: 600; text-decoration: none; }
+.body a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.code { font-family: var(--ops-display); font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em; padding: 1px 6px; border-radius: 6px; background: var(--ops-surface-soft); color: var(--ops-cobalt-deep); }
+
+@media (max-width: 1180px) {
+  .grid { grid-template-columns: 1fr; }
+  .subnav { position: static; }
+  .subnavList { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .subnavItem { min-height: 32px; border: 1px solid var(--ops-border); border-radius: 999px; font-size: 13px; }
+  .grid:not(:has(:target)) .subnavItem:first-child,
+  .grid:has(:target) .subnavItem { box-shadow: none; }
+}
+@media (max-width: 720px) {
+  .frow, .fact { grid-template-columns: 1fr; }
+  .frowLabel, .frowLabelTall { padding-top: 0; }
+  .trustItem { grid-template-columns: 1fr; }
+  /* panel head (title + action) wraps instead of squeezing the title */
+  .section > section > div:first-child { flex-wrap: wrap; }
+}

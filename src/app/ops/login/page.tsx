@@ -1,7 +1,11 @@
+import "@/components/ops/ui/ops-tokens.css";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { ArrowRight } from "lucide-react";
+import s from "@/components/ops/ui/ops.module.css";
+import l from "./login.module.css";
 import {
   ADMIN_COOKIE,
   adminLogin,
@@ -26,7 +30,7 @@ import {
  */
 
 export const metadata: Metadata = {
-  title: "Sign in | PODOS admin",
+  title: "Sign in · PODOS ops",
   robots: { index: false, follow: false, nocache: true },
 };
 export const dynamic = "force-dynamic";
@@ -70,84 +74,27 @@ export default async function AdminLoginPage({
   if (existing && (await adminSessionValid(existing))) redirect("/ops/proposals");
 
   return (
-    <main
-      style={{
-        background: "var(--paper)",
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "3rem 1.25rem",
-      }}
-    >
-      <form
-        action={login}
-        style={{
-          width: "100%",
-          maxWidth: 380,
-          border: "1px solid var(--edge)",
-          borderRadius: 16,
-          background: "var(--panel)",
-          padding: "2rem",
-          display: "grid",
-          gap: "0.8rem",
-          boxShadow: "0 1px 2px rgba(15,23,42,.04), 0 24px 60px -30px rgba(15,23,42,.25)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <Image src="/logo.png" alt="PODOS AI" width={140} height={48} priority sizes="140px" style={{ height: 48, width: "auto" }} />
-          <span style={{ fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--brand)" }}>Internal</span>
+    <main className={`ops ${l.page}`}>
+      <div className={l.card}>
+        <div className={l.brand}>
+          <Image src="/logo.png" alt="PODOS AI" width={168} height={58} priority sizes="168px" className={l.logo} />
+          <span className={s.label}>Operations</span>
         </div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20, color: "var(--ink-strong)" }}>
-          Admin sign-in
-        </h1>
-        <label htmlFor="secret" style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--ink-faint)" }}>
-          Access code
-        </label>
-        <input
-          id="secret"
-          name="secret"
-          type="password"
-          required
-          inputMode="numeric"
-          autoComplete="current-password"
-          style={{
-            padding: "0.7rem 0.8rem",
-            borderRadius: 10,
-            border: "1px solid var(--edge-bright)",
-            fontSize: 15,
-            fontFamily: "inherit",
-          }}
-        />
-        {e === "1" && (
-          <p role="alert" style={{ fontSize: 13, color: "#B91C1C" }}>
-            Sign-in failed.
-          </p>
-        )}
-        {e === "2" && (
-          <p role="alert" style={{ fontSize: 13, color: "#B91C1C" }}>
-            Too many attempts. Wait 15 minutes.
-          </p>
-        )}
-        <button
-          type="submit"
-          style={{
-            padding: "0.8rem 1rem",
-            borderRadius: 10,
-            background: "var(--brand-gradient)",
-            color: "#fff",
-            fontWeight: 600,
-            fontSize: 14.5,
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Sign in →
-        </button>
-        <p style={{ fontSize: 11.5, color: "var(--ink-faint)", lineHeight: 1.6 }}>
-          Sessions last 12 hours. Every sign-in and failure is audit-logged.
-        </p>
-      </form>
+        <div>
+          <h1 className={l.title}>Sign in</h1>
+          <p className={l.sub}>Enter your access code to open the operations console.</p>
+        </div>
+        <form action={login} className={l.form}>
+          <label htmlFor="secret" className={s.field}>
+            <span className={s.label}>Access code</span>
+            <input id="secret" name="secret" type="password" required inputMode="numeric" autoComplete="current-password" className={s.input} />
+          </label>
+          {e === "1" && <p role="alert" className={`${s.notice} ${s.noticeDanger}`}>Sign-in failed.</p>}
+          {e === "2" && <p role="alert" className={`${s.notice} ${s.noticeDanger}`}>Too many attempts. Wait 15 minutes.</p>}
+          <button type="submit" className={`${s.btn} ${s.btnPrimary}`}>Sign in <ArrowRight size={16} aria-hidden /></button>
+        </form>
+        <p className={l.foot}>Sessions last 12 hours. Every sign-in and failure is audit-logged.</p>
+      </div>
     </main>
   );
 }

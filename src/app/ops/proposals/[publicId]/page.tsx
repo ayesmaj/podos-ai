@@ -1,28 +1,40 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { requireOps } from "@/lib/ops/session";
-import { ADMIN_SECRET, getProposalFull, listCatalog, listContacts, listInvitations, usd } from "@/lib/estimates/admin";
-import { dismissInviteReveal, inviteContactAction, revokeInvitationAction } from "../actions";
-import OpsShell from "@/components/ops/OpsShell";
-import LineItemEditor, { type Item, type CatalogOption } from "./LineItemEditor";
 import { cookies } from "next/headers";
-import { dismissReleaseReveal, importClientSelections, releaseToClient, reopenForClientAction, sendBackForRevision, setModeAction, toggleSignature } from "./actions";
-import DesignPanel from "./DesignPanel";
-import ProposalSettings, { type HeadLike } from "./ProposalSettings";
-import AdminResult from "@/components/ops/AdminResult";
+import { notFound } from "next/navigation";
+import {
+  Activity, Check, CheckCircle2, ChevronDown, Download, Eye, FileCheck2, FilePlus2, Import, Inbox, KeyRound, Layers, ListChecks, Mail, MoreHorizontal, Palette, PenLine, Send,
+  Settings2, ShieldCheck, Trash2, Undo2, UserPlus, Wand2, Wrench, DollarSign, History, Link2,
+} from "lucide-react";
+import { requireOps } from "@/lib/ops/session";
+import { nowMs } from "@/lib/ops/clock";
+import { ADMIN_SECRET, getProposalFull, listCatalog, listContacts, listInvitations } from "@/lib/estimates/admin";
 import { resolveDesign } from "@/lib/proposals/design";
-import { Download, Eye, Import, ListChecks, Mail, PenLine, Send, Undo2, Wand2 } from "lucide-react";
-import { SITE } from "@/lib/seo/site";
+import { docFromFull, type ProposalFull as DocFull } from "@/lib/proposals/document";
+import { validateProposalForRelease } from "@/lib/proposals/validate";
+import { NOT_SUBMITTED, RELEASED } from "@/lib/proposals/render";
 import { STEPS, STEP_CATEGORY } from "@/lib/proposals/steps";
+import { SITE } from "@/lib/seo/site";
+import { AppShell, Chip, EmptyState, Notice, Panel, StatusChip, ago, compact, fmtDate, ops as s, usd } from "@/components/ops/ui";
+import { PIPELINE_STAGES, stageKeyFor } from "@/components/ops/ui/status";
+import AdminResult from "@/components/ops/AdminResult";
+import { dismissInviteReveal, revokeInvitationAction } from "../actions";
+import { dismissReleaseReveal, importClientSelections, releaseToClient, reopenForClientAction, sendBackForRevision, setModeAction, toggleSignature } from "./actions";
+import LineItemEditor, { type Item, type CatalogOption } from "./LineItemEditor";
+import ProposalSettings from "./ProposalSettings";
+import DesignPanel from "./DesignPanel";
+import InviteDrawer from "./InviteDrawer";
+import p from "./proposal.module.css";
 
 /**
- * /ops/proposals/[publicId] — proposal detail (master brief 7.5 + 8).
+ * /ops/proposals/[publicId] — the proposal editor (archetype 4, Editor/Split).
  *
- * Left: overview + the categorized line-item editor. Right (sticky): totals,
- * secure access (per-viewer invitation/last-seen), and the activity feed.
- * Everything is one server round-trip (get_proposal_full). Money on the right
- * is the DB's own recomputed value, never derived in the browser.
+ * Header (title · status · meta · one primary) → status strip (the 8 pipeline
+ * stages, current highlighted) → 7/5 split: line-item editor, the client's
+ * configuration and notes/revision on the left; totals (featured), release
+ * checklist, versions, secure access, settings and document design on the
+ * right. One server round-trip (get_proposal_full); every figure is the
+ * database's own — money is never derived in the browser.
  */
 
 export const metadata: Metadata = {
@@ -31,20 +43,21 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-const mono: React.CSSProperties = { fontSize: 10.5, letterSpacing: "0.12em", textTransform: "uppercase" };
 const PUBLIC_ID_RE = /^POD-EST-\d{4}-\d{4}$/;
+const REVIEWING = new Set(["client_submitted", "engineering_review", "commercial_review"]);
+const STAGE_ICON: Record<string, React.ReactNode> = {
+  draft: <FilePlus2 size={16} strokeWidth={1.9} />, invited: <UserPlus size={16} strokeWidth={1.9} />, configuring: <Settings2 size={16} strokeWidth={1.9} />,
+  submitted: <Inbox size={16} strokeWidth={1.9} />, review: <Wrench size={16} strokeWidth={1.9} />, sent: <Send size={16} strokeWidth={1.9} />,
+  signature: <PenLine size={16} strokeWidth={1.9} />, signed: <CheckCircle2 size={16} strokeWidth={1.9} />,
+};
+const humanize = (e: string) => e.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 
-interface ProposalFull {
-  head: {
-    public_id: string; estimate_no: string; organization_id: string; client_name: string; company: string | null;
-    project_name: string | null; status: string; view_count: number;
+interface ProposalFull extends Omit<DocFull, "head" | "line_items"> {
+  head: DocFull["head"] & {
+    organization_id: string; project_id?: string | null; view_count: number; notes?: string | null; revoked?: boolean;
     mode: "client_configured" | "admin_built";
-    one_time_low_cents: number; one_time_high_cents: number; recurring_cents: number;
-    signed_at: string | null; signer_name: string | null; expires_at: string | null;
   };
-  version: { id: string; rev: number; status: string; locked_at: string | null; pdf_sha256?: string | null; pdf_generated_at?: string | null } | null;
   line_items: Item[];
-  selections: Record<string, Record<string, unknown>>;
   invitations: { invitation_id: string; recipient_email: string; access_policy: string; issued_at: string; expires_at: string; revoked: boolean; exchanged_at: string | null }[];
   viewers: { email: string; total_sessions: number; last_view_at: string | null; first_view_at: string | null }[];
   activity: { at: string; actor: string; event: string; metadata?: { note?: string; sha256?: string } | null }[];
@@ -59,323 +72,321 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
   if (!data?.head) notFound();
   const { head, version, line_items, activity } = data;
   const selections = data.selections ?? {};
-  const released = ["released", "signature_requested", "client_signed", "signed", "countersigned", "completed"].includes(head.status);
+  const [catalogRaw, allContacts, invitesRaw] = await Promise.all([listCatalog(ADMIN_SECRET), listContacts(ADMIN_SECRET), listInvitations(ADMIN_SECRET, head.estimate_no)]);
+  const catalog = catalogRaw ?? [];
+  const invites = invitesRaw ?? [];
+  const orgContacts = (allContacts ?? []).filter((c) => c.organization_id === head.organization_id && c.email);
+  const skuName = new Map(catalog.map((c) => [c.sku ?? "", c.name]));
+  // add-from-catalog is keyed by SKU; items saved without one are edited in /ops/pricing first
+  const catalogOptions: CatalogOption[] = catalog
+    .filter((c): c is typeof c & { sku: string } => !!c.sku)
+    .map((c) => ({ sku: c.sku, name: c.name, category: c.category, price_cents: c.price_cents }));
+
+  const clientMode = head.mode === "client_configured";
+  const submitted = ["client_submitted", "engineering_review", "commercial_review", "approved"].includes(head.status);
+  const released = RELEASED.has(head.status);
+  const locked = !!version?.locked_at;
   const chosen = Object.entries(STEP_CATEGORY).flatMap(([step]) => {
     const sku = selections[step]?.sku as string | undefined;
     return sku ? [{ step, label: STEPS.find((x) => x.id === step)?.title ?? step, sku }] : [];
   });
   const stepsSaved = Object.keys(selections).length;
-  const catalog = (await listCatalog(ADMIN_SECRET)) ?? [];
-  const [allContacts, invitesWithLinks] = await Promise.all([listContacts(ADMIN_SECRET), listInvitations(ADMIN_SECRET, head.estimate_no)]);
-  const orgContacts = (allContacts ?? []).filter((c) => c.organization_id === head.organization_id && c.email);
-  const skuName = new Map(catalog.map((c) => [c.sku ?? "", c.name]));
-  const clientMode = head.mode === "client_configured";
-  const submitted = ["client_submitted", "engineering_review", "commercial_review", "approved"].includes(head.status);
-  // add-from-catalog is keyed by SKU; items saved without one are edited in /ops/pricing first
-  const catalogOptions: CatalogOption[] = catalog
-    .filter((c): c is typeof c & { sku: string } => !!c.sku)
-    .map((c) => ({ sku: c.sku, name: c.name, category: c.category, price_cents: c.price_cents }));
-  const locked = !!version?.locked_at;
+  const stepsTotal = STEPS.length - 1;
+  // Client-builds: releasing before the client has built anything locks an empty
+  // proposal (that is what happened to PODOS-1002). Require a submission or line items.
+  const blocked = clientMode && !submitted && line_items.length === 0;
+  const canRevise = !locked && REVIEWING.has(head.status);
+  const reopenAllowed = released && !head.signed_at;
+  // the same gate releaseToClient applies — shown here so the checklist never lies
+  const validation = validateProposalForRelease(docFromFull(data, Object.fromEntries(catalogOptions.map((c) => [c.sku, c.name]))), { mode: head.mode, submitted: !NOT_SUBMITTED.has(head.status) });
+
+  const pendingCount = line_items.filter((i) => i.pending_review).length;
+  const optionalCount = line_items.filter((i) => i.optional).length;
+  const live = invites.filter((i) => !i.revoked);
+  const verified = live.filter((i) => i.exchanged_at).length;
+  const sessions = live.reduce((a, i) => a + (Number(i.sessions) || 0), 0);
+  const company = head.company ?? head.client_name;
+  const title = head.project_name ? `${company} · ${head.project_name}` : company;
+  const stageKey = stageKeyFor({ status: head.status, revoked: head.revoked, signed_at: head.signed_at });
+  const stageIdx = PIPELINE_STAGES.findIndex((st) => st.key === stageKey);
+  const sigOn = head.status === "signature_requested";
+  const contactOpts = orgContacts.map((c) => ({ id: c.id, label: `${[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email} · ${c.email}` }));
+
+  const checklist: { label: string; ok: boolean }[] = [
+    { label: "Client and project bound", ok: !!head.organization_id && !!(head.project_name || head.project_id) },
+    ...(clientMode ? [{ label: "Client submitted the configuration", ok: submitted || released }] : []),
+    { label: "At least one line item", ok: line_items.length > 0 },
+    { label: pendingCount ? `${pendingCount} item${pendingCount === 1 ? "" : "s"} still pending review` : "No line items pending review", ok: line_items.length > 0 && pendingCount === 0 },
+    { label: orgContacts.length ? `${orgContacts.length} contact${orgContacts.length === 1 ? "" : "s"} with an email` : "A contact with an email on the client", ok: orgContacts.length > 0 },
+    { label: validation.ok ? "Release gate passes" : `Release gate · ${validation.errors.length} blocker${validation.errors.length === 1 ? "" : "s"}`, ok: validation.ok },
+  ];
+
+  const primary = !locked ? (
+    <form action={releaseToClient} title={blocked ? "In Client-builds mode the client must build and submit their estimate first (or switch to PODOS builds)." : "Lock this version and send the client their link"}>
+      <input type="hidden" name="publicId" value={publicId} />
+      <button type="submit" disabled={blocked} className={`${s.btn} ${s.btnPrimary}`}><Send size={16} aria-hidden /> {blocked ? "Release (waiting for client)" : "Release proposal"}</button>
+    </form>
+  ) : reopenAllowed ? (
+    <form action={reopenForClientAction} title="Undo this release so the client can build their estimate (allowed while unsigned)">
+      <input type="hidden" name="publicId" value={publicId} />
+      <button type="submit" className={`${s.btn} ${s.btnPrimary}`}><Undo2 size={16} aria-hidden /> Reopen for client</button>
+    </form>
+  ) : null;
 
   return (
-    <OpsShell
-      active="/ops/proposals"
-      title={head.company ?? head.client_name}
-      actions={
-        <>
-          <Link href={`/ops/proposals/${publicId}/preview`} style={{ ...mono, fontSize: 11, padding: ".5rem .8rem", borderRadius: 8, textDecoration: "none", border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", display: "inline-flex", alignItems: "center", gap: 6 }}>
-            <Eye size={13} aria-hidden /> Preview as client
-          </Link>
-          <a href={`/api/proposal/${publicId}/pdf`} target="_blank" rel="noopener" style={{ ...mono, fontSize: 11, padding: ".5rem .8rem", borderRadius: 8, textDecoration: "none", border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", display: "inline-flex", alignItems: "center", gap: 6 }}>
-            <Download size={13} aria-hidden /> PDF
-          </a>
+    <AppShell active="/ops/proposals" crumbs={[{ label: "Proposals", href: "/ops/proposals" }, { label: head.estimate_no }]}>
+      <header className={s.pageHeader}>
+        <div style={{ minWidth: 0 }}>
+          <div className={p.titleRow}>
+            <h1 className={s.pageTitle}>{title}</h1>
+            <StatusChip status={head.status} revoked={head.revoked} signedAt={head.signed_at} />
+          </div>
+          <p className={p.meta}>
+            <b>{head.public_id}</b><span aria-hidden>·</span><span>{head.estimate_no}</span><span aria-hidden>·</span>
+            <span>{clientMode ? "Client builds" : "PODOS builds"}</span><span aria-hidden>·</span>
+            <span>{head.expires_at ? `valid until ${fmtDate(head.expires_at)}` : "no validity date"}</span><span aria-hidden>·</span>
+            <span>rev {version?.rev ?? 1}{locked ? " · locked" : ""}</span><span aria-hidden>·</span>
+            <span>viewed {head.view_count}×</span>
+          </p>
+        </div>
+        <div className={s.pageActions}>
+          <Link href={`/ops/proposals/${publicId}/preview`} className={`${s.btn} ${s.btnSecondary}`}><Eye size={16} aria-hidden /> Preview as client</Link>
+          <a href={`/api/proposal/${publicId}/pdf`} target="_blank" rel="noopener" className={`${s.btn} ${s.btnSecondary}`}><Download size={16} aria-hidden /> PDF</a>
           {version?.pdf_sha256 && (
-            <a href={`/api/proposal/${publicId}/pdf/stored`} target="_blank" rel="noopener" title={`Immutable PDF stored at release · sha256 ${version.pdf_sha256}`} style={{ ...mono, fontSize: 11, padding: ".5rem .8rem", borderRadius: 8, textDecoration: "none", border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <Download size={13} aria-hidden /> Released PDF · {version.pdf_sha256.slice(0, 8)}
-            </a>
+            <a href={`/api/proposal/${publicId}/pdf/stored`} target="_blank" rel="noopener" title={`Immutable PDF stored at release · sha256 ${version.pdf_sha256}`} className={`${s.btn} ${s.btnSecondary}`}><FileCheck2 size={16} aria-hidden /> Released PDF</a>
           )}
-          {!locked && (() => {
-            // Client-builds: releasing before the client has built anything locks an empty
-            // proposal (that is what happened to PODOS-1002). Require a submission or line items.
-            const blocked = clientMode && !submitted && line_items.length === 0;
-            return (
-              <form action={releaseToClient} title={blocked ? "In Client-builds mode the client must build and submit their estimate first (or switch to PODOS builds)." : "Lock this version and send the client their link"}>
+          <details className={p.menu}>
+            <summary className={`${s.btn} ${s.btnSecondary} ${p.plain}`} aria-label="More actions" title="More actions"><MoreHorizontal size={18} aria-hidden /></summary>
+            <div className={p.menuPop}>
+              {released && (
+                <form action={toggleSignature}>
+                  <input type="hidden" name="publicId" value={publicId} />
+                  <input type="hidden" name="enable" value={sigOn ? "0" : "1"} />
+                  <button type="submit" className={p.menuItem}><PenLine size={15} aria-hidden /> {sigOn ? "Disable signature" : "Enable signature"}</button>
+                </form>
+              )}
+              {reopenAllowed && !locked && (
+                <form action={reopenForClientAction}>
+                  <input type="hidden" name="publicId" value={publicId} />
+                  <button type="submit" className={p.menuItem}><Undo2 size={15} aria-hidden /> Reopen for client</button>
+                </form>
+              )}
+              {canRevise && <a href="#revision" className={p.menuItem}><Undo2 size={15} aria-hidden /> Send back for revision</a>}
+              <form action={setModeAction}>
                 <input type="hidden" name="publicId" value={publicId} />
-                <button type="submit" disabled={blocked} style={{ ...mono, fontSize: 11, padding: ".5rem .9rem", borderRadius: 8, border: "none", background: blocked ? "var(--edge-bright)" : "var(--brand-gradient)", color: blocked ? "var(--ink-faint)" : "#fff", cursor: blocked ? "not-allowed" : "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <Send size={13} aria-hidden /> {blocked ? "Release (waiting for client)" : "Release proposal"}
+                <button type="submit" name="mode" value={clientMode ? "admin_built" : "client_configured"} disabled={locked} className={p.menuItem} title={locked ? "The version is locked" : undefined}>
+                  {clientMode ? <Wand2 size={15} aria-hidden /> : <ListChecks size={15} aria-hidden />} Switch to {clientMode ? "PODOS builds" : "Client builds (menu)"}
                 </button>
               </form>
-            );
-          })()}
-          {released && !head.signed_at && (
-            <form action={reopenForClientAction} title="Undo this release so the client can build their estimate (allowed while unsigned)">
-              <input type="hidden" name="publicId" value={publicId} />
-              <button type="submit" style={{ ...mono, fontSize: 11, padding: ".5rem .9rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                <Undo2 size={13} aria-hidden /> Reopen for client
-              </button>
-            </form>
-          )}
-          {released && (
-            <form action={toggleSignature}>
-              <input type="hidden" name="publicId" value={publicId} />
-              <input type="hidden" name="enable" value={head.status === "signature_requested" ? "0" : "1"} />
-              <button type="submit" style={{ ...mono, fontSize: 11, padding: ".5rem .9rem", borderRadius: 8, border: "1px solid var(--brand)", background: head.status === "signature_requested" ? "var(--panel)" : "var(--brand-wash)", color: "var(--brand-deep)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                <PenLine size={13} aria-hidden /> {head.status === "signature_requested" ? "Disable signature" : "Enable signature"}
-              </button>
-            </form>
-          )}
-          <Link href="/ops/proposals" style={{ ...mono, fontSize: 11, color: "var(--ink-faint)", textDecoration: "none" }}>← All proposals</Link>
-        </>
-      }
-    >
-      {/* overview bar */}
-      <div style={{ display: "flex", gap: "1.4rem", flexWrap: "wrap", alignItems: "baseline", marginBottom: "1.4rem", paddingBottom: "1rem", borderBottom: "1px solid var(--edge)" }}>
-        <span style={{ ...mono, fontSize: 11, color: "var(--brand-deep)" }}>{head.estimate_no}</span>
-        <span style={{ ...mono, fontSize: 10, color: "var(--ink-faint)" }}>v{version?.rev ?? 1}{locked ? " · locked" : ""}</span>
-        <StatusPill status={head.signed_at ? "signed" : head.status} />
-        {/* how this proposal is built — the client picks from the menu, or PODOS builds the line items */}
-        <form action={setModeAction} style={{ display: "inline-flex", gap: 4, alignItems: "center", border: "1px solid var(--edge)", borderRadius: 999, padding: 2 }}>
-          <input type="hidden" name="publicId" value={publicId} />
-          {([["client_configured", "Client builds (menu)", <ListChecks key="a" size={12} aria-hidden />], ["admin_built", "PODOS builds", <Wand2 key="b" size={12} aria-hidden />]] as const).map(([m, lbl, icon]) => (
-            <button key={m} type="submit" name="mode" value={m} disabled={locked} aria-pressed={head.mode === m}
-              style={{ ...mono, fontSize: 9.5, padding: ".3rem .65rem", borderRadius: 999, border: "none", cursor: locked ? "default" : "pointer", display: "inline-flex", alignItems: "center", gap: 5,
-                background: head.mode === m ? "var(--brand)" : "transparent", color: head.mode === m ? "#fff" : "var(--ink-dim)" }}>
-              {icon} {lbl}
-            </button>
-          ))}
-        </form>
-        <span style={{ fontSize: 13.5, color: "var(--ink-dim)" }}>{head.project_name ?? "No project name"}</span>
-        <span style={{ ...mono, fontSize: 10, color: "var(--ink-faint)", marginLeft: "auto" }}>
-          viewed {head.view_count}×
-        </span>
+              <div className={p.menuSep} aria-hidden />
+              {/* ponytail: anchors scroll to the collapsible panels; the operator opens them there */}
+              <a href="#settings" className={p.menuItem}><Settings2 size={15} aria-hidden /> Proposal settings</a>
+              <a href="#design" className={p.menuItem}><Palette size={15} aria-hidden /> Document design</a>
+            </div>
+          </details>
+          {primary}
+        </div>
+      </header>
+
+      {/* status strip — the 8 pipeline stages, current highlighted (replaces the KPI row) */}
+      <div className={p.strip} role="list" aria-label="Pipeline stage">
+        {PIPELINE_STAGES.map((st, i) => {
+          const state = stageIdx < 0 ? "future" : i < stageIdx ? "done" : i === stageIdx ? "current" : "future";
+          return (
+            <div key={st.key} role="listitem" className={p.node} data-state={state} aria-current={state === "current" ? "step" : undefined}>
+              <span className={p.nodeIcon}>{state === "done" ? <Check size={15} strokeWidth={2.5} aria-hidden /> : STAGE_ICON[st.key]}</span>
+              <span className={p.nodeLabel}>{st.label}</span>
+            </div>
+          );
+        })}
       </div>
 
-      <ReleaseReveal />
       <AdminResult />
-      <ProposalSettings publicId={publicId} head={head as unknown as HeadLike} locked={locked} />
-      <DesignPanel publicId={publicId} design={resolveDesign((head as { design?: unknown }).design, head.status)} />
+      <ReleaseReveal />
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(280px,1fr)", gap: "1.4rem", alignItems: "start" }}>
-        {/* main column — driven by the build mode */}
-        <div style={{ display: "grid", gap: "1.2rem" }}>
+      <div className={s.split75}>
+        {/* ---- main (7): editor ---- */}
+        <div className={s.stack}>
+          <Panel title="Line items" icon={<Layers size={18} aria-hidden />}
+            summary={clientMode ? "Imported from the client's configuration — adjust, then release." : "PODOS builds the line items; the range is recomputed server-side on every edit."}
+            action={<span className={p.pill}>{line_items.length} item{line_items.length === 1 ? "" : "s"}{pendingCount ? ` · ${pendingCount} pending` : ""}</span>}>
+            {clientMode && line_items.length === 0 ? (
+              <EmptyState icon={<Import size={22} strokeWidth={1.8} />} title="No line items yet" text="Import the client's configuration once they have saved it, or switch to PODOS builds (⋯ menu) to add the items yourself." />
+            ) : (
+              <LineItemEditor publicId={publicId} items={line_items} catalog={catalogOptions} locked={locked} />
+            )}
+          </Panel>
+
           {clientMode && (
-            <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.2rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-                <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)" }}>Client configuration</p>
-                <span style={{ ...mono, fontSize: 9, color: "var(--ink-faint)" }}>{stepsSaved} / {STEPS.length - 1} steps saved · {head.status.replace(/_/g, " ")}</span>
-              </div>
+            <Panel title="Client configuration" icon={<ListChecks size={18} aria-hidden />} summary="Live view of the client's workspace — what they have saved in the menu configurator."
+              action={<span className={p.pill}>{stepsSaved} / {stepsTotal} steps</span>}>
+              <div className={s.progress} style={{ marginBottom: 16 }} aria-hidden><span style={{ width: `${Math.min(100, Math.round((stepsSaved / stepsTotal) * 100))}%` }} /></div>
+              {(() => {
+                const pr = selections.project ?? {}; const site = selections.site ?? {};
+                const facts: [string, unknown][] = [["Pods", pr.pod_quantity], ["Capacity (MW)", pr.required_capacity_mw], ["Workload", pr.workload], ["Go-live", pr.target_golive], ["Site", site.site_name ?? site.address]];
+                const shown = facts.filter(([, v]) => v !== undefined && v !== null && v !== "");
+                return shown.length > 0 ? (
+                  <dl className={p.facts} style={{ marginBottom: 16 }}>
+                    {shown.map(([k, v]) => <div key={k} className={p.fact}><dt>{k}</dt><dd>{String(v)}</dd></div>)}
+                  </dl>
+                ) : null;
+              })()}
               {stepsSaved === 0 ? (
-                <div style={{ marginTop: "0.9rem", padding: "1rem 1.1rem", borderRadius: 10, background: "var(--brand-wash)", border: "1px solid rgba(37,99,235,.2)" }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink-strong)" }}>Waiting for the client to configure.</p>
-                  <p style={{ fontSize: 12.5, color: "var(--ink-dim)", marginTop: 4, lineHeight: 1.55 }}>
-                    The client builds this proposal from the menu configurator. Invite a contact below if you have not yet — their selections and live estimate will appear here as they save. Switch to <strong>PODOS builds</strong> if you want to add the line items yourself.
-                  </p>
-                </div>
+                <Notice>
+                  <ListChecks size={16} aria-hidden />
+                  <div style={{ flex: 1, minWidth: 0 }}><b>Waiting for the client to configure.</b> <span className={s.secondary}>Their selections and live estimate appear here as they save. Invite a contact from Secure access if you have not yet, or switch to PODOS builds to add the line items yourself.</span></div>
+                </Notice>
               ) : (
-                <div style={{ marginTop: "0.9rem", display: "grid", gap: "0.9rem" }}>
+                <div className={p.steps}>
                   {Object.entries(selections).filter(([step]) => step !== "review").map(([step, payload]) => {
                     const stepDef = STEPS.find((x) => x.id === step);
                     const sku = payload.sku as string | undefined;
                     const facts = Object.entries(payload).filter(([k, v]) => k !== "sku" && v !== "" && v != null && !(Array.isArray(v) && v.length === 0));
                     return (
-                      <div key={step} style={{ borderTop: "1px solid var(--edge-faint)", paddingTop: "0.7rem" }}>
-                        <p style={{ ...mono, fontSize: 9, color: "var(--brand-deep)" }}>{stepDef?.no} · {stepDef?.title ?? step}</p>
-                        {sku && <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink-strong)", marginTop: 4 }}>{skuName.get(sku) ?? sku} <span style={{ ...mono, fontSize: 9, color: "var(--ink-faint)", marginLeft: 6 }}>{sku}</span></p>}
+                      <div key={step} className={p.stepCard}>
+                        <p className={s.label}>{stepDef?.no ? `${stepDef.no} · ` : ""}{stepDef?.title ?? step}</p>
+                        {sku && <p style={{ fontSize: 14.5, fontWeight: 600, marginTop: 4 }}>{skuName.get(sku) ?? sku} <span className={s.mono} style={{ marginLeft: 6 }}>{sku}</span></p>}
                         {facts.length > 0 && (
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "4px 16px", marginTop: 4 }}>
-                            {facts.map(([k, v]) => (
-                              <div key={k} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 12.5 }}>
-                                <span style={{ color: "var(--ink-faint)", textTransform: "capitalize" }}>{k.replace(/_/g, " ")}</span>
-                                <span style={{ color: "var(--ink-strong)", textAlign: "right" }}>{Array.isArray(v) ? v.join(", ") : String(v)}</span>
-                              </div>
-                            ))}
+                          <div className={p.stepFacts}>
+                            {facts.map(([k, v]) => <div key={k} className={p.stepFact}><span>{k.replace(/_/g, " ")}</span><span>{Array.isArray(v) ? v.join(", ") : String(v)}</span></div>)}
                           </div>
                         )}
                       </div>
                     );
                   })}
                   {!locked && chosen.length > 0 && (
-                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", padding: "0.9rem 1rem", borderRadius: 10, background: submitted ? "rgba(34,197,94,.08)" : "var(--brand-wash)", border: `1px solid ${submitted ? "rgba(34,197,94,.45)" : "rgba(37,99,235,.2)"}` }}>
-                      <p style={{ fontSize: 13, color: "var(--ink-strong)", flex: "1 1 240px" }}>
-                        {submitted ? "The client submitted this configuration." : "The client is still configuring."} Import their selections to turn them into line items you can adjust and release.
-                      </p>
+                    <Notice tone={submitted ? "ok" : "info"}>
+                      <Import size={16} aria-hidden />
+                      <div style={{ flex: 1, minWidth: 0 }}>{submitted ? "The client submitted this configuration." : "The client is still configuring."} Import their selections to turn them into line items you can adjust and release.</div>
                       <form action={importClientSelections}>
                         <input type="hidden" name="publicId" value={publicId} />
-                        <button type="submit" style={{ ...mono, fontSize: 10, padding: ".55rem .9rem", borderRadius: 8, border: "none", background: "var(--brand-gradient)", color: "#fff", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                          <Import size={13} aria-hidden /> Import selections as line items
-                        </button>
+                        <button type="submit" className={`${s.btn} ${s.btnSecondary} ${s.btnSm}`}><Import size={14} aria-hidden /> Import as line items</button>
                       </form>
-                    </div>
+                    </Notice>
                   )}
                 </div>
               )}
-            </section>
+            </Panel>
           )}
 
-          {(!clientMode || line_items.length > 0) && (
-            <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.2rem" }}>
-              <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)", marginBottom: "0.9rem" }}>
-                Line items{clientMode ? " · imported from the client's configuration" : ""}
-              </p>
-              <LineItemEditor publicId={publicId} items={line_items} catalog={catalogOptions} locked={locked} />
-            </section>
-          )}
-        </div>
-
-        {/* right rail */}
-        <div style={{ display: "grid", gap: "1.2rem", position: "sticky", top: "1rem" }}>
-          {/* ---- client configuration (live view of the client's workspace) ---- */}
-          <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.1rem 1.2rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-              <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)" }}>Client configuration</p>
-              <span style={{ ...mono, fontSize: 9, color: "var(--ink-faint)" }}>{stepsSaved} / {STEPS.length - 1} steps saved</span>
-            </div>
-            <div style={{ height: 5, borderRadius: 999, background: "var(--canvas)", marginTop: 8, overflow: "hidden" }} aria-hidden>
-              <div style={{ width: `${Math.min(100, Math.round((stepsSaved / (STEPS.length - 1)) * 100))}%`, height: "100%", background: "linear-gradient(90deg, var(--brand), var(--cyan))" }} />
-            </div>
-            {(() => {
-              const pr = selections.project ?? {}; const site = selections.site ?? {};
-              const facts: [string, unknown][] = [["Pods", pr.pod_quantity], ["Capacity (MW)", pr.required_capacity_mw], ["Workload", pr.workload], ["Go-live", pr.target_golive], ["Site", site.site_name ?? site.address]];
-              const shown = facts.filter(([, v]) => v !== undefined && v !== null && v !== "");
-              return shown.length > 0 ? (
-                <div style={{ display: "grid", gap: 4, marginTop: 10 }}>
-                  {shown.map(([k, v]) => <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}><span style={{ color: "var(--ink-faint)" }}>{k}</span><span style={{ color: "var(--ink-strong)", fontWeight: 600 }}>{String(v)}</span></div>)}
-                </div>
-              ) : <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 8 }}>The client has not started configuring yet.</p>;
-            })()}
-            {chosen.length > 0 && (
-              <div style={{ marginTop: 10, display: "grid", gap: 4 }}>
-                {chosen.map((c) => <div key={c.step} style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}><span style={{ color: "var(--ink-faint)" }}>{c.label}</span><span style={{ ...mono, fontSize: 9.5, color: "var(--brand-deep)" }}>{c.sku}</span></div>)}
-              </div>
-            )}
-            {!locked && (
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
-                {head.mode === "client_configured" && chosen.length > 0 && (
-                  <form action={importClientSelections}>
-                    <input type="hidden" name="publicId" value={publicId} />
-                    <button type="submit" style={{ ...mono, fontSize: 9.5, padding: ".45rem .7rem", borderRadius: 8, border: "1px solid var(--brand)", background: "var(--brand-wash)", color: "var(--brand-deep)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                      <Import size={12} aria-hidden /> Import selections as line items
-                    </button>
-                  </form>
-                )}
-                {["client_submitted", "engineering_review", "commercial_review"].includes(head.status) && (
-                  <form action={sendBackForRevision} style={{ display: "flex", gap: 6 }}>
-                    <input type="hidden" name="publicId" value={publicId} />
-                    <input name="note" placeholder="Note to client (optional)" style={{ padding: ".4rem .6rem", borderRadius: 8, border: "1px solid var(--edge-bright)", fontSize: 12, fontFamily: "inherit", minWidth: 160 }} />
-                    <button type="submit" style={{ ...mono, fontSize: 9.5, padding: ".45rem .7rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                      <Undo2 size={12} aria-hidden /> Request revision
-                    </button>
-                  </form>
-                )}
-              </div>
-            )}
-          </section>
-
-          <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.1rem 1.2rem" }}>
-            <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)" }}>Preliminary total</p>
-            <p style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--ink-strong)", marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
-              {usd(head.one_time_low_cents)} – {usd(head.one_time_high_cents)}
-            </p>
-            {head.recurring_cents > 0 && (
-              <p style={{ fontSize: 13, color: "var(--ink-dim)", marginTop: 3 }}>+ {usd(head.recurring_cents)} / year</p>
-            )}
-            <p style={{ ...mono, fontSize: 8.5, color: "var(--ink-faint)", marginTop: "0.6rem", lineHeight: 1.6 }}>
-              Range auto-recomputed server-side as you edit line items.
-            </p>
-          </section>
-
-          <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.1rem 1.2rem" }}>
-            <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)", marginBottom: "0.6rem" }}>Secure access · client links</p>
-            {(invitesWithLinks ?? []).length === 0 && (
-              <p style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>No client links yet. Invite a contact below — each person gets their own secret link.</p>
-            )}
-            {(invitesWithLinks ?? []).map((i) => {
-              const base = i.link_token ? `${SITE.baseUrl}/e/${i.link_token}` : null;
-              return (
-                <div key={i.invitation_id} style={{ padding: "0.6rem 0", borderTop: "1px solid var(--edge-faint)" }}>
-                  <div style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap", fontSize: 12.5 }}>
-                    <span style={{ color: "var(--ink-strong)", fontWeight: 600 }}>{i.recipient_name ? `${i.recipient_name} · ` : ""}{i.recipient_email}</span>
-                    <span style={{ ...mono, fontSize: 8.5, color: i.revoked ? "#B91C1C" : i.exchanged_at ? "#15803D" : "var(--ink-faint)" }}>
-                      {i.revoked ? "revoked" : i.exchanged_at ? `verified · ${i.sessions} session${Number(i.sessions) === 1 ? "" : "s"}` : `not opened · expires ${new Date(i.expires_at).toLocaleDateString("en-US")}`}
-                    </span>
-                    {!i.revoked && (
-                      <form action={revokeInvitationAction} style={{ display: "inline", marginLeft: "auto" }}>
-                        <input type="hidden" name="invitationId" value={i.invitation_id} />
-                        <input type="hidden" name="publicId" value={publicId} />
-                        <button type="submit" style={{ ...mono, fontSize: 8.5, color: "#B91C1C", background: "none", border: "none", cursor: "pointer" }}>Revoke</button>
-                      </form>
-                    )}
-                  </div>
-                  {!i.revoked && (base ? (
-                    <div style={{ display: "grid", gap: 4, marginTop: 6 }}>
-                      {clientMode && <LinkRow label="Build estimate" href={`${base}?to=configure`} />}
-                      <LinkRow label={released ? "View proposal" : "View (after release)"} href={`${base}?to=proposal`} />
-                      <LinkRow label="Workspace" href={base} />
-                    </div>
-                  ) : (
-                    <p style={{ fontSize: 11.5, color: "var(--ink-faint)", marginTop: 4 }}>Link issued before link storage existed — revoke and invite again to get a visible link.</p>
-                  ))}
-                </div>
-              );
-            })}
-            {orgContacts.length === 0 ? (
-              <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 8 }}>Add a contact with an email to <Link href={`/ops/clients/${head.organization_id}`} style={{ color: "var(--brand)" }}>this client</Link> to create a link.</p>
-            ) : (
-              <form action={inviteContactAction} style={{ display: "grid", gap: 6, marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--edge)" }}>
-                <input type="hidden" name="estimateNo" value={head.estimate_no} />
+          <Panel title="Notes & revision" icon={<Activity size={18} aria-hidden />} summary="Send a submitted configuration back for changes; the activity trail below is the audit log." tight>
+            {canRevise && (
+              <form id="revision" action={sendBackForRevision} style={{ display: "grid", gap: 10, marginBottom: 18, paddingBottom: 18, borderBottom: "1px solid var(--ops-border)" }}>
                 <input type="hidden" name="publicId" value={publicId} />
-                <input type="hidden" name="mode" value={head.mode} />
-                <input type="hidden" name="company" value={head.company ?? ""} />
-                <input type="hidden" name="project" value={head.project_name ?? ""} />
-                <select name="contactId" required defaultValue="" style={{ padding: "0.45rem 0.6rem", borderRadius: 8, border: "1px solid var(--edge-bright)", fontSize: 12.5, fontFamily: "inherit" }}>
-                  <option value="" disabled>Choose a contact…</option>
-                  {orgContacts.map((c) => <option key={c.id} value={c.id}>{[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email} · {c.email}</option>)}
-                </select>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <select name="policy" defaultValue="email-confirm" style={{ padding: "0.45rem 0.6rem", borderRadius: 8, border: "1px solid var(--edge-bright)", fontSize: 12.5, fontFamily: "inherit", flex: 1 }}>
-                    <option value="email-confirm">Email confirm</option><option value="otp">Email OTP</option>
-                  </select>
-                  <button type="submit" style={{ ...mono, fontSize: 9.5, padding: ".5rem .8rem", borderRadius: 8, border: "1px solid var(--brand)", background: "var(--brand-wash)", color: "var(--brand-deep)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                    <Send size={12} aria-hidden /> New link
-                  </button>
-                </div>
+                <label className={s.field}>Note to the client (optional)<textarea className={s.input} name="note" rows={2} placeholder="What should they change before resubmitting?" /></label>
+                <div><button type="submit" className={`${s.btn} ${s.btnSecondary} ${s.btnSm}`}><Undo2 size={14} aria-hidden /> Send back for revision</button></div>
               </form>
             )}
-            <InviteOutcome />
-          </section>
-
-          <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.1rem 1.2rem" }}>
-            <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)", marginBottom: "0.6rem" }}>Activity</p>
-            {activity.length === 0 ? (
-              <p style={{ fontSize: 12.5, color: "var(--ink-faint)" }}>No activity yet.</p>
-            ) : activity.slice(0, 15).map((a, i) => (
-              <div key={i} style={{ fontSize: 12, padding: "0.25rem 0", borderTop: i === 0 ? "none" : "1px solid var(--edge-faint)" }}>
-                <span style={{ color: a.event === "client_comment" ? "var(--brand-deep)" : "var(--ink-strong)", textTransform: "capitalize", fontWeight: a.event === "client_comment" ? 600 : 400 }}>{a.event.replace(/_/g, " ")}</span>
-                <span style={{ ...mono, fontSize: 8, color: "var(--ink-faint)", marginLeft: 6 }}>
-                  {new Date(a.at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {a.actor}
+            {activity.length === 0 ? <p className={s.muted} style={{ fontSize: 13.5 }}>No activity yet — events appear as the client opens links, configures, comments and signs.</p> : activity.slice(0, 15).map((a, i) => (
+              <div key={i} className={s.listRow} style={i === 0 ? { paddingTop: 0 } : undefined}>
+                <span style={{ minWidth: 0 }}>
+                  <span className={s.timelineText} style={a.event === "client_comment" ? { color: "var(--ops-cobalt-deep)" } : undefined}>{humanize(a.event)}</span>
+                  <span className={s.timelineMeta} style={{ display: "block" }}>{a.actor} · {fmtDate(a.at)}</span>
+                  {a.metadata?.note && <blockquote className={p.note}>{a.metadata.note}</blockquote>}
                 </span>
-                {a.metadata?.note && (
-                  <p style={{ fontSize: 12.5, color: "var(--ink-dim)", margin: "4px 0 2px", padding: "6px 10px", borderLeft: "2px solid var(--brand)", background: "var(--brand-wash)", borderRadius: 6, whiteSpace: "pre-wrap" }}>{a.metadata.note}</p>
-                )}
+                <span className={s.timelineTime} title={new Date(a.at).toLocaleString("en-US")}>{ago(a.at)}</span>
               </div>
             ))}
-          </section>
+          </Panel>
         </div>
-      </div>
-    </OpsShell>
-  );
-}
 
-function StatusPill({ status }: { status: string }) {
-  const tone = status === "signed" || status === "client_signed"
-    ? { c: "#15803D", b: "rgba(34,197,94,.45)", bg: "rgba(34,197,94,.08)" }
-    : status === "viewed"
-      ? { c: "var(--cyan-deep)", b: "rgba(34,211,238,.45)", bg: "rgba(34,211,238,.08)" }
-      : { c: "var(--ink-dim)", b: "var(--edge-bright)", bg: "var(--glass-bg-strong)" };
-  return (
-    <span style={{ fontSize: 9.5, letterSpacing: "0.1em", textTransform: "uppercase", padding: ".22rem .55rem", borderRadius: 999, color: tone.c, border: `1px solid ${tone.b}`, background: tone.bg }}>
-      {status.replace(/_/g, " ")}
-    </span>
+        {/* ---- rail (5) ---- */}
+        <aside className={s.stack}>
+          <Panel title="Totals" icon={<DollarSign size={18} aria-hidden />} tight className={p.featured} action={<span className={p.pill}>server-computed</span>}>
+            <p className={s.label}>One-time</p>
+            <p className={p.moneyLg} data-kpi-value>
+              {head.one_time_high_cents > 0 ? (head.one_time_low_cents === head.one_time_high_cents ? compact(head.one_time_high_cents) : `${compact(head.one_time_low_cents)} – ${compact(head.one_time_high_cents)}`) : "—"}
+            </p>
+            <p className={p.moneyExact}>{head.one_time_high_cents > 0 ? (head.one_time_low_cents === head.one_time_high_cents ? usd(head.one_time_high_cents) : `${usd(head.one_time_low_cents)} – ${usd(head.one_time_high_cents)}`) : "no priced line items yet"}</p>
+            <dl className={p.facts} style={{ marginTop: 16 }}>
+              <div className={p.fact}><dt>Recurring</dt><dd className={s.num}>{head.recurring_cents > 0 ? `${usd(head.recurring_cents)} / yr` : "—"}</dd></div>
+              <div className={p.fact}><dt>Line items</dt><dd className={s.num}>{line_items.length}</dd></div>
+              <div className={p.fact}><dt>Pending review</dt><dd className={s.num} style={pendingCount ? { color: "#8a5a00" } : undefined}>{pendingCount}</dd></div>
+              <div className={p.fact}><dt>Optional alternates</dt><dd className={s.num}>{optionalCount}</dd></div>
+            </dl>
+          </Panel>
+
+          <Panel title="Release checklist" icon={<CheckCircle2 size={18} aria-hidden />} tight>
+            {checklist.map((c) => (
+              <div key={c.label} className={p.check} data-ok={c.ok}><span className={p.checkDot}>{c.ok && <Check size={12} strokeWidth={3} aria-hidden />}</span><span>{c.label}</span></div>
+            ))}
+            {!validation.ok && (
+              <div className={p.blockers}>
+                {validation.errors.slice(0, 5).map((e, i) => <span key={i}>{e.message}</span>)}
+                {validation.errors.length > 5 && <span>+{validation.errors.length - 5} more — open the preview for the full list.</span>}
+              </div>
+            )}
+            {validation.ok && validation.warnings.length > 0 && <p className={s.muted} style={{ fontSize: 12.5, marginTop: 10 }}>{validation.warnings.length} warning{validation.warnings.length === 1 ? "" : "s"} (non-blocking): {validation.warnings.slice(0, 2).map((w) => w.message).join(" ")}</p>}
+          </Panel>
+
+          <Panel title="Versions" icon={<History size={18} aria-hidden />} tight>
+            {version ? (
+              <>
+                <div className={s.listRow} style={{ paddingTop: 0 }}>
+                  <span style={{ minWidth: 0 }}><span className={s.timelineText}>rev {version.rev} · {locked ? "locked" : "editable draft"}</span><span className={s.timelineMeta} style={{ display: "block" }}>{version.locked_at ? `Locked ${fmtDate(version.locked_at)}` : "Not released yet — line items can still change"}</span></span>
+                  <a href={`/api/proposal/${publicId}/pdf`} target="_blank" rel="noopener" className={`${s.btn} ${s.btnGhost} ${s.btnXs}`}><Download size={13} aria-hidden /> Live PDF</a>
+                </div>
+                {version.pdf_sha256 && (
+                  <div className={s.listRow}>
+                    <span style={{ minWidth: 0 }}><span className={s.timelineText}>Released PDF (stored)</span><span className={s.timelineMeta} style={{ display: "block" }}>sha256 {version.pdf_sha256.slice(0, 12)}…{version.pdf_generated_at ? ` · ${fmtDate(version.pdf_generated_at)}` : ""}</span></span>
+                    <a href={`/api/proposal/${publicId}/pdf/stored`} target="_blank" rel="noopener" className={`${s.btn} ${s.btnGhost} ${s.btnXs}`}><FileCheck2 size={13} aria-hidden /> Open</a>
+                  </div>
+                )}
+              </>
+            ) : <p className={s.muted} style={{ fontSize: 13.5 }}>No version yet.</p>}
+          </Panel>
+
+          <Panel title="Secure access" icon={<ShieldCheck size={18} aria-hidden />} tight
+            action={orgContacts.length > 0 ? <InviteDrawer estimateNo={head.estimate_no} publicId={publicId} mode={head.mode} company={head.company ?? ""} project={head.project_name ?? ""} contacts={contactOpts} /> : undefined}>
+            {/* summary line → invitation rows; links are buttons, never printed URLs */}
+            <details open>
+              <summary className={p.accessSummary}>
+                <span>{live.length} authorized viewer{live.length === 1 ? "" : "s"} · {verified} verified · {sessions} session{sessions === 1 ? "" : "s"}{invites.length - live.length > 0 ? ` · ${invites.length - live.length} revoked` : ""}</span>
+                <ChevronDown size={16} className={p.chev} aria-hidden />
+              </summary>
+              <div className={p.accessBody}>
+                {invites.length === 0 && <p className={s.muted} style={{ fontSize: 13 }}>No client links yet. Issue a personal link — each person gets their own secret link.</p>}
+                {invites.map((i) => {
+                  const expired = !i.revoked && !i.exchanged_at && new Date(i.expires_at).getTime() < nowMs();
+                  const base = i.link_token ? `${SITE.baseUrl}/e/${i.link_token}` : null;
+                  return (
+                    <div key={i.invitation_id} className={p.accessRow} style={i.revoked ? { opacity: 0.65 } : undefined}>
+                      <div className={p.accessTop}>
+                        <div style={{ minWidth: 0 }}><b style={{ display: "block", fontWeight: 600, fontSize: 14 }}>{i.recipient_name ?? "Contact"}</b><span className={s.muted} style={{ fontSize: 12.5 }}>{i.recipient_email}</span></div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          <Chip tone="gray">{i.access_policy === "otp" ? "One-time code" : "Email confirm"}</Chip>
+                          {i.revoked ? <Chip tone="red">Revoked</Chip> : i.exchanged_at ? <Chip tone="green" title={i.last_seen ? `Last seen ${ago(i.last_seen)}` : undefined}>Verified · {i.sessions} session{Number(i.sessions) === 1 ? "" : "s"}</Chip> : expired ? <Chip tone="muted">Expired {fmtDate(i.expires_at)}</Chip> : <Chip tone="gray">Not opened · expires {fmtDate(i.expires_at)}</Chip>}
+                        </div>
+                      </div>
+                      {!i.revoked && (
+                        <div className={p.accessActions}>
+                          {base && clientMode && <a href={`${base}?to=configure`} target="_blank" rel="noopener" className={`${s.btn} ${s.btnGhost} ${s.btnXs}`}><Link2 size={13} aria-hidden /> Build estimate</a>}
+                          {base && <a href={`${base}?to=proposal`} target="_blank" rel="noopener" className={`${s.btn} ${s.btnGhost} ${s.btnXs}`}><Eye size={13} aria-hidden /> {released ? "View proposal" : "View (after release)"}</a>}
+                          {base && <a href={base} target="_blank" rel="noopener" className={`${s.btn} ${s.btnGhost} ${s.btnXs}`}><KeyRound size={13} aria-hidden /> Workspace</a>}
+                          <form action={revokeInvitationAction} style={{ marginLeft: "auto" }}>
+                            <input type="hidden" name="invitationId" value={i.invitation_id} />
+                            <input type="hidden" name="publicId" value={publicId} />
+                            <button type="submit" className={`${s.btn} ${s.btnDanger} ${s.btnXs}`}><Trash2 size={12} aria-hidden /> Revoke</button>
+                          </form>
+                        </div>
+                      )}
+                      {!i.revoked && !base && <p className={s.muted} style={{ fontSize: 12.5 }}>Link issued before link storage existed — revoke and invite again to get an openable link.</p>}
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
+            {orgContacts.length === 0 && (
+              <p className={s.muted} style={{ fontSize: 13, marginTop: 12 }}>Add a contact with an email to <Link href={`/ops/clients/${head.organization_id}`} style={{ color: "var(--ops-cobalt)", fontWeight: 600 }}>{company}</Link> to create a link.</p>
+            )}
+            <InviteOutcome />
+          </Panel>
+
+          <ProposalSettings publicId={publicId} head={head} locked={locked} />
+          <DesignPanel publicId={publicId} design={resolveDesign(head.design, head.status)} />
+        </aside>
+      </div>
+    </AppShell>
   );
 }
 
@@ -391,67 +402,70 @@ async function ReleaseReveal() {
   if (!raw) return null;
   const [token, status, detail] = raw.split("|");
   const sent = status === "sent";
+  const done = <form action={dismissReleaseReveal}><button type="submit" className={`${s.btn} ${s.btnSecondary} ${s.btnSm}`}>Done</button></form>;
   if (status === "blocked") {
     return (
-      <div style={{ marginBottom: "1.2rem", border: "1px solid rgba(185,28,28,.4)", borderRadius: 12, background: "rgba(185,28,28,.06)", padding: "1rem 1.2rem" }}>
-        <p style={{ ...mono, fontSize: 10, color: "#B91C1C", display: "flex", alignItems: "center", gap: 6 }}><Send size={13} aria-hidden /> Release blocked — nothing was locked or sent</p>
-        <p style={{ fontSize: 13, color: "var(--ink-dim)", marginTop: 6, lineHeight: 1.55 }}>{detail}</p>
-        <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 6 }}>Fix the data above (or ask the client to correct their configuration), check the preview, then release again.</p>
-        <form action={dismissReleaseReveal}>
-          <button type="submit" style={{ ...mono, marginTop: 8, fontSize: 9.5, padding: ".4rem .7rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer" }}>Done</button>
-        </form>
-      </div>
+      <Notice tone="danger">
+        <Send size={16} aria-hidden />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <b>Release blocked — nothing was locked or sent.</b>
+          <p style={{ marginTop: 4, lineHeight: 1.5 }}>{detail}</p>
+          <p style={{ marginTop: 4, fontSize: 12.5, opacity: 0.8 }}>Fix the data (or ask the client to correct their configuration), check the preview, then release again.</p>
+        </div>
+        {done}
+      </Notice>
     );
   }
   return (
-    <div style={{ marginBottom: "1.2rem", border: `1px solid ${sent ? "rgba(34,197,94,.45)" : "rgba(180,83,9,.4)"}`, borderRadius: 12, background: sent ? "rgba(34,197,94,.07)" : "rgba(180,83,9,.06)", padding: "1rem 1.2rem" }}>
-      <p style={{ ...mono, fontSize: 10, color: sent ? "#15803D" : "#B45309", display: "flex", alignItems: "center", gap: 6 }}>
-        <Mail size={13} aria-hidden /> Proposal released · {sent ? `email sent to ${detail}` : `email NOT sent — ${detail}`}
-      </p>
-      {token ? (
-        <>
-          <p style={{ fontSize: 13, color: "var(--ink-dim)", marginTop: 6 }}>
-            {sent ? "The client received this secure link. It is also shown here once in case you want to forward it yourself:" : "Send the client this secure link yourself (shown only once):"}
-          </p>
-          <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
-            <LinkRow label="Build estimate" href={`${SITE.baseUrl}/e/${token}?to=configure`} />
-            <LinkRow label="View proposal" href={`${SITE.baseUrl}/e/${token}?to=proposal`} />
-            <LinkRow label="Workspace" href={`${SITE.baseUrl}/e/${token}`} />
-          </div>
-        </>
-      ) : (
-        <p style={{ fontSize: 13, color: "var(--ink-dim)", marginTop: 6 }}>Add a contact with an email to this client, then release again to issue their link.</p>
-      )}
-      <form action={dismissReleaseReveal}>
-        <button type="submit" style={{ ...mono, marginTop: 8, fontSize: 9.5, padding: ".4rem .7rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer" }}>Done</button>
-      </form>
-    </div>
+    <Notice tone={sent ? "ok" : "warn"}>
+      <Mail size={16} aria-hidden />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <b>Proposal released · {sent ? `email sent to ${detail}` : `email not sent — ${detail}`}</b>
+        {token ? (
+          <>
+            <p style={{ marginTop: 4, fontSize: 13 }}>{sent ? "The client received this secure link. It is also shown here once in case you want to forward it yourself:" : "Send the client this secure link yourself (shown only once):"}</p>
+            <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
+              <LinkRow label="Build estimate" href={`${SITE.baseUrl}/e/${token}?to=configure`} />
+              <LinkRow label="View proposal" href={`${SITE.baseUrl}/e/${token}?to=proposal`} />
+              <LinkRow label="Workspace" href={`${SITE.baseUrl}/e/${token}`} />
+            </div>
+          </>
+        ) : (
+          <p style={{ marginTop: 4, fontSize: 13 }}>Add a contact with an email to this client, then release again to issue their link.</p>
+        )}
+      </div>
+      {done}
+    </Notice>
   );
 }
 
-/** One client link with its purpose — selectable text so it can be copied in one click. */
+/** One client link with its purpose — selectable text so it can be copied in one click (one-time reveal only). */
 function LinkRow({ label, href }: { label: string; href: string }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "96px 1fr", gap: 8, alignItems: "baseline" }}>
-      <span style={{ ...mono, fontSize: 8.5, color: "var(--brand-deep)" }}>{label}</span>
-      <a href={href} target="_blank" rel="noopener" style={{ fontSize: 11.5, color: "var(--ink-dim)", wordBreak: "break-all", textDecoration: "none", borderBottom: "1px dotted var(--edge-bright)" }}>{href}</a>
+    <div className={p.linkRow}>
+      <span className={s.label}>{label}</span>
+      <a href={href} target="_blank" rel="noopener" className={p.linkUrl}>{href}</a>
     </div>
   );
 }
 
-/** After "New link": whether the invitation email went out (one-shot cookie set by the action). */
+/** After "New link": whether the invitation email went out, plus the link itself, once (one-shot cookie set by the action). */
 async function InviteOutcome() {
   const jar = await cookies();
   const raw = jar.get("podos_new_invite")?.value;
   if (!raw) return null;
-  const [, , status, detail] = raw.split("|");
+  const [, token, status, detail] = raw.split("|");
   const sent = status === "sent";
   return (
-    <div style={{ marginTop: 10, padding: "0.6rem 0.8rem", borderRadius: 8, fontSize: 12, border: `1px solid ${sent ? "rgba(34,197,94,.45)" : "rgba(180,83,9,.4)"}`, background: sent ? "rgba(34,197,94,.07)" : "rgba(180,83,9,.06)", color: sent ? "#15803D" : "#B45309" }}>
-      {sent ? `Link created and emailed to ${detail}.` : `Link created — email NOT sent (${detail}). Copy the link above and send it yourself.`}
-      <form action={dismissInviteReveal} style={{ display: "inline", marginLeft: 8 }}>
-        <button type="submit" style={{ ...mono, fontSize: 8.5, background: "none", border: "none", cursor: "pointer", color: "var(--ink-faint)" }}>dismiss</button>
-      </form>
+    <div style={{ marginTop: 12 }}>
+      <Notice tone={sent ? "ok" : "warn"}>
+        <KeyRound size={16} aria-hidden />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <b>Secure link issued</b> · {sent ? `emailed to ${detail}` : `email not sent (${detail}) — send it yourself`}
+          {token && <input readOnly value={`${SITE.baseUrl}/e/${token}`} className={s.input} style={{ marginTop: 8, height: 36, fontSize: 12.5 }} aria-label="Secure link (shown once)" />}
+        </div>
+        <form action={dismissInviteReveal}><button type="submit" className={`${s.btn} ${s.btnSecondary} ${s.btnSm}`}>Done</button></form>
+      </Notice>
     </div>
   );
 }

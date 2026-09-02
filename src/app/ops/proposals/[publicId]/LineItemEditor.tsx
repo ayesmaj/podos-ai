@@ -10,6 +10,9 @@
  */
 
 import { useState, useTransition } from "react";
+import { Lock, Plus, Trash2 } from "lucide-react";
+import s from "@/components/ops/ui/ops.module.css";
+import p from "./proposal.module.css";
 import { saveLineItem, removeLineItem, addFromCatalog } from "./actions";
 
 export interface Item {
@@ -20,8 +23,7 @@ export interface Item {
 export interface CatalogOption { sku: string; name: string; category: string | null; price_cents: number | null; }
 
 const usd = (c: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(c / 100);
-const mono: React.CSSProperties = { fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase" };
-const cell: React.CSSProperties = { padding: "0.35rem 0.4rem", borderRadius: 6, border: "1px solid var(--edge-bright)", background: "var(--panel)", fontSize: 13, fontFamily: "inherit" };
+const CATEGORIES = ["platform", "compute", "cooling", "power", "network", "deployment", "support", "custom"];
 
 export default function LineItemEditor({
   publicId, items, catalog, locked,
@@ -59,90 +61,89 @@ export default function LineItemEditor({
 
   if (locked) {
     return (
-      <div>
-        <p style={{ ...mono, fontSize: 9.5, color: "#B45309", marginBottom: "0.7rem" }}>
-          Version locked — signed/released proposals are immutable. Create a revision to change it.
-        </p>
+      <div className={p.editor}>
+        <div className={`${s.notice} ${s.noticeWarn}`} style={{ marginBottom: 14 }}>
+          <Lock size={15} aria-hidden /> Version locked — signed/released proposals are immutable. Reopen or create a revision to change it.
+        </div>
         <ReadOnlyTable grouped={grouped} />
       </div>
     );
   }
 
   return (
-    <div>
+    <div className={p.editor}>
       {[...grouped.entries()].map(([cat, rows]) => (
-        <div key={cat} style={{ marginBottom: "1.1rem" }}>
-          <p style={{ ...mono, fontSize: 9, color: "var(--brand-deep)", marginBottom: "0.4rem" }}>{cat}</p>
-          <div style={{ display: "grid", gap: "0.35rem" }}>
-            {rows.map((it) => (
-              <div key={it.id} style={{ display: "flex", gap: "0.4rem", alignItems: "center", flexWrap: "wrap", padding: "0.4rem", borderRadius: 8, background: busyId === it.id ? "var(--brand-wash)" : "transparent", border: "1px solid var(--edge-faint)" }}>
+        <div key={cat} className={p.group}>
+          <div className={p.groupHead}><p className={s.label}>{cat}</p><span className={s.muted} style={{ fontSize: 12.5 }}>{rows.length} line{rows.length === 1 ? "" : "s"}</span></div>
+          {rows.map((it) => (
+            <div key={it.id} className={`${p.li}${busyId === it.id ? ` ${p.liBusy}` : ""}`} aria-busy={busyId === it.id}>
+              <input
+                className={p.cell} defaultValue={it.name} aria-label="Line item name"
+                onBlur={(e) => e.target.value !== it.name && commit(it, { name: e.target.value })}
+                style={{ fontWeight: 550 }}
+              />
+              <input
+                className={`${p.cell} ${p.cellNum}`} type="number" min="0" step="1" defaultValue={it.qty}
+                onBlur={(e) => Number(e.target.value) !== it.qty && commit(it, { qty: Number(e.target.value) })}
+                title="Quantity" aria-label="Quantity"
+              />
+              <div className={p.price}>
+                <span aria-hidden>$</span>
                 <input
-                  defaultValue={it.name}
-                  onBlur={(e) => e.target.value !== it.name && commit(it, { name: e.target.value })}
-                  style={{ ...cell, flex: "1 1 200px", fontWeight: 500 }}
+                  className={`${p.cell} ${p.cellNum}`} type="number" min="0" step="1000" defaultValue={Math.round(it.unit_price_cents / 100)}
+                  onBlur={(e) => Math.round(Number(e.target.value)) * 100 !== it.unit_price_cents && commit(it, { unit_price_cents: Math.round(Number(e.target.value)) * 100 })}
+                  title="Unit price (USD)" aria-label="Unit price (USD)"
                 />
-                <input
-                  type="number" min="0" step="1" defaultValue={it.qty}
-                  onBlur={(e) => Number(e.target.value) !== it.qty && commit(it, { qty: Number(e.target.value) })}
-                  style={{ ...cell, width: 60, textAlign: "right" }}
-                  title="Quantity"
-                />
-                <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <span style={{ fontSize: 12, color: "var(--ink-faint)" }}>$</span>
-                  <input
-                    type="number" min="0" step="1000" defaultValue={Math.round(it.unit_price_cents / 100)}
-                    onBlur={(e) => Math.round(Number(e.target.value)) * 100 !== it.unit_price_cents && commit(it, { unit_price_cents: Math.round(Number(e.target.value)) * 100 })}
-                    style={{ ...cell, width: 110, textAlign: "right" }}
-                    title="Unit price (USD)"
-                  />
-                </div>
-                <span style={{ width: 100, textAlign: "right", fontVariantNumeric: "tabular-nums", fontSize: 13, color: "var(--ink-strong)" }}>
-                  {usd(Math.round(it.qty * it.unit_price_cents))}
-                </span>
-                <label style={{ ...mono, fontSize: 8.5, display: "flex", alignItems: "center", gap: 3, color: "var(--ink-dim)" }} title="Recurring (per year)">
-                  <input type="checkbox" defaultChecked={it.recurring} onChange={(e) => commit(it, { recurring: e.target.checked })} /> Rec
+              </div>
+              <span className={p.liTotal}>{usd(Math.round(it.qty * it.unit_price_cents))}{it.recurring ? <span className={s.muted} style={{ fontWeight: 500 }}> /yr</span> : null}</span>
+
+              <div className={p.liMeta}>
+                <label className={p.flag} title="Recurring (per year)">
+                  <input type="checkbox" defaultChecked={it.recurring} onChange={(e) => commit(it, { recurring: e.target.checked })} /> Recurring
                 </label>
-                <label style={{ ...mono, fontSize: 8.5, display: "flex", alignItems: "center", gap: 3, color: "var(--ink-dim)" }} title="Optional alternate">
-                  <input type="checkbox" defaultChecked={it.optional} onChange={(e) => commit(it, { optional: e.target.checked })} /> Opt
+                <label className={p.flag} title="Optional alternate">
+                  <input type="checkbox" defaultChecked={it.optional} onChange={(e) => commit(it, { optional: e.target.checked })} /> Optional
                 </label>
-                <label style={{ ...mono, fontSize: 8.5, display: "flex", alignItems: "center", gap: 3, color: "#B45309" }} title="Pending engineering review">
-                  <input type="checkbox" defaultChecked={it.pending_review} onChange={(e) => commit(it, { pending_review: e.target.checked })} /> Pend
+                <label className={`${p.flag} ${p.flagPend}`} title="Pending engineering review — blocks release">
+                  <input type="checkbox" defaultChecked={it.pending_review} onChange={(e) => commit(it, { pending_review: e.target.checked })} /> Pending review
                 </label>
                 <button
+                  type="button" className={`${s.btn} ${s.btnGhost} ${s.btnXs}`} style={{ marginLeft: "auto", color: "var(--ops-danger)" }}
                   onClick={() => {
                     if (!window.confirm(`Delete "${it.name}" from this proposal?`)) return;
                     setBusyId(it.id); start(async () => { await removeLineItem(publicId, it.id); setBusyId(null); });
                   }}
-                  style={{ ...mono, fontSize: 9, color: "#B91C1C", background: "none", border: "none", cursor: "pointer" }}
-                  title="Delete line"
+                  title="Delete line" aria-label={`Delete ${it.name}`}
                 >
-                  ✕
+                  <Trash2 size={13} aria-hidden /> Delete
                 </button>
                 {/* client-facing description, category and unit — what the estimate sheet prints */}
-                <details style={{ flex: "1 1 100%" }}>
-                  <summary style={{ ...mono, fontSize: 8.5, color: "var(--ink-faint)", cursor: "pointer", listStyle: "none", padding: "2px 0" }}>
-                    {it.customer_description ? `Description · ${it.customer_description.slice(0, 70)}${it.customer_description.length > 70 ? "…" : ""}` : "Add client description · category · unit"}
+                <details className={p.detail}>
+                  <summary>
+                    {it.customer_description ? `Description · ${it.customer_description.slice(0, 90)}${it.customer_description.length > 90 ? "…" : ""}` : "Add client description · category · unit"}
                   </summary>
-                  <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 140px 90px", gap: "0.4rem", paddingTop: 6 }}>
+                  <div className={p.detailGrid}>
                     <textarea
-                      defaultValue={it.customer_description ?? ""} rows={2} placeholder="What the client reads under the item name (one bullet per line)"
+                      className={p.cell} defaultValue={it.customer_description ?? ""} rows={2} placeholder="What the client reads under the item name (one bullet per line)"
                       onBlur={(e) => e.target.value !== (it.customer_description ?? "") && commit(it, { customer_description: e.target.value })}
-                      style={{ ...cell, resize: "vertical" }}
+                      aria-label="Client description"
                     />
-                    <select defaultValue={it.category_slug ?? "custom"} onChange={(e) => commit(it, { category_slug: e.target.value })} style={cell} title="Category">
-                      {["platform", "compute", "cooling", "power", "network", "deployment", "support", "custom"].map((c) => <option key={c} value={c}>{c}</option>)}
+                    <select className={p.cell} defaultValue={it.category_slug ?? "custom"} onChange={(e) => commit(it, { category_slug: e.target.value })} title="Category" aria-label="Category">
+                      {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
-                    <input defaultValue={it.unit ?? "pod"} maxLength={16} onBlur={(e) => e.target.value !== (it.unit ?? "") && commit(it, { unit: e.target.value })} style={cell} title="Unit (e.g. pod, ea, yr)" />
+                    <input className={p.cell} defaultValue={it.unit ?? "pod"} maxLength={16} onBlur={(e) => e.target.value !== (it.unit ?? "") && commit(it, { unit: e.target.value })} title="Unit (e.g. pod, ea, yr)" aria-label="Unit" />
                   </div>
                 </details>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       ))}
 
+      {items.length === 0 && <p className={s.muted} style={{ fontSize: 13.5 }}>No line items yet — add from the catalog or start a custom line below.</p>}
+
       {/* add controls */}
-      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.9rem", paddingTop: "0.9rem", borderTop: "1px solid var(--edge)" }}>
+      <div className={p.addRow}>
         <AddCatalog publicId={publicId} catalog={catalog} disabled={pending} />
         <AddCustom publicId={publicId} disabled={pending} />
       </div>
@@ -154,19 +155,18 @@ function AddCatalog({ publicId, catalog, disabled }: { publicId: string; catalog
   const [, start] = useTransition();
   const [sku, setSku] = useState("");
   return (
-    <div style={{ display: "flex", gap: "0.3rem", alignItems: "center" }}>
-      <select value={sku} onChange={(e) => setSku(e.target.value)} style={{ ...cell }}>
+    <div className={p.addGroup}>
+      <select className={p.cell} value={sku} onChange={(e) => setSku(e.target.value)} aria-label="Catalog item">
         <option value="">Add catalog item…</option>
         {catalog.map((c) => (
           <option key={c.sku} value={c.sku}>{c.category ? `${c.category} · ` : ""}{c.name}{c.price_cents != null ? ` (${usd(c.price_cents)})` : ""}</option>
         ))}
       </select>
       <button
-        disabled={!sku || disabled}
-        onClick={() => { const s = sku; setSku(""); start(async () => { await addFromCatalog(publicId, s); }); }}
-        style={{ ...mono, fontSize: 9.5, padding: ".45rem .7rem", borderRadius: 8, border: "1px solid var(--brand)", background: "var(--brand-wash)", color: "var(--brand-deep)", cursor: sku ? "pointer" : "not-allowed", opacity: sku ? 1 : 0.5 }}
+        type="button" className={`${s.btn} ${s.btnSecondary} ${s.btnSm}`} disabled={!sku || disabled}
+        onClick={() => { const chosen = sku; setSku(""); start(async () => { await addFromCatalog(publicId, chosen); }); }}
       >
-        + Add
+        <Plus size={14} aria-hidden /> Add
       </button>
     </div>
   );
@@ -176,17 +176,16 @@ function AddCustom({ publicId, disabled }: { publicId: string; disabled: boolean
   const [, start] = useTransition();
   const [name, setName] = useState("");
   return (
-    <div style={{ display: "flex", gap: "0.3rem", alignItems: "center" }}>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Custom line name…" style={cell} />
+    <div className={p.addGroup}>
+      <input className={p.cell} value={name} onChange={(e) => setName(e.target.value)} placeholder="Custom line name…" aria-label="Custom line name" />
       <button
-        disabled={!name.trim() || disabled}
+        type="button" className={`${s.btn} ${s.btnGhost} ${s.btnSm}`} disabled={!name.trim() || disabled}
         onClick={() => {
           const n = name.trim(); setName("");
           start(async () => { await saveLineItem({ publicId, name: n, qty: 1, unitPriceCents: 0, optional: false, recurring: false, pendingReview: true, categorySlug: "custom" }); });
         }}
-        style={{ ...mono, fontSize: 9.5, padding: ".45rem .7rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: name.trim() ? "pointer" : "not-allowed", opacity: name.trim() ? 1 : 0.5 }}
       >
-        + Custom
+        <Plus size={14} aria-hidden /> Custom
       </button>
     </div>
   );
@@ -196,12 +195,12 @@ function ReadOnlyTable({ grouped }: { grouped: Map<string, Item[]> }) {
   return (
     <div>
       {[...grouped.entries()].map(([cat, rows]) => (
-        <div key={cat} style={{ marginBottom: "0.9rem" }}>
-          <p style={{ ...mono, fontSize: 9, color: "var(--brand-deep)", marginBottom: "0.3rem" }}>{cat}</p>
+        <div key={cat} className={p.group}>
+          <p className={s.label} style={{ marginBottom: 4 }}>{cat}</p>
           {rows.map((it) => (
-            <div key={it.id} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: "0.3rem 0", fontSize: 13, borderTop: "1px solid var(--edge-faint)" }}>
-              <span style={{ color: "var(--ink-strong)" }}>{it.name} {it.qty > 1 && <span style={{ color: "var(--ink-faint)" }}>×{it.qty}</span>}</span>
-              <span style={{ fontVariantNumeric: "tabular-nums", color: "var(--ink-strong)" }}>{usd(Math.round(it.qty * it.unit_price_cents))}{it.recurring ? "/yr" : ""}</span>
+            <div key={it.id} className={p.ro}>
+              <span style={{ color: "var(--ops-ink)", minWidth: 0 }}>{it.name} {it.qty > 1 && <span className={s.muted}>×{it.qty}</span>}</span>
+              <span className={s.num} style={{ fontWeight: 650 }}>{usd(Math.round(it.qty * it.unit_price_cents))}{it.recurring ? "/yr" : ""}</span>
             </div>
           ))}
         </div>

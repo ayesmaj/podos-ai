@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const PUBLIC_ID_RE = /^POD-EST-\d{4}-\d{4}$/;
-const EDITABLE = new Set(["draft", "sent", "client_invited", "viewed", "client_configuring", "revision_required"]);
+const EDITABLE = new Set(["draft", "sent", "client_invited", "viewed", "client_configuring", "configuring", "in_progress", "revision_requested"]);
 const URL_BASE = process.env.PODOS_SUPABASE_URL ?? "https://buqghwxjjksqperiamag.supabase.co";
 const ANON_KEY = process.env.PODOS_SUPABASE_ANON_KEY ?? "sb_publishable_1W4q68h6ES47vNdJZVsq7g_p88eLPi5";
 const NAME_TO_SLUG: Record<string, string> = {
