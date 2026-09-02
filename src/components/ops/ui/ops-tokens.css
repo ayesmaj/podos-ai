@@ -1,0 +1,69 @@
+/* ops-tokens.css — the PODOS Operations design tokens (bright, premium,
+   cobalt/cyan with discipline). Scoped to .ops so the marketing site is
+   untouched. Imported once by AppShell. */
+
+.ops {
+  --ops-sidebar-width: 252px;
+  --ops-page-max-width: 1680px;
+  --ops-page-padding-x: clamp(24px, 3vw, 48px);
+  --ops-page-padding-y: 28px;
+  --ops-section-gap: 24px;
+  --ops-panel-gap: 16px;
+  --ops-card-padding: 22px;
+  --ops-panel-padding: 26px;
+  --ops-radius-sm: 12px;
+  --ops-radius-md: 16px;
+  --ops-radius-lg: 20px;
+  --ops-radius-xl: 24px;
+
+  --ops-bg: #f4f7fc;
+  --ops-bg-elevated: #f8fbff;
+  --ops-surface: #ffffff;
+  --ops-surface-soft: #f2f7ff;
+  --ops-surface-selected: #eaf2ff;
+
+  --ops-ink: #071126;
+  --ops-ink-secondary: #35425b;
+  --ops-ink-muted: #7d8ba3;
+
+  --ops-cobalt-deep: #1236c6;
+  --ops-cobalt: #1b55f5;
+  --ops-electric: #168dff;
+  --ops-cyan: #27c3ea;
+  --ops-live: #20c77a;
+  --ops-warning: #eca43a;
+  --ops-orange: #f0803a;
+  --ops-danger: #e25568;
+  --ops-purple: #7759f6;
+  --ops-violet: #5b5bf0;
+
+  --ops-border: rgba(34, 82, 154, 0.12);
+  --ops-border-strong: rgba(27, 85, 245, 0.28);
+  --ops-shadow-sm: 0 6px 22px rgba(27, 57, 103, 0.06);
+  --ops-shadow-md: 0 16px 42px rgba(22, 53, 103, 0.09);
+  --ops-shadow-active: 0 18px 48px rgba(27, 85, 245, 0.15);
+  --ops-gradient-primary: linear-gradient(135deg, #1236c6 0%, #168dff 62%, #27c3ea 100%);
+
+  --ops-display: var(--font-geist), "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ops-text: var(--font-inter-tight), "Inter Tight", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ops-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ops-dur: 200ms;
+
+  color: var(--ops-ink);
+  font-family: var(--ops-text);
+  font-size: 14px;
+  line-height: 1.45;
+  background: var(--ops-bg);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+.ops *, .ops *::before, .ops *::after { box-sizing: border-box; }
+.ops p, .ops h1, .ops h2, .ops h3, .ops ul, .ops dl { margin: 0; }
+.ops ul { padding: 0; list-style: none; }
+.ops a { color: inherit; }
+.ops button, .ops input, .ops select, .ops textarea { font: inherit; color: inherit; }
+.ops :focus-visible { outline: 2px solid var(--ops-electric); outline-offset: 2px; border-radius: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ops * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
