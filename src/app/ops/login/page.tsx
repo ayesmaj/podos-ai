@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
@@ -90,9 +91,10 @@ export default async function AdminLoginPage({
           boxShadow: "0 1px 2px rgba(15,23,42,.04), 0 24px 60px -30px rgba(15,23,42,.25)",
         }}
       >
-        <p style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--brand)" }}>
-          PODOS · Internal
-        </p>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+          <Image src="/logo.png" alt="PODOS AI" width={99} height={34} priority sizes="99px" style={{ height: 34, width: "auto" }} />
+          <span style={{ fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--brand)" }}>Internal</span>
+        </div>
         <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20, color: "var(--ink-strong)" }}>
           Admin sign-in
         </h1>

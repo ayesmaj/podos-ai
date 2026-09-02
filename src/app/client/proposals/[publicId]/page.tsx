@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -95,9 +96,7 @@ export default async function ProposalWorkspace({
           background: "var(--panel)",
         }}
       >
-        <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, letterSpacing: "-0.02em", color: "var(--ink-strong)" }}>
-          PODOS
-        </span>
+        <Image src="/logo.png" alt="PODOS AI" width={64} height={22} priority sizes="64px" style={{ height: 22, width: "auto" }} />
         <span style={mono}>{p.estimate_no} · v1</span>
         <span
           style={{

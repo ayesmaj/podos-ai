@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { ProposalPdf, type PdfData, type PdfLine } from "@/lib/proposals/ProposalPdf";
 import { VIEWER_COOKIE, sessionProposal } from "@/lib/proposals/access";
@@ -27,6 +29,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ publicI
 
   const jar = await cookies();
   let data: PdfData | null = null;
+  // Wordmark for the cover — read from /public on the server, never fetched over HTTP.
+  const logo = "data:image/png;base64," +
+    (await readFile(path.join(process.cwd(), "public", "logo.png"))).toString("base64");
 
   // 1) viewer session bound to this proposal
   const session = jar.get(VIEWER_COOKIE)?.value ?? "";
@@ -40,7 +45,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ publicI
         recurring_cents: p.recurring_cents,
         line_items: (p.line_items as unknown as { name: string; qty: number; unit_price_cents: number; recurring: boolean; pending_review?: boolean }[])
           .map<PdfLine>((l) => ({ name: l.name, qty: l.qty, unit_price_cents: l.unit_price_cents, recurring: l.recurring, pending_review: l.pending_review })),
-        issued: fmt(p.created_at) ?? "", expires: fmt(p.expires_at),
+        logo, issued: fmt(p.created_at) ?? "", expires: fmt(p.expires_at),
       };
     }
   }
@@ -63,7 +68,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ publicI
           one_time_high_cents: full.head.one_time_high_cents, recurring_cents: full.head.recurring_cents,
           line_items: (full.line_items ?? []).filter((l) => l.client_visible)
             .map<PdfLine>((l) => ({ name: l.name, qty: l.qty, unit_price_cents: l.unit_price_cents, recurring: l.recurring, pending_review: l.pending_review })),
-          issued: fmt(full.head.created_at) ?? "", expires: fmt(full.head.expires_at),
+          logo, issued: fmt(full.head.created_at) ?? "", expires: fmt(full.head.expires_at),
         };
       }
     }

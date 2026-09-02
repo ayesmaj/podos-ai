@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ADMIN_COOKIE, adminLogout } from "@/lib/estimates/admin";
@@ -70,9 +71,7 @@ export default function OpsShell({
         }}
       >
         <Link href="/ops" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 8, padding: "0 0.4rem" }}>
-          <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, letterSpacing: "-0.02em", color: "var(--ink-strong)", fontSize: 18 }}>
-            PODOS
-          </span>
+          <Image src="/logo.png" alt="PODOS AI" width={76} height={26} priority sizes="76px" style={{ height: 26, width: "auto" }} />
           <span style={{ ...mono, fontSize: 9, color: "var(--brand)" }}>Ops</span>
         </Link>
 

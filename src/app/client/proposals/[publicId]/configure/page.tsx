@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -77,7 +78,7 @@ export default async function ConfigurePage({ params }: { params: Promise<{ publ
     <div style={{ background: "var(--paper)", minHeight: "100vh" }}>
       {/* utility bar (NOT marketing nav) */}
       <header style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", padding: "0.7rem clamp(1rem,3vw,2rem)", borderBottom: "1px solid var(--edge)", background: "var(--panel)" }}>
-        <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, letterSpacing: "-0.02em", color: "var(--ink-strong)" }}>PODOS</span>
+        <Image src="/logo.png" alt="PODOS AI" width={64} height={22} priority sizes="64px" style={{ height: 22, width: "auto" }} />
         <span style={mono}>{p.estimate_no} · Configure</span>
         <span style={{ ...mono, color: "var(--brand-deep)", border: "1px solid rgba(37,99,235,.35)", background: "rgba(37,99,235,.06)", borderRadius: 999, padding: "0.2rem 0.6rem" }}>Confidential</span>
         <Link href={`/client/proposals/${publicId}`} style={{ ...mono, color: "var(--brand)", marginLeft: "auto", textDecoration: "none" }}>← Proposal</Link>

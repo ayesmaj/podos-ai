@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/renderer";
 
 /**
  * ProposalPdf — the branded PDF, rendered server-side by @react-pdf/renderer
@@ -14,6 +14,8 @@ import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 export interface PdfLine { name: string; qty: number; unit_price_cents: number; recurring: boolean; pending_review?: boolean; }
 export interface PdfData {
   estimate_no: string;
+  /** PNG data URI of the PODOS wordmark, read server-side by the route. */
+  logo: string;
   rev: number;
   client_name: string;
   company: string | null;
@@ -73,7 +75,8 @@ export function ProposalPdf({ data }: { data: PdfData }) {
       <Page size="A4" style={s.page}>
         <Chrome data={data} />
         <View style={s.brandRow}>
-          <Text style={s.brand}>PODOS</Text>
+          {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf primitive, not a DOM <img>; has no alt prop */}
+          <Image src={data.logo} style={{ width: 110, height: 38 }} />
           <Text style={s.kicker}>Preliminary Configuration Estimate</Text>
         </View>
         <Text style={s.h1}>{data.project_name ?? "PODOS deployment proposal"}</Text>
