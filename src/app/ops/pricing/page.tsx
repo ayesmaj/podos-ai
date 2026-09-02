@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ADMIN_COOKIE, ADMIN_SECRET, adminSessionValid, usd } from "@/lib/estimates/admin";
+import OpsShell from "@/components/ops/OpsShell";
 
 /**
  * /ops/pricing — server-rendered view of the DATABASE catalog.
@@ -77,10 +78,8 @@ export default async function OpsPricingPage() {
   }
 
   return (
-    <main style={{ background: "var(--paper)", minHeight: "100vh" }}>
-      <div className="container-site" style={{ paddingBlock: "clamp(32px,5vw,56px)", maxWidth: 1100 }}>
-        <p style={{ ...mono, color: "var(--brand)" }}>PODOS · Ops</p>
-        <h1 className="t-headline" style={{ marginTop: ".5rem" }}>Catalog & pricing</h1>
+    <OpsShell active="/ops/pricing" title="Catalog & pricing">
+      <div style={{ maxWidth: 1100 }}>
         <p style={{ color: "var(--ink-dim)", fontSize: 14, marginTop: ".8rem", maxWidth: "72ch", lineHeight: 1.6 }}>
           Database-backed catalog ({rows.length} items). Every value imported from the prototype is
           flagged <strong>needs verification</strong> and none are published to clients until the
@@ -117,6 +116,6 @@ export default async function OpsPricingPage() {
           </section>
         ))}
       </div>
-    </main>
+    </OpsShell>
   );
 }

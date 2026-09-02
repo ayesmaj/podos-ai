@@ -6,7 +6,6 @@ import { revalidatePath } from "next/cache";
 import {
   ADMIN_COOKIE,
   ADMIN_SECRET,
-  adminLogout,
   adminSessionValid,
   createInvitation,
   listEstimates,
@@ -18,6 +17,7 @@ import {
 } from "@/lib/estimates/admin";
 import { SITE } from "@/lib/seo/site";
 import NewEstimateForm from "./NewEstimateForm";
+import OpsShell from "@/components/ops/OpsShell";
 
 /**
  * /admin/estimates — staff proposal operations (interim single-page build of
@@ -53,15 +53,6 @@ async function requireSession(): Promise<void> {
 }
 
 /* ------------------------------------------------------------ actions */
-
-async function logout() {
-  "use server";
-  const jar = await cookies();
-  const tok = jar.get(ADMIN_COOKIE)?.value;
-  if (tok) await adminLogout(tok);
-  jar.delete(ADMIN_COOKIE);
-  redirect("/ops/login");
-}
 
 async function invite(formData: FormData) {
   "use server";
@@ -207,19 +198,9 @@ export default async function AdminEstimatesPage() {
   };
 
   return (
-    <main style={{ background: "var(--paper)", minHeight: "100vh" }}>
-      <div className="container-site" style={{ paddingBlock: "clamp(32px,5vw,56px)", maxWidth: 1100 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: "1rem", flexWrap: "wrap" }}>
-          <p style={{ ...mono, color: "var(--brand)" }}>PODOS · Admin</p>
-          <form action={logout} style={{ marginLeft: "auto" }}>
-            <button type="submit" style={{ ...mono, color: "var(--ink-faint)", background: "none", border: "none", cursor: "pointer" }}>
-              Sign out
-            </button>
-          </form>
-        </div>
-        <h1 className="t-headline" style={{ marginTop: ".5rem" }}>Estimates</h1>
-
-        <div style={{ display: "flex", gap: "1.6rem", flexWrap: "wrap", marginTop: "0.9rem" }}>
+    <OpsShell active="/ops/proposals" title="Proposals">
+      <div style={{ maxWidth: 1100 }}>
+        <div style={{ display: "flex", gap: "1.6rem", flexWrap: "wrap" }}>
           <span style={{ ...mono, color: "var(--ink-faint)" }}>{rows.length} total</span>
           <span style={{ ...mono, color: "var(--ink-faint)" }}>{signed} signed</span>
           <span style={{ ...mono, color: "var(--ink-faint)" }}>{usd(totalOpen)} open pipeline</span>
@@ -282,6 +263,6 @@ export default async function AdminEstimatesPage() {
           authorized address). Revoking an invitation also ends its active sessions.
         </p>
       </div>
-    </main>
+    </OpsShell>
   );
 }

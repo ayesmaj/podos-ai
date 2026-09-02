@@ -76,7 +76,7 @@ export default function OpsShell({
           <span style={{ ...mono, fontSize: 9, color: "var(--brand)" }}>Ops</span>
         </Link>
 
-        <nav style={{ marginTop: "1.4rem", display: "grid", gap: 2, flex: 1 }}>
+        <nav style={{ marginTop: "1.4rem", display: "grid", gap: 2, flex: 1, alignContent: "start" }}>
           {MODULES.map((m) => {
             const isActive = m.href === active;
             if (!m.ready) {
