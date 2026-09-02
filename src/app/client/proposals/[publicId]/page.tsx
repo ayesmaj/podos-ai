@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { existsSync } from "node:fs";
-import path from "node:path";
 import { cookies } from "next/headers";
+import { HERO_IMAGE } from "@/lib/proposals/menu-manifest";
 import { notFound } from "next/navigation";
 import { ArrowRight, Clock3, ListChecks, ShieldCheck, Boxes, FileText, Send, Lock } from "lucide-react";
 import { VIEWER_COOKIE, getSelections, sessionProposal } from "@/lib/proposals/access";
@@ -29,7 +28,7 @@ export const dynamic = "force-dynamic";
 
 const PUBLIC_ID_RE = /^POD-EST-\d{4}-\d{4}$/;
 const RELEASED = new Set(["released", "signature_requested", "client_signed", "signed", "countersigned", "completed"]);
-const HERO = "/visuals/menu/hero-pod-schematic.webp";
+const HERO = HERO_IMAGE;
 
 export default async function ClientWelcome({ params }: { params: Promise<{ publicId: string }> }) {
   const { publicId } = await params;
@@ -49,7 +48,7 @@ export default async function ClientWelcome({ params }: { params: Promise<{ publ
   const pct = Math.round((done / STEPS.length) * 100);
   const released = RELEASED.has(p.status);
   const submitted = p.status === "client_submitted" || p.status === "engineering_review" || p.status === "commercial_review" || p.status === "approved";
-  const heroExists = existsSync(path.join(process.cwd(), "public", HERO));
+  const heroExists = true; // generated asset registered in menu-manifest.ts
   const preparedFor = p.company ? `${p.client_name} / ${p.company}` : p.client_name;
 
   const cta = released

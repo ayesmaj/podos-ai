@@ -1,6 +1,5 @@
-import { existsSync } from "node:fs";
-import path from "node:path";
 import type { DocData, DocLine, DocSpec } from "@/components/private/ProposalDocument";
+import { HERO_IMAGE, menuImage } from "@/lib/proposals/menu-manifest";
 import type { SessionProposal } from "@/lib/proposals/access";
 import { STEPS, STEP_CATEGORY } from "@/lib/proposals/steps";
 
@@ -15,15 +14,14 @@ if (typeof window !== "undefined") throw new Error("src/lib/proposals/document.t
 
 type Payload = Record<string, unknown>;
 
-/** Only images that actually exist under public/visuals/menu/. */
+/** Menu illustrations for the given SKUs, from the static manifest (no fs probes). */
 export function menuImages(skus: string[]): Record<string, string> {
   const out: Record<string, string> = {};
   for (const sku of skus) {
-    const rel = `/visuals/menu/${sku.toLowerCase()}.webp`;
-    if (existsSync(path.join(process.cwd(), "public", rel))) out[sku] = rel;
+    const rel = menuImage(sku);
+    if (rel) out[sku] = rel;
   }
-  const hero = "/visuals/menu/hero-pod-schematic.webp";
-  if (existsSync(path.join(process.cwd(), "public", hero))) out.hero = hero;
+  out.hero = HERO_IMAGE;
   return out;
 }
 

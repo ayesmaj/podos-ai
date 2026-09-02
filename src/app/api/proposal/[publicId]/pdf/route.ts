@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -21,10 +20,18 @@ import { docFromFull, docFromSession, skuNameMap, type ProposalFull } from "@/li
 export const dynamic = "force-dynamic";
 const PUBLIC_ID_RE = /^POD-EST-\d{4}-\d{4}$/;
 
-async function dataUri(rel: string, mime: string): Promise<string | null> {
-  const abs = path.join(process.cwd(), "public", rel);
-  if (!existsSync(abs)) return null;
-  return `data:${mime};base64,${(await readFile(abs)).toString("base64")}`;
+/**
+ * PDF assets live in src/lib/proposals/assets (a small, explicitly traced
+ * folder). Never read from public/ here: that made Vercel's output tracer
+ * bundle the whole public/ tree (772 MB) into this function.
+ */
+async function dataUri(name: string, mime: string): Promise<string | null> {
+  try {
+    const abs = path.join(process.cwd(), "src", "lib", "proposals", "assets", name);
+    return `data:${mime};base64,${(await readFile(abs)).toString("base64")}`;
+  } catch {
+    return null;
+  }
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ publicId: string }> }) {
@@ -35,7 +42,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ publicI
   const names = await skuNameMap();
   let data: PdfData | null = null;
   const logo = (await dataUri("logo.png", "image/png")) ?? "";
-  const pod = await dataUri("visuals/menu/pdf-cover-pod.png", "image/png");
+  const pod = await dataUri("pdf-cover-pod.png", "image/png");
 
   // 1) viewer session bound to this proposal
   const session = jar.get(VIEWER_COOKIE)?.value ?? "";

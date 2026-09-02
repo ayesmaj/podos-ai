@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { existsSync } from "node:fs";
-import path from "node:path";
 import { cookies } from "next/headers";
+import { menuImage } from "@/lib/proposals/menu-manifest";
 import { notFound } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { VIEWER_COOKIE, getSelections, previewEstimate, sessionProposal } from "@/lib/proposals/access";
@@ -56,12 +55,12 @@ async function publicCatalog(): Promise<Record<string, CatalogOption[]>> {
   } catch { return {}; }
 }
 
-/** Menu illustrations generated into public/visuals/menu/<sku>.webp — only those present. */
+/** Menu illustrations per SKU from the static manifest (no fs probes — see menu-manifest.ts). */
 function imageMap(catalog: Record<string, CatalogOption[]>): Record<string, string> {
   const map: Record<string, string> = {};
   for (const opts of Object.values(catalog)) for (const o of opts) {
-    const rel = `/visuals/menu/${o.sku.toLowerCase()}.webp`;
-    if (existsSync(path.join(process.cwd(), "public", rel))) map[o.sku] = rel;
+    const rel = menuImage(o.sku);
+    if (rel) map[o.sku] = rel;
   }
   return map;
 }
