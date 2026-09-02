@@ -1,11 +1,14 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireOps } from "@/lib/ops/session";
+import { attempt } from "@/lib/ops/result";
 import {
-  ADMIN_COOKIE, ADMIN_SECRET, addCatalogLineItem, deleteLineItem, upsertLineItem,
-  importSelections, logEmail, recordProposalPdf, releaseProposal, reopenProposal, requestRevision, setProposalDesign, setProposalMode, setSignatureState,
+  ADMIN_COOKIE, ADMIN_SECRET, addCatalogLineItem, deleteLineItem, deleteProposal, upsertLineItem,
+  importSelections, logEmail, recordProposalPdf, releaseProposal, reopenProposal, requestRevision, restoreProposal,
+  setProposalDesign, setProposalMode, setProposalOutcome, setSignatureState, updateProposal, withdrawProposal,
   type ProposalMode,
 } from "@/lib/estimates/admin";
 import { releasedEmail, sendProposalEmail } from "@/lib/email/proposals";
@@ -21,7 +24,7 @@ import { printUrlToPdf } from "@/lib/proposals/pdf";
 
 export async function saveLineItem(input: {
   publicId: string; itemId?: string | null; name: string; customerDescription?: string;
-  categorySlug?: string; qty: number; unitPriceCents: number;
+  categorySlug?: string; unit?: string; qty: number; unitPriceCents: number;
   optional: boolean; recurring: boolean; pendingReview: boolean;
 }) {
   await requireOps();
@@ -30,6 +33,7 @@ export async function saveLineItem(input: {
   await upsertLineItem(ADMIN_SECRET, {
     publicId: input.publicId, itemId: input.itemId ?? null, name: input.name,
     customerDescription: input.customerDescription, categorySlug: input.categorySlug,
+    unit: input.unit?.trim().slice(0, 16) || undefined,
     qty, unitPriceCents: cents, optional: input.optional,
     recurring: input.recurring, pendingReview: input.pendingReview,
   });
@@ -157,6 +161,60 @@ export async function saveDesignAction(formData: FormData) {
   });
   revalidatePath(`/ops/proposals/${publicId}`);
   revalidatePath(`/ops/proposals/${publicId}/preview`);
+}
+
+/* ---- proposal settings: edit head · outcome · withdraw / restore · delete ---- */
+
+export async function updateProposalAction(formData: FormData) {
+  await requireOps();
+  const publicId = String(formData.get("publicId") ?? "");
+  if (!publicId) return;
+  const projectId = String(formData.get("projectId") ?? "").trim();
+  const expires = String(formData.get("expiresAt") ?? "").trim();
+  await attempt("Proposal updated.", () => updateProposal(ADMIN_SECRET, {
+    publicId,
+    projectId: /^[0-9a-f-]{36}$/.test(projectId) ? projectId : null,
+    clientName: String(formData.get("clientName") ?? "").trim() || null,
+    clientEmail: formData.has("clientEmail") ? String(formData.get("clientEmail") ?? "").trim() : null,
+    expiresAt: /^\d{4}-\d{2}-\d{2}$/.test(expires) ? new Date(`${expires}T23:59:59Z`).toISOString() : null,
+    notes: formData.has("notes") ? String(formData.get("notes") ?? "") : null,
+  }));
+  revalidatePath(`/ops/proposals/${publicId}`); revalidatePath("/ops/proposals");
+}
+
+export async function setOutcomeAction(formData: FormData) {
+  await requireOps();
+  const publicId = String(formData.get("publicId") ?? "");
+  const outcome = String(formData.get("outcome") ?? "");
+  if (!publicId || !["won", "lost", "declined", "expired", "completed"].includes(outcome)) return;
+  await attempt(`Marked ${outcome}.`, () => setProposalOutcome(ADMIN_SECRET, publicId, outcome as "won" | "lost" | "declined" | "expired" | "completed"));
+  revalidatePath(`/ops/proposals/${publicId}`); revalidatePath("/ops/proposals"); revalidatePath("/ops");
+}
+
+export async function withdrawProposalAction(formData: FormData) {
+  await requireOps();
+  const publicId = String(formData.get("publicId") ?? "");
+  if (!publicId || formData.get("confirm") !== "on") return;
+  await attempt("Proposal withdrawn — client links no longer work.", () => withdrawProposal(ADMIN_SECRET, publicId, String(formData.get("reason") ?? "").trim() || undefined));
+  revalidatePath(`/ops/proposals/${publicId}`); revalidatePath("/ops/proposals"); revalidatePath("/ops");
+}
+
+export async function restoreProposalAction(formData: FormData) {
+  await requireOps();
+  const publicId = String(formData.get("publicId") ?? "");
+  if (!publicId) return;
+  await attempt("Proposal restored. Issue a new secure link for the client.", () => restoreProposal(ADMIN_SECRET, publicId));
+  revalidatePath(`/ops/proposals/${publicId}`); revalidatePath("/ops/proposals"); revalidatePath("/ops");
+}
+
+export async function deleteProposalAction(formData: FormData) {
+  await requireOps();
+  const publicId = String(formData.get("publicId") ?? "");
+  if (!publicId || formData.get("confirm") !== "on") return;
+  const ok = await attempt("Draft proposal deleted.", () => deleteProposal(ADMIN_SECRET, publicId));
+  revalidatePath("/ops/proposals"); revalidatePath("/ops/clients"); revalidatePath("/ops");
+  if (ok) redirect("/ops/proposals");
+  revalidatePath(`/ops/proposals/${publicId}`);
 }
 
 /** Send a submitted configuration back to the client for changes. */

@@ -5,13 +5,14 @@ import { docFromFull, docFromSession, skuNameMap, type ProposalFull } from "@/li
 import { resolveDesign, type PageMode, type ProposalDesign } from "@/lib/proposals/design";
 import { maskForPreview, validateProposalForRelease, type ValidationResult } from "@/lib/proposals/validate";
 import { resolveAssetUrls, type PrintAssets } from "@/lib/proposals/assets";
+import { getCompanySettings, type CompanySettings } from "@/lib/proposals/settings";
 import { documentHash } from "@/lib/proposals/pdf";
 
 /**
  * render.ts — builds the ONE model every document surface renders from
  * (admin print, admin preview, client viewer, client print → PDF). Keeping
- * the validation → masking → design → assets → hash sequence here means no
- * surface can drift from another.
+ * the validation → masking → design → assets → company → hash sequence here
+ * means no surface can drift from another.
  */
 
 if (typeof window !== "undefined") throw new Error("src/lib/proposals/render.ts is server-only");
@@ -24,13 +25,14 @@ export interface RenderModel {
   design: ProposalDesign;
   pageMode: PageMode;
   assets: PrintAssets;
+  company: CompanySettings;
   hash: string;
   validation: ValidationResult;
   /** admin-only banner text when the document is a masked design preview */
   previewNotice: string | null;
 }
 
-function finish(doc: DocData, design: ProposalDesign, pageMode: PageMode, assets: PrintAssets, validation: ValidationResult, admin: boolean): RenderModel {
+function finish(doc: DocData, design: ProposalDesign, pageMode: PageMode, assets: PrintAssets, company: CompanySettings, validation: ValidationResult, admin: boolean): RenderModel {
   let d = doc; let previewNotice: string | null = null;
   if (!validation.ok) {
     d = maskForPreview(doc);
@@ -39,26 +41,28 @@ function finish(doc: DocData, design: ProposalDesign, pageMode: PageMode, assets
       previewNotice = `Design preview — ${validation.errors.length} release blocker${validation.errors.length === 1 ? "" : "s"}. ${shown}${validation.errors.length > 2 ? " …" : ""}`;
     }
   }
-  return { doc: d, design, pageMode, assets, validation, previewNotice, hash: documentHash({ doc: d, pageMode, design, assets }) };
+  return { doc: d, design, pageMode, assets, company, validation, previewNotice, hash: documentHash({ doc: d, pageMode, design, assets, company }) };
 }
 
-/** Admin surfaces. `modeOverride` lets the admin preview either page mode. */
+/** Admin surfaces. `modeOverride` lets the admin preview either document type. */
 export async function adminRenderModel(publicId: string, modeOverride?: string): Promise<(RenderModel & { full: ProposalFull }) | null> {
-  const [full, names, assets] = await Promise.all([getProposalFull(ADMIN_SECRET, publicId) as Promise<ProposalFull | null>, skuNameMap(), resolveAssetUrls()]);
+  const [full, names, assets, company] = await Promise.all([
+    getProposalFull(ADMIN_SECRET, publicId) as Promise<ProposalFull | null>, skuNameMap(), resolveAssetUrls(), getCompanySettings(),
+  ]);
   if (!full?.head) return null;
   const doc = docFromFull(full, names);
   const design = resolveDesign(full.head.design, full.head.status);
   const pageMode: PageMode = modeOverride === "preliminary" || modeOverride === "formal" ? modeOverride : design.page_mode;
   const validation = validateProposalForRelease(doc, { mode: full.head.mode, submitted: !NOT_SUBMITTED.has(full.head.status) });
-  return { ...finish(doc, design, pageMode, assets, validation, true), full };
+  return { ...finish(doc, design, pageMode, assets, company, validation, true), full };
 }
 
 /** Client surfaces: formal only once released, otherwise preliminary; never exposes validation text. */
 export async function clientRenderModel(p: SessionProposal, session: string): Promise<RenderModel> {
-  const [selections, names, assets] = await Promise.all([getSelections(session), skuNameMap(), resolveAssetUrls()]);
+  const [selections, names, assets, company] = await Promise.all([getSelections(session), skuNameMap(), resolveAssetUrls(), getCompanySettings()]);
   const doc = docFromSession(p, selections as Record<string, Record<string, unknown>>, names);
   const design = resolveDesign(p.design, p.status);
   const pageMode: PageMode = RELEASED.has(p.status) ? design.page_mode : "preliminary";
   const validation = validateProposalForRelease(doc, { mode: p.mode, submitted: true });
-  return finish(doc, design, pageMode, assets, validation, false);
+  return finish(doc, design, pageMode, assets, company, validation, false);
 }

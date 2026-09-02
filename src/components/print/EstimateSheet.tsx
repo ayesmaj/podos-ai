@@ -7,7 +7,7 @@ import { CATEGORY_ORDER, categoryLabel } from "@/lib/proposals/categories";
 import { usd } from "@/lib/proposals/money";
 import { STATIC_ASSETS, type PrintAssets } from "@/lib/proposals/assets";
 import { PREVIEW_MASK, displayName } from "@/lib/proposals/validate";
-import { SITE } from "@/lib/seo/site";
+import { DEFAULT_COMPANY, type CompanySettings } from "@/lib/proposals/settings";
 
 /**
  * EstimateSheet — the ONE PODOS estimate / proposal document. A single
@@ -28,6 +28,8 @@ export interface EstimateSheetProps {
   design: ProposalDesign;
   hash: string;
   assets?: Partial<PrintAssets>;
+  /** company identity + standard texts from /ops/settings (defaults when absent) */
+  company?: CompanySettings;
   previewNotice?: string | null;
   /** web-only interactive block (accept & sign, request change) rendered under the totals */
   actions?: ReactNode;
@@ -48,9 +50,9 @@ const real = (v: string | null | undefined): v is string => !!v && v !== PREVIEW
 const fmtMw = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
 export const isCounted = (l: DocLine) => !l.optional || l.selected !== false;
 
-function validUntil(d: DocData, design: ProposalDesign) {
+function validUntil(d: DocData, design: ProposalDesign, defaultDays = 30) {
   if (design.validity_days) return addDays(d.issued, design.validity_days);
-  return d.expires ?? addDays(d.issued, 30);
+  return d.expires ?? addDays(d.issued, defaultDays);
 }
 function podCount(d: DocData): number | null {
   if (d.spec.pods != null) return d.spec.pods;
@@ -83,16 +85,11 @@ function buildRows(lines: DocLine[]): Row[] {
   return rows;
 }
 
-const TRUST = [
-  { t: "Factory-built", s: "Integrated and tested before shipping" },
-  { t: "Liquid-cooled", s: "Direct-to-chip, high-density ready" },
-  { t: "Commissioned on site", s: "Delivered, connected, handed over" },
-];
 const SIGNED = new Set(["client_signed", "signed", "countersigned", "completed"]);
 
-export default function EstimateSheet({ d, pageMode, design, hash, assets: partial, previewNotice = null, actions, renderAddonToggle }: EstimateSheetProps) {
+export default function EstimateSheet({ d, pageMode, design, hash, assets: partial, company = DEFAULT_COMPANY, previewNotice = null, actions, renderAddonToggle }: EstimateSheetProps) {
   const assets: PrintAssets = { ...STATIC_ASSETS, ...partial };
-  const company = displayName(d.company);
+  const companyName = displayName(d.company);
   const client = displayName(d.clientName);
   const project = real(d.project) ? displayName(d.project) : d.project ?? null;
   const pods = podCount(d);
@@ -106,7 +103,7 @@ export default function EstimateSheet({ d, pageMode, design, hash, assets: parti
   const title = pageMode === "formal" ? "Proposal" : "Estimate";
   const supportItems = counted.filter((l) => l.category_slug === "support").map((l) => l.name);
   const signed = SIGNED.has(d.status) && d.signedAt;
-  const until = validUntil(d, design);
+  const until = validUntil(d, design, company.default_validity_days);
 
   return (
     <article className="es-sheet" aria-label={`${title} ${d.publicId}`}>
@@ -137,18 +134,19 @@ export default function EstimateSheet({ d, pageMode, design, hash, assets: parti
       <div className="es-body">
         <section className="es-parties">
           <div>
-            <p className="es-party-name">{SITE.name}</p>
+            <p className="es-party-name">{company.name}</p>
             <ul className="es-lines">
-              <li><Globe size={14} strokeWidth={2} aria-hidden /> podosai.com</li>
-              <li><Mail size={14} strokeWidth={2} aria-hidden /> {SITE.email}</li>
-              <li><Phone size={14} strokeWidth={2} aria-hidden /> {SITE.phone.replace(/^\+1-/, "+1 ").replace(/-/g, " ")}</li>
+              {company.address_lines.map((l) => <li key={l} style={{ paddingLeft: 22 }}>{l}</li>)}
+              <li><Globe size={14} strokeWidth={2} aria-hidden /> {company.website}</li>
+              <li><Mail size={14} strokeWidth={2} aria-hidden /> {company.email}</li>
+              <li><Phone size={14} strokeWidth={2} aria-hidden /> {company.phone}</li>
             </ul>
           </div>
           <div>
             <span className="es-label">Prepared for</span>
             <div className="es-prepared">
-              <b>{client || company || "—"}</b>
-              {company && company !== client && <span>{company}</span>}
+              <b>{client || companyName || "—"}</b>
+              {companyName && companyName !== client && <span>{companyName}</span>}
               {d.contactEmail && <span>{d.contactEmail}</span>}
               {project && <span>Project: {project}</span>}
             </div>
@@ -252,12 +250,7 @@ export default function EstimateSheet({ d, pageMode, design, hash, assets: parti
           {design.sections.notes ? (
             <div>
               <span className="es-label">Notes</span>
-              <ul className="es-bullets">
-                <li>Pricing is based on the configuration documented above and on site conditions as provided.</li>
-                <li>Utility power and fiber beyond the demarcation point, civil works, permits, taxes and duties are excluded.</li>
-                <li>Servers and accelerators are excluded unless itemized.</li>
-                <li>Delivery schedule is confirmed at order after the engineering review.</li>
-              </ul>
+              <ul className="es-bullets">{company.notes.map((n) => <li key={n}>{n}</li>)}</ul>
             </div>
           ) : <div />}
           {design.sections.warranty ? (
@@ -265,7 +258,7 @@ export default function EstimateSheet({ d, pageMode, design, hash, assets: parti
               <span className="es-label">Warranty &amp; support</span>
               <div className="es-warranty">
                 <ShieldCheck size={18} strokeWidth={2} aria-hidden />
-                <p>{supportItems.length ? <>Covered by <b>{supportItems.join(", ")}</b> as itemized above.</> : <>Factory warranty on the PODOS unit and integrated systems; support and service levels as itemized or per the PODOS standard terms.</>}</p>
+                <p>{supportItems.length ? <>Covered by <b>{supportItems.join(", ")}</b> as itemized above.</> : company.warranty}</p>
               </div>
             </div>
           ) : <div />}
@@ -280,10 +273,10 @@ export default function EstimateSheet({ d, pageMode, design, hash, assets: parti
 
       {design.sections.trust_band && (
         <section className="es-trust">
-          {TRUST.map((t) => <div key={t.t}><CheckCircle2 size={20} strokeWidth={2} aria-hidden /><div><b>{t.t}</b><span>{t.s}</span></div></div>)}
+          {company.trust.map((t) => <div key={t.title}><CheckCircle2 size={20} strokeWidth={2} aria-hidden /><div><b>{t.title}</b><span>{t.subtitle}</span></div></div>)}
         </section>
       )}
-      <footer className="es-foot">{SITE.name} · Revision {d.rev} · Prepared specifically for {client || company} · <span className="es-num">{d.publicId} · {hash}</span></footer>
+      <footer className="es-foot">{company.name} · Revision {d.rev} · Prepared specifically for {client || companyName} · <span className="es-num">{d.publicId} · {hash}</span></footer>
     </article>
   );
 }

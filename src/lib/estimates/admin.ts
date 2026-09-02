@@ -63,6 +63,44 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T | nu
   }
 }
 
+/** Like rpc(), but surfaces the database's refusal message (e.g. "This client has released proposals…") to the caller. */
+export class AdminRpcError extends Error {}
+async function rpcStrict<T>(fn: string, args: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`${URL_BASE}/rest/v1/rpc/${fn}`, {
+    method: "POST", headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify(args), cache: "no-store",
+  });
+  if (!res.ok) {
+    let msg = `${fn} failed (${res.status})`;
+    try { const j = (await res.json()) as { message?: string; hint?: string }; msg = j.message ?? j.hint ?? msg; } catch { /* keep default */ }
+    throw new AdminRpcError(msg);
+  }
+  const text = await res.text();
+  return (text ? JSON.parse(text) : null) as T;
+}
+
+/* ---- full admin control: edit / archive / delete (rules enforced in the DB functions) ---- */
+export const updateOrganization = (secret: string, i: { orgId: string; name: string; legalName?: string; website?: string; industry?: string; country?: string; notes?: string }) =>
+  rpcStrict<boolean>("update_organization", { p_admin_secret: secret, p_org_id: i.orgId, p_name: i.name, p_legal_name: i.legalName ?? null, p_website: i.website ?? null, p_industry: i.industry ?? null, p_country: i.country ?? null, p_notes: i.notes ?? null });
+export const archiveOrganization = (secret: string, orgId: string, archived: boolean) =>
+  rpcStrict<boolean>("archive_organization", { p_admin_secret: secret, p_org_id: orgId, p_archived: archived });
+export const deleteOrganization = (secret: string, orgId: string) => rpcStrict<boolean>("delete_organization", { p_admin_secret: secret, p_org_id: orgId });
+export const updateContact = (secret: string, i: { id: string; first: string; last?: string; title?: string; email?: string; phone?: string; roles?: string[] }) =>
+  rpcStrict<boolean>("update_contact", { p_admin_secret: secret, p_id: i.id, p_first: i.first, p_last: i.last ?? null, p_title: i.title ?? null, p_email: i.email ?? null, p_phone: i.phone ?? null, p_roles: i.roles ?? null });
+export const deleteContact = (secret: string, id: string) => rpcStrict<boolean>("delete_contact", { p_admin_secret: secret, p_id: id });
+export const updateProject = (secret: string, i: { id: string; name: string; description?: string; pods?: number | null; capacityMw?: number | null; gpus?: number | null; workload?: string; golive?: string | null }) =>
+  rpcStrict<boolean>("update_project", { p_admin_secret: secret, p_id: i.id, p_name: i.name, p_description: i.description ?? null, p_pods: i.pods ?? null, p_capacity_mw: i.capacityMw ?? null, p_gpus: i.gpus ?? null, p_workload: i.workload ?? null, p_golive: i.golive ?? null });
+export const deleteProject = (secret: string, id: string) => rpcStrict<boolean>("delete_project", { p_admin_secret: secret, p_id: id });
+export const updateProposal = (secret: string, i: { publicId: string; projectId?: string | null; clientName?: string | null; clientEmail?: string | null; expiresAt?: string | null; notes?: string | null }) =>
+  rpcStrict<boolean>("update_proposal", { p_admin_secret: secret, p_public_id: i.publicId, p_project_id: i.projectId ?? null, p_client_name: i.clientName ?? null, p_client_email: i.clientEmail ?? null, p_expires_at: i.expiresAt ?? null, p_notes: i.notes ?? null });
+export const deleteProposal = (secret: string, publicId: string) => rpcStrict<boolean>("delete_proposal", { p_admin_secret: secret, p_public_id: publicId });
+export const withdrawProposal = (secret: string, publicId: string, reason?: string) => rpcStrict<boolean>("withdraw_proposal", { p_admin_secret: secret, p_public_id: publicId, p_reason: reason ?? null });
+export const restoreProposal = (secret: string, publicId: string) => rpcStrict<boolean>("restore_proposal", { p_admin_secret: secret, p_public_id: publicId });
+export const setProposalOutcome = (secret: string, publicId: string, outcome: "won" | "lost" | "declined" | "expired" | "completed") =>
+  rpcStrict<boolean>("set_proposal_outcome", { p_admin_secret: secret, p_public_id: publicId, p_outcome: outcome });
+export const deleteNote = (secret: string, noteId: string) => rpcStrict<boolean>("delete_note", { p_admin_secret: secret, p_note_id: noteId });
+export const setAppSettings = (secret: string, data: Record<string, unknown>) => rpcStrict<Record<string, unknown>>("set_app_settings", { p_admin_secret: secret, p_data: data });
+
 export const listEstimates = (secret: string) =>
   rpc<EstimateRow[]>("list_estimates", { p_admin_secret: secret });
 

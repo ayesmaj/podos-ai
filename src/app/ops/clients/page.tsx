@@ -57,9 +57,10 @@ export default async function ClientsPage() {
             <span style={{ width: 130, textAlign: "right" }}>Open value</span>
           </div>
           {orgs.map((o) => (
-            <Link key={o.id} href={`/ops/clients/${o.id}`} style={{ display: "flex", gap: "1rem", alignItems: "center", padding: "0.7rem 1rem", borderTop: "1px solid var(--edge-faint)", textDecoration: "none" }}>
+            <Link key={o.id} href={`/ops/clients/${o.id}`} style={{ display: "flex", gap: "1rem", alignItems: "center", padding: "0.7rem 1rem", borderTop: "1px solid var(--edge-faint)", textDecoration: "none", opacity: (o as { archived_at?: string | null }).archived_at ? 0.55 : 1 }}>
               <span style={{ flex: "1 1 240px", fontSize: 14, color: "var(--ink-strong)", fontWeight: 500 }}>
                 {o.name}
+                {(o as { archived_at?: string | null }).archived_at && <span style={{ ...mono, fontSize: 8.5, color: "#B45309", marginLeft: 8, border: "1px solid rgba(180,83,9,.4)", borderRadius: 999, padding: ".1rem .45rem" }}>archived</span>}
                 {o.website && <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-faint)" }}>{o.website}</span>}
               </span>
               <span style={{ width: 80, textAlign: "right", fontVariantNumeric: "tabular-nums", fontSize: 13.5, color: "var(--ink-dim)" }}>{o.contacts}</span>

@@ -9,6 +9,8 @@ import LineItemEditor, { type Item, type CatalogOption } from "./LineItemEditor"
 import { cookies } from "next/headers";
 import { dismissReleaseReveal, importClientSelections, releaseToClient, reopenForClientAction, sendBackForRevision, setModeAction, toggleSignature } from "./actions";
 import DesignPanel from "./DesignPanel";
+import ProposalSettings, { type HeadLike } from "./ProposalSettings";
+import AdminResult from "@/components/ops/AdminResult";
 import { resolveDesign } from "@/lib/proposals/design";
 import { Download, Eye, Import, ListChecks, Mail, PenLine, Send, Undo2, Wand2 } from "lucide-react";
 import { SITE } from "@/lib/seo/site";
@@ -149,6 +151,8 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
       </div>
 
       <ReleaseReveal />
+      <AdminResult />
+      <ProposalSettings publicId={publicId} head={head as unknown as HeadLike} locked={locked} />
       <DesignPanel publicId={publicId} design={resolveDesign((head as { design?: unknown }).design, head.status)} />
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(280px,1fr)", gap: "1.4rem", alignItems: "start" }}>

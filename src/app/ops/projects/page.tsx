@@ -39,8 +39,9 @@ export default async function ProjectsPage() {
           {projects.map((p) => (
             <div key={p.id} style={{ display: "flex", gap: "1rem", alignItems: "baseline", padding: "0.7rem 1rem", borderTop: "1px solid var(--edge-faint)" }}>
               <span style={{ flex: "1 1 200px", fontSize: 14, color: "var(--ink-strong)", fontWeight: 500 }}>
-                {p.name}
+                {p.org_id ? <Link href={`/ops/clients/${p.org_id}#project-${p.id}`} style={{ color: "inherit", textDecoration: "none" }}>{p.name}</Link> : p.name}
                 {p.description && <span style={{ display: "block", fontSize: 11.5, color: "var(--ink-faint)" }}>{p.description}</span>}
+                <span style={{ display: "block", fontSize: 10.5, color: "var(--brand)", marginTop: 2 }}>Edit or delete on the client page →</span>
               </span>
               <span style={{ flex: "1 1 160px", fontSize: 13 }}>
                 {p.org_id ? <Link href={`/ops/clients/${p.org_id}`} style={{ color: "var(--brand)", textDecoration: "none" }}>{p.org_name}</Link> : <span style={{ color: "var(--ink-faint)" }}>—</span>}

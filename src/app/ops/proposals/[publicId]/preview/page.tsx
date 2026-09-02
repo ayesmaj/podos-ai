@@ -45,7 +45,7 @@ export default async function ProposalPreview({ params, searchParams }: { params
         <Readiness ok={m.validation.ok} errors={m.validation.errors.map((e) => e.message)} warnings={m.validation.warnings.map((w) => w.message)} />
         <p className={`${s.chip} ${s.chipCyan}`} style={{ margin: 0, justifySelf: "start" }}><Eye size={12} aria-hidden /> {m.pageMode === "formal" ? "proposal" : "estimate"} · viewing as {m.doc.clientName} · {m.full.head.status.replace(/_/g, " ")}</p>
         <div className="es-stage" style={{ borderRadius: 16, minHeight: 0 }}>
-          <EstimateSheet d={m.doc} pageMode={m.pageMode} design={m.design} hash={m.hash} assets={m.assets} previewNotice={m.previewNotice} />
+          <EstimateSheet d={m.doc} pageMode={m.pageMode} design={m.design} hash={m.hash} assets={m.assets} company={m.company} previewNotice={m.previewNotice} />
         </div>
       </div>
     </OpsShell>

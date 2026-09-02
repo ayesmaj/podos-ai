@@ -29,6 +29,6 @@ export default async function ClientPrintPage({ params, searchParams }: { params
   const m = await clientRenderModel(p, session);
   const printing = sp.screen === "0";
   if (printing && !m.design.allow_download) notFound();
-  const sheet = <EstimateSheet d={m.doc} pageMode={m.pageMode} design={m.design} hash={m.hash} assets={m.assets} />;
+  const sheet = <EstimateSheet d={m.doc} pageMode={m.pageMode} design={m.design} hash={m.hash} assets={m.assets} company={m.company} />;
   return printing ? sheet : <div className="es-stage">{sheet}</div>;
 }

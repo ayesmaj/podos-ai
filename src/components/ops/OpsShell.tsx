@@ -25,7 +25,7 @@ const MODULES: { label: string; href: string; ready: boolean }[] = [
   { label: "Signatures", href: "/ops/signatures", ready: false },
   { label: "Activity", href: "/ops/activity", ready: false },
   { label: "Users & Roles", href: "/ops/users", ready: false },
-  { label: "Settings", href: "/ops/settings", ready: false },
+  { label: "Settings", href: "/ops/settings", ready: true },
 ];
 
 async function signOut() {

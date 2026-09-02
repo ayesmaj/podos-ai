@@ -132,7 +132,7 @@ export default async function ClientProposal({ params, searchParams }: { params:
       />
       <main className={`es-stage${canSign ? " has-sticky" : ""}`} style={{ minHeight: 0 }}>
         <EstimateSheet
-          d={m.doc} pageMode={m.pageMode} design={m.design} hash={m.hash} assets={m.assets} actions={actions}
+          d={m.doc} pageMode={m.pageMode} design={m.design} hash={m.hash} assets={m.assets} company={m.company} actions={actions}
           renderAddonToggle={canToggle ? (line, row) => (
             <form action={toggle}>
               <input type="hidden" name="itemId" value={line.id ?? ""} />

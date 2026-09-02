@@ -46,6 +46,7 @@ export default function LineItemEditor({
         name: patch.name ?? it.name,
         customerDescription: (patch.customer_description ?? it.customer_description) || undefined,
         categorySlug: (patch.category_slug ?? it.category_slug) || undefined,
+        unit: (patch.unit ?? it.unit) || undefined,
         qty: patch.qty ?? it.qty,
         unitPriceCents: patch.unit_price_cents ?? it.unit_price_cents,
         optional: patch.optional ?? it.optional,
@@ -108,12 +109,32 @@ export default function LineItemEditor({
                   <input type="checkbox" defaultChecked={it.pending_review} onChange={(e) => commit(it, { pending_review: e.target.checked })} /> Pend
                 </label>
                 <button
-                  onClick={() => { setBusyId(it.id); start(async () => { await removeLineItem(publicId, it.id); setBusyId(null); }); }}
+                  onClick={() => {
+                    if (!window.confirm(`Delete "${it.name}" from this proposal?`)) return;
+                    setBusyId(it.id); start(async () => { await removeLineItem(publicId, it.id); setBusyId(null); });
+                  }}
                   style={{ ...mono, fontSize: 9, color: "#B91C1C", background: "none", border: "none", cursor: "pointer" }}
                   title="Delete line"
                 >
                   ✕
                 </button>
+                {/* client-facing description, category and unit — what the estimate sheet prints */}
+                <details style={{ flex: "1 1 100%" }}>
+                  <summary style={{ ...mono, fontSize: 8.5, color: "var(--ink-faint)", cursor: "pointer", listStyle: "none", padding: "2px 0" }}>
+                    {it.customer_description ? `Description · ${it.customer_description.slice(0, 70)}${it.customer_description.length > 70 ? "…" : ""}` : "Add client description · category · unit"}
+                  </summary>
+                  <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 140px 90px", gap: "0.4rem", paddingTop: 6 }}>
+                    <textarea
+                      defaultValue={it.customer_description ?? ""} rows={2} placeholder="What the client reads under the item name (one bullet per line)"
+                      onBlur={(e) => e.target.value !== (it.customer_description ?? "") && commit(it, { customer_description: e.target.value })}
+                      style={{ ...cell, resize: "vertical" }}
+                    />
+                    <select defaultValue={it.category_slug ?? "custom"} onChange={(e) => commit(it, { category_slug: e.target.value })} style={cell} title="Category">
+                      {["platform", "compute", "cooling", "power", "network", "deployment", "support", "custom"].map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <input defaultValue={it.unit ?? "pod"} maxLength={16} onBlur={(e) => e.target.value !== (it.unit ?? "") && commit(it, { unit: e.target.value })} style={cell} title="Unit (e.g. pod, ea, yr)" />
+                  </div>
+                </details>
               </div>
             ))}
           </div>

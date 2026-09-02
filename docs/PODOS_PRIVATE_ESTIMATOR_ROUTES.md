@@ -39,3 +39,12 @@ client, never the DB uuid). Tokens: 256-bit random, SHA-256 at rest, shown once.
 | `/api/proposal/[publicId]/pdf?mode=` | viewer or admin session (forwarded to the print route) | Headless-Chrome PDF of the caller's own print route; `X-Document-SHA256` header |
 | `/api/proposal-assets/[type].webp?v=sha` | public (no client data) | Admin-generated document visual from the DB store; 404 → shipped file in `/public/visuals/proposal` |
 | `/ops/design` | admin session | Regenerate / revert the three controlled visuals (GPT Image 2 edits, server-side key) |
+
+## Full admin control (added 2026-09-01)
+
+| Surface | What it can do now | Safety rule (enforced in the DB function) |
+|---|---|---|
+| `/ops/clients/[orgId]` | edit client (name, legal name, website, industry, country, notes); archive / restore; delete; edit / remove contacts (roles, phone); edit / delete projects (pods, MW, GPUs, workload, go-live); delete notes | delete refused while any proposal is released or signed → archive instead; deleting a contact revokes its links; deleting a project removes only draft proposals |
+| `/ops/proposals/[publicId]` · Proposal settings | edit project (same client), client name / email on the document, validity, internal notes; mark won / lost / declined / expired; withdraw (links stop, record kept) / restore; delete draft | delete only for never-released drafts; a signed proposal cannot change project; won / completed require a signature |
+| `/ops/proposals/[publicId]` · line items | client description (bullets), category, unit; delete confirms | locked versions stay read-only |
+| `/ops/settings` | company identity + address, standard notes, warranty text, trust band, default validity, notify email — printed on every estimate sheet | admin secret rotation stays a DB + Vercel change (documented on the page) |

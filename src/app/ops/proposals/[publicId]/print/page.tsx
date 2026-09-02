@@ -25,6 +25,6 @@ export default async function OpsPrintPage({ params, searchParams }: { params: P
   const sp = await searchParams;
   const m = await adminRenderModel(publicId, sp.mode);
   if (!m) notFound();
-  const sheet = <EstimateSheet d={m.doc} pageMode={m.pageMode} design={m.design} hash={m.hash} assets={m.assets} previewNotice={m.previewNotice} />;
+  const sheet = <EstimateSheet d={m.doc} pageMode={m.pageMode} design={m.design} hash={m.hash} assets={m.assets} company={m.company} previewNotice={m.previewNotice} />;
   return sp.screen === "0" ? sheet : <div className="es-stage">{sheet}</div>;
 }
