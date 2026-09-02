@@ -112,36 +112,6 @@ export async function signEstimate(
   return ok === true;
 }
 
-/** Create an estimate and return its one-time-only raw token. Admin secret required. */
-export async function createEstimate(input: {
-  adminSecret: string;
-  clientName: string;
-  projectName?: string;
-  company?: string;
-  clientEmail?: string;
-  config?: Record<string, unknown>;
-  lineItems?: { label: string; amount: number }[];
-  lowCents?: number;
-  highCents?: number;
-  recurringCents?: number;
-  expiresDays?: number;
-}): Promise<{ estimate_no: string; token: string } | null> {
-  const rows = await rpc<{ estimate_no: string; token: string }[]>("create_estimate", {
-    p_admin_secret: input.adminSecret,
-    p_client_name: input.clientName,
-    p_project_name: input.projectName ?? null,
-    p_company: input.company ?? null,
-    p_client_email: input.clientEmail ?? null,
-    p_config: input.config ?? {},
-    p_line_items: input.lineItems ?? [],
-    p_low_cents: input.lowCents ?? 0,
-    p_high_cents: input.highCents ?? 0,
-    p_recurring: input.recurringCents ?? 0,
-    p_expires_days: input.expiresDays ?? 30,
-  });
-  return rows && rows.length > 0 ? rows[0] : null;
-}
-
 /** Format integer cents as USD. Never used for arithmetic. */
 export function usd(cents: number): string {
   return new Intl.NumberFormat("en-US", {

@@ -20,6 +20,8 @@ export const ADMIN_SECRET = process.env.PODOS_ADMIN_SECRET ?? "";
 export interface EstimateRow {
   public_id: string;
   estimate_no: string;
+  organization_id: string;
+  project_id: string;
   client_name: string;
   company: string | null;
   project_name: string | null;
@@ -63,29 +65,28 @@ async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T | nu
 export const listEstimates = (secret: string) =>
   rpc<EstimateRow[]>("list_estimates", { p_admin_secret: secret });
 
-export const rotateToken = (secret: string, estimateNo: string) =>
-  rpc<string>("rotate_estimate_token", { p_admin_secret: secret, p_estimate_no: estimateNo });
-
 export const revokeEstimate = (secret: string, estimateNo: string) =>
   rpc<boolean>("revoke_estimate", { p_admin_secret: secret, p_estimate_no: estimateNo });
 
-export const createEstimate = (secret: string, i: {
-  clientName: string; projectName?: string; company?: string;
-  lowCents?: number; highCents?: number; recurringCents?: number; expiresDays?: number;
+/**
+ * Connected model: a proposal exists only under a client's project. The
+ * database enforces it (NOT NULL organization_id/project_id, create_proposal
+ * verifies the project belongs to the client).
+ */
+export const createProposal = (secret: string, i: {
+  orgId: string; projectId: string; contactId?: string | null; expiresDays?: number;
 }) =>
-  rpc<{ estimate_no: string; token: string }[]>("create_estimate", {
-    p_admin_secret: secret,
-    p_client_name: i.clientName,
-    p_project_name: i.projectName ?? null,
-    p_company: i.company ?? null,
-    p_client_email: null,
-    p_config: {},
-    p_line_items: [],
-    p_low_cents: i.lowCents ?? 0,
-    p_high_cents: i.highCents ?? 0,
-    p_recurring: i.recurringCents ?? 0,
-    p_expires_days: i.expiresDays ?? 30,
+  rpc<{ estimate_no: string; public_id: string }[]>("create_proposal", {
+    p_admin_secret: secret, p_org_id: i.orgId, p_project_id: i.projectId,
+    p_contact_id: i.contactId ?? null, p_expires_days: i.expiresDays ?? 30,
   });
+
+export interface ContactRow {
+  id: string; organization_id: string; first_name: string | null; last_name: string | null;
+  title: string | null; email: string | null; contact_roles: string[];
+}
+export const listContacts = (secret: string) =>
+  rpc<ContactRow[]>("list_contacts", { p_admin_secret: secret });
 
 export const usd = (c: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(c / 100);
@@ -129,15 +130,14 @@ export interface InvitationRow {
 export const listInvitations = (secret: string, estimateNo: string) =>
   rpc<InvitationRow[]>("list_invitations", { p_admin_secret: secret, p_estimate_no: estimateNo });
 
+/** Invitations go only to a contact of the proposal's client (enforced in the DB). */
 export const createInvitation = (secret: string, i: {
-  estimateNo: string; email: string; name?: string;
-  policy?: "otp" | "email-confirm"; expiresDays?: number;
+  estimateNo: string; contactId: string; policy?: "otp" | "email-confirm"; expiresDays?: number;
 }) =>
   rpc<{ invitation_id: string; token: string }[]>("create_invitation", {
     p_admin_secret: secret,
     p_estimate_no: i.estimateNo,
-    p_recipient_email: i.email,
-    p_recipient_name: i.name ?? null,
+    p_contact_id: i.contactId,
     p_access_policy: i.policy ?? "email-confirm",
     p_expires_days: i.expiresDays ?? 14,
   });

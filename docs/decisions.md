@@ -11,6 +11,20 @@
 - Consequence: BUSINESS_DATA_REQUIRED "approve prices" items are closed by
   the editor itself; released proposals stay immutable snapshots.
 
+## 2026-09-01 — Connected model; no fake records
+- Decision: a proposal exists only under a client's project, a project only
+  under a client, an invitation only for a contact of that client. Enforced
+  in the database (NOT NULL organization_id/project_id on estimates,
+  organization_id on projects/contacts; create_proposal and create_invitation
+  verify ownership). create_estimate (free-text client) is dropped; inbound
+  website requests upsert organization → contact → project → proposal.
+- All test records (PODOS-1005…1009, test organizations/contacts/projects,
+  test invitations) were purged; the public-id sequence restarted so the first
+  real proposal is POD-EST-<year>-0001. No demo data is ever seeded again.
+- UI: proposals are created from the client's project (client page or the
+  proposals form with client → project → contact selects); invitations pick
+  a contact, never a free email. The legacy whole-proposal link is gone.
+
 ## 2026-09-01 — Logo scale on private surfaces
 - Decision: wordmark at 40–48px in bars/sidebar/login, 60px on the document
   cover, 90×31pt in the PDF running header (was 26–34px / 62×21pt) —

@@ -67,8 +67,8 @@ export default async function OpsDashboard() {
       active="/ops"
       title="Operations Dashboard"
       actions={
-        <Link href="/ops/proposals#new" className={`${s.btn} ${s.btnPrimary}`} style={{ minHeight: 42, fontSize: 14 }}>
-          <UserPlus size={16} aria-hidden /> New client invitation
+        <Link href="/ops/clients" className={`${s.btn} ${s.btnPrimary}`} style={{ minHeight: 42, fontSize: 14 }}>
+          <UserPlus size={16} aria-hidden /> New client
         </Link>
       }
     >

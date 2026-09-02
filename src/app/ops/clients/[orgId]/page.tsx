@@ -7,6 +7,7 @@ import {
   ADMIN_SECRET, addOrgNote, createContact, createProject, getOrganization, usd,
 } from "@/lib/estimates/admin";
 import OpsShell from "@/components/ops/OpsShell";
+import { createProposalAction } from "../../proposals/actions";
 
 /**
  * /ops/clients/[orgId] — client detail (master brief 7.4): contacts (with
@@ -130,11 +131,25 @@ export default async function ClientDetail({ params }: { params: Promise<{ orgId
 
           {/* projects */}
           <Panel label="Projects">
+            {projects.length === 0 && <Empty>No projects yet — a proposal needs a project, add one below.</Empty>}
             {projects.map((p) => (
-              <div key={p.id} style={{ padding: "0.5rem 0", borderTop: "1px solid var(--edge-faint)" }}>
-                <span style={{ fontSize: 13.5, color: "var(--ink-strong)", fontWeight: 500 }}>{p.name}</span>
-                {p.pod_quantity ? <span style={{ ...mono, fontSize: 9, color: "var(--ink-faint)", marginLeft: 8 }}>{p.pod_quantity} pods</span> : null}
-                {p.description && <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 2 }}>{p.description}</p>}
+              <div key={p.id} style={{ display: "flex", gap: "0.8rem", alignItems: "center", flexWrap: "wrap", padding: "0.5rem 0", borderTop: "1px solid var(--edge-faint)" }}>
+                <div style={{ flex: "1 1 200px", minWidth: 0 }}>
+                  <span style={{ fontSize: 13.5, color: "var(--ink-strong)", fontWeight: 500 }}>{p.name}</span>
+                  {p.pod_quantity ? <span style={{ ...mono, fontSize: 9, color: "var(--ink-faint)", marginLeft: 8 }}>{p.pod_quantity} pods</span> : null}
+                  {p.description && <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 2 }}>{p.description}</p>}
+                </div>
+                {/* a proposal can only be created here — under this client's project */}
+                <form action={createProposalAction} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <input type="hidden" name="orgId" value={orgId} />
+                  <input type="hidden" name="projectId" value={p.id} />
+                  {contacts.length > 0 && (
+                    <select name="contactId" defaultValue={contacts[0]?.id ?? ""} style={{ ...input, minHeight: 34 }} aria-label="Primary contact">
+                      {contacts.map((c) => <option key={c.id} value={c.id}>{[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email}</option>)}
+                    </select>
+                  )}
+                  <button type="submit" style={btn}>+ New proposal</button>
+                </form>
               </div>
             ))}
             <form action={addProject} style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.7rem", paddingTop: "0.7rem", borderTop: "1px solid var(--edge)" }}>
