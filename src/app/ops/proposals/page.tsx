@@ -9,8 +9,13 @@ import {
 } from "@/lib/estimates/admin";
 import { SITE } from "@/lib/seo/site";
 import OpsShell from "@/components/ops/OpsShell";
+import AdminResult from "@/components/ops/AdminResult";
+import ConfirmDelete from "@/components/ops/ConfirmDelete";
 import NewProposalForm from "./NewProposalForm";
 import { dismissInviteReveal, inviteContactAction, revokeInvitationAction } from "./actions";
+import { deleteProposalAction } from "./[publicId]/actions";
+
+const RELEASED_STATES = new Set(["released", "signature_requested", "client_signed", "signed", "countersigned", "completed", "won", "lost", "declined", "expired"]);
 import s from "@/components/private/private.module.css";
 
 /**
@@ -73,6 +78,7 @@ export default async function ProposalsPage() {
   return (
     <OpsShell active="/ops/proposals" title="Proposals" actions={<Link href="/ops/clients" className={`${s.btn} ${s.btnSecondary}`} style={{ minHeight: 40, fontSize: 13.5 }}>Clients</Link>}>
       <div className={s.root} style={{ minHeight: 0, background: "transparent" }}>
+        <AdminResult />
         <div style={{ display: "flex", gap: "1.4rem", flexWrap: "wrap", marginTop: "-0.8rem", marginBottom: "1rem" }}>
           <span className={s.label}>{estimates.length} total</span>
           <span className={s.label}>{estimates.filter((r) => r.signed_at).length} signed</span>
@@ -114,7 +120,12 @@ export default async function ProposalsPage() {
                   </span>
                   <StatusPill r={r} />
                   <span className={s.chip} title="How this proposal is built">{r.mode === "admin_built" ? "PODOS builds" : "Client builds"}</span>
-                  <Link href={`/ops/proposals/${r.public_id}`} className={`${s.btn} ${s.btnSecondary}`} style={{ minHeight: 34, fontSize: 12.5 }}>Open</Link>
+                  <Link href={`/ops/proposals/${r.public_id}`} className={`${s.btn} ${s.btnSecondary}`} style={{ minHeight: 34, fontSize: 12.5 }}>Open · edit</Link>
+                  <ConfirmDelete
+                    compact action={deleteProposalAction} hidden={{ publicId: r.public_id }} label="Delete"
+                    text={`Permanently deletes ${r.estimate_no} (${r.public_id}) with its line items, links and activity.`}
+                    guard={r.signed_at || RELEASED_STATES.has(r.status) ? { reason: r.signed_at ? "This proposal was signed by the client." : "This proposal was released to the client.", expectName: r.public_id, what: "the proposal number" } : null}
+                  />
                 </div>
 
                 {/* secure access — contacts of this client only */}

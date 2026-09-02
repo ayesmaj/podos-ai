@@ -38,10 +38,17 @@ export async function archiveOrgAction(fd: FormData) {
   refresh(orgId);
 }
 
+/** Typed-name confirmation unlocks the forced delete (also removes released / signed proposals). */
+const typedMatches = (fd: FormData, expectKey: string) => {
+  const typed = s(fd, "confirm_name"), expect = s(fd, expectKey);
+  return !!typed && !!expect && typed.toLowerCase() === expect.toLowerCase();
+};
+
 export async function deleteOrgAction(fd: FormData) {
   await requireOps();
   const orgId = s(fd, "orgId"); if (!UUID_RE.test(orgId) || fd.get("confirm") !== "on") return;
-  const ok = await attempt("Client deleted with its contacts, projects and draft proposals.", () => deleteOrganization(ADMIN_SECRET, orgId));
+  const force = typedMatches(fd, "expectName");
+  const ok = await attempt(force ? "Client deleted, including its released and signed proposals." : "Client deleted with its contacts, projects and draft proposals.", () => deleteOrganization(ADMIN_SECRET, orgId, force));
   refresh(orgId);
   if (ok) redirect("/ops/clients");
 }
@@ -75,7 +82,8 @@ export async function updateProjectAction(fd: FormData) {
 export async function deleteProjectAction(fd: FormData) {
   await requireOps();
   const id = s(fd, "id"), orgId = s(fd, "orgId"); if (!UUID_RE.test(id) || !UUID_RE.test(orgId) || fd.get("confirm") !== "on") return;
-  await attempt("Project deleted with its draft proposals.", () => deleteProject(ADMIN_SECRET, id));
+  const force = typedMatches(fd, "expectName");
+  await attempt(force ? "Project deleted, including its released and signed proposals." : "Project deleted with its draft proposals.", () => deleteProject(ADMIN_SECRET, id, force));
   refresh(orgId);
 }
 

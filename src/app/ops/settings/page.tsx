@@ -6,7 +6,7 @@ import AdminResult from "@/components/ops/AdminResult";
 import { requireOps } from "@/lib/ops/session";
 import { getCompanySettings } from "@/lib/proposals/settings";
 import { isEmailConfigured } from "@/lib/email/proposals";
-import { saveSettingsAction } from "./actions";
+import { saveSettingsAction, setAdminPinAction } from "./actions";
 
 /**
  * /ops/settings — company identity and standard texts printed on every
@@ -69,8 +69,13 @@ export default async function SettingsPage() {
             {!email && <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 6, lineHeight: 1.55 }}>Set <code>RESEND_API_KEY</code> and <code>NOTIFY_FROM</code> in the Vercel project environment, then redeploy.</p>}
           </Panel>
           <Panel label="Admin access">
-            <p style={{ fontSize: 13, color: "var(--ink-dim)", display: "flex", alignItems: "center", gap: 6 }}><KeyRound size={14} aria-hidden /> One shared access secret; sessions last 12 hours and every sign-in is audit-logged.</p>
-            <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 6, lineHeight: 1.55 }}>To rotate it: update <code>PODOS_ADMIN_SECRET</code> in Vercel and run <code>set_admin_secret</code> in the database in the same change, then redeploy. Rotating one side only locks the app out.</p>
+            <p style={{ fontSize: 13, color: "var(--ink-dim)", display: "flex", alignItems: "center", gap: 6 }}><KeyRound size={14} aria-hidden /> Sign in with the numeric access code below or the master secret. Sessions last 12 hours; every attempt is audit-logged and rate-limited.</p>
+            <form action={setAdminPinAction} style={{ display: "grid", gap: 8, marginTop: 10 }}>
+              <label style={label}>New access code (4–12 digits; 6+ recommended)<input style={input} name="pin" inputMode="numeric" pattern="[0-9]{4,12}" required autoComplete="off" /></label>
+              <label style={label}>Repeat the code<input style={input} name="pin_again" inputMode="numeric" pattern="[0-9]{4,12}" required autoComplete="off" /></label>
+              <button type="submit" style={{ ...mono, fontSize: 10, padding: ".5rem .8rem", borderRadius: 8, border: "1px solid var(--brand)", background: "var(--brand-wash)", color: "var(--brand-deep)", cursor: "pointer", justifySelf: "start" }}>Change access code</button>
+            </form>
+            <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 10, lineHeight: 1.55 }}>The master secret (<code>PODOS_ADMIN_SECRET</code>) also lives in the Vercel environment; rotate it only by changing both the database and Vercel in the same step.</p>
           </Panel>
           <Panel label="Document design">
             <p style={{ fontSize: 13, color: "var(--ink-dim)", lineHeight: 1.55 }}>Visuals used by every sheet are managed in <Link href="/ops/design" style={{ color: "var(--brand)" }}>Document Design</Link>; per-proposal options live in each proposal&apos;s Proposal design panel.</p>

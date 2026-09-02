@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import {
   ADMIN_COOKIE,
   adminLogin,
+  adminLoginPin,
   adminRateCheck,
   adminSessionValid,
 } from "@/lib/estimates/admin";
@@ -40,7 +41,9 @@ async function login(formData: FormData) {
   const allowed = await adminRateCheck("admin-login", ip, 5, 900);
   if (!allowed) redirect("/ops/login?e=2");
 
-  const token = await adminLogin(secret, h.get("user-agent") ?? undefined);
+  // a short numeric access code (set in /ops/settings) or the full master secret
+  const ua = h.get("user-agent") ?? undefined;
+  const token = /^\d{4,12}$/.test(secret) ? await adminLoginPin(secret, ua) : await adminLogin(secret, ua);
   if (!token) redirect("/ops/login?e=1");
 
   const jar = await cookies();
@@ -99,13 +102,14 @@ export default async function AdminLoginPage({
           Admin sign-in
         </h1>
         <label htmlFor="secret" style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--ink-faint)" }}>
-          Access secret
+          Access code
         </label>
         <input
           id="secret"
           name="secret"
           type="password"
           required
+          inputMode="numeric"
           autoComplete="current-password"
           style={{
             padding: "0.7rem 0.8rem",

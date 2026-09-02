@@ -7,6 +7,7 @@ import { requireOps } from "@/lib/ops/session";
 import { ADMIN_SECRET, addOrgNote, createContact, createProject, getOrganization, usd } from "@/lib/estimates/admin";
 import OpsShell from "@/components/ops/OpsShell";
 import AdminResult from "@/components/ops/AdminResult";
+import ConfirmDelete from "@/components/ops/ConfirmDelete";
 import { createProposalAction } from "../../proposals/actions";
 import { archiveOrgAction, deleteContactAction, deleteNoteAction, deleteOrgAction, deleteProjectAction, updateContactAction, updateOrgAction, updateProjectAction } from "./actions";
 
@@ -115,8 +116,8 @@ export default async function ClientDetail({ params }: { params: Promise<{ orgId
             </form>
             <ConfirmDelete
               action={deleteOrgAction} hidden={{ orgId }} label="Delete client"
-              blocked={hasReleased ? "This client has released or signed proposals — archive it instead." : null}
-              text={`Permanently deletes ${org.name}, its ${contacts.length} contact(s), ${projects.length} project(s) and ${proposals.length} draft proposal(s). This cannot be undone.`}
+              text={`Permanently deletes ${org.name}, its ${contacts.length} contact(s), ${projects.length} project(s) and ${proposals.length} proposal(s).`}
+              guard={hasReleased ? { reason: `${proposals.filter(released).length} proposal(s) were released or signed.`, expectName: org.name, what: "the company name" } : null}
             />
           </div>
         </div>
@@ -158,7 +159,7 @@ export default async function ClientDetail({ params }: { params: Promise<{ orgId
                   </div>
                 </form>
                 <div style={{ paddingBottom: "0.8rem" }}>
-                  <ConfirmDelete action={deleteContactAction} hidden={{ id: c.id, orgId }} label="Remove contact" text={`Removes ${[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email} and revokes every secure link issued to ${c.email ?? "them"}.`} />
+                  <ConfirmDelete action={deleteContactAction} hidden={{ id: c.id, orgId }} label="Remove contact" text={`Removes ${[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email} and revokes every secure link issued to ${c.email ?? "them"}.`} guard={null} />
                 </div>
               </details>
             ))}
@@ -213,7 +214,7 @@ export default async function ClientDetail({ params }: { params: Promise<{ orgId
                       )}
                       <button type="submit" style={btn}>+ New proposal</button>
                     </form>
-                    <ConfirmDelete action={deleteProjectAction} hidden={{ id: p.id, orgId }} label="Delete project" blocked={blocked ? "This project has released or signed proposals." : null} text={`Deletes ${p.name} and its ${own.length} draft proposal(s).`} />
+                    <ConfirmDelete action={deleteProjectAction} hidden={{ id: p.id, orgId }} label="Delete project" text={`Deletes ${p.name} and its ${own.length} proposal(s).`} guard={blocked ? { reason: `${own.filter(released).length} proposal(s) were released or signed.`, expectName: p.name, what: "the project name" } : null} />
                   </div>
                 </details>
               );
@@ -252,22 +253,6 @@ export default async function ClientDetail({ params }: { params: Promise<{ orgId
 
 function Field({ label, children, wide }: { label: string; children: React.ReactNode; wide?: boolean }) {
   return <label style={{ display: "grid", gap: 3, fontSize: 11, color: "var(--ink-faint)", gridColumn: wide ? "1 / -1" : undefined }}>{label}{children}</label>;
-}
-
-/** Two-step destructive control: open → tick → confirm. `blocked` renders the reason instead. */
-function ConfirmDelete({ action, hidden, label, text, blocked }: { action: (fd: FormData) => Promise<void>; hidden: Record<string, string>; label: string; text: string; blocked?: string | null }) {
-  if (blocked) return <span style={{ fontSize: 12, color: "var(--ink-faint)", display: "inline-flex", alignItems: "center", gap: 6 }}><Trash2 size={12} aria-hidden /> {label} unavailable — {blocked}</span>;
-  return (
-    <details>
-      <summary style={{ ...danger, listStyle: "none" }}><Trash2 size={12} aria-hidden /> {label}</summary>
-      <form action={action} style={{ marginTop: 8, padding: "0.7rem 0.9rem", border: "1px solid rgba(185,28,28,.35)", borderRadius: 10, background: "rgba(185,28,28,.04)", display: "grid", gap: 8, maxWidth: 520 }}>
-        {Object.entries(hidden).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
-        <p style={{ fontSize: 12.5, color: "#7f1d1d", lineHeight: 1.5 }}>{text}</p>
-        <label style={{ fontSize: 12.5, color: "var(--ink-dim)", display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" name="confirm" required /> I understand</label>
-        <button type="submit" style={{ ...mono, fontSize: 10, padding: ".5rem .8rem", borderRadius: 8, border: "none", background: "#B91C1C", color: "#fff", cursor: "pointer", justifySelf: "start" }}>{label}</button>
-      </form>
-    </details>
-  );
 }
 
 function Panel({ label, children }: { label: string; children: React.ReactNode }) {

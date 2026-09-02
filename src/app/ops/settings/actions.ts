@@ -3,7 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { requireOps } from "@/lib/ops/session";
 import { attempt } from "@/lib/ops/result";
-import { ADMIN_SECRET, setAppSettings } from "@/lib/estimates/admin";
+import { ADMIN_SECRET, setAdminPin, setAppSettings } from "@/lib/estimates/admin";
+
+/** Change the numeric access code used on the admin sign-in (4–12 digits, both fields must match). */
+export async function setAdminPinAction(fd: FormData) {
+  await requireOps();
+  const pin = s(fd, "pin"), again = s(fd, "pin_again");
+  if (pin !== again) { const { setAdminResult } = await import("@/lib/ops/result"); await setAdminResult(false, "The two codes do not match."); revalidatePath("/ops/settings"); return; }
+  await attempt("Access code changed. Use it on the next sign-in.", () => setAdminPin(ADMIN_SECRET, pin));
+  revalidatePath("/ops/settings");
+}
 
 const s = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 const linesOf = (v: string) => v.split(/\r?\n/).map((x) => x.trim()).filter(Boolean);

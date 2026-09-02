@@ -1,5 +1,6 @@
 import { Settings2, Trash2 } from "lucide-react";
 import { ADMIN_SECRET, listProjects } from "@/lib/estimates/admin";
+import ConfirmDelete from "@/components/ops/ConfirmDelete";
 import { deleteProposalAction, restoreProposalAction, setOutcomeAction, updateProposalAction, withdrawProposalAction } from "./actions";
 
 /**
@@ -55,20 +56,25 @@ export default async function ProposalSettings({ publicId, head, locked }: { pub
             </form>
           )}
           {!revoked ? (
-            <details style={{ marginLeft: "auto" }}>
-              <summary style={{ ...ghost, listStyle: "none", color: "#B91C1C", borderColor: "rgba(185,28,28,.35)", display: "inline-flex", alignItems: "center", gap: 5 }}><Trash2 size={12} aria-hidden /> {releasedOnce ? "Withdraw proposal" : "Delete proposal"}</summary>
-              <form action={releasedOnce ? withdrawProposalAction : deleteProposalAction} style={{ marginTop: 8, padding: ".7rem .9rem", border: "1px solid rgba(185,28,28,.35)", borderRadius: 10, background: "rgba(185,28,28,.04)", display: "grid", gap: 8, maxWidth: 520 }}>
-                <input type="hidden" name="publicId" value={publicId} />
-                <p style={{ fontSize: 12.5, color: "#7f1d1d", lineHeight: 1.5 }}>
-                  {releasedOnce
-                    ? "Withdraws the proposal from the client: every secure link stops working and the status becomes withdrawn. Versions, the stored PDF and the activity trail are kept. You can restore it later."
-                    : "Permanently deletes this draft proposal, its line items, links and activity. It was never released to the client."}
-                </p>
-                {releasedOnce && <input style={input} name="reason" placeholder="Reason (optional, internal)" />}
-                <label style={{ fontSize: 12.5, color: "var(--ink-dim)", display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" name="confirm" required /> I understand</label>
-                <button type="submit" style={{ ...mono, fontSize: 10, padding: ".5rem .8rem", borderRadius: 8, border: "none", background: "#B91C1C", color: "#fff", cursor: "pointer", justifySelf: "start" }}>{releasedOnce ? "Withdraw" : "Delete"}</button>
-              </form>
-            </details>
+            <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "flex-start", flexWrap: "wrap" }}>
+              {releasedOnce && (
+                <details>
+                  <summary style={{ ...ghost, listStyle: "none", color: "#B45309", borderColor: "rgba(180,83,9,.4)", display: "inline-flex", alignItems: "center", gap: 5 }}><Trash2 size={12} aria-hidden /> Withdraw</summary>
+                  <form action={withdrawProposalAction} style={{ marginTop: 8, padding: ".7rem .9rem", border: "1px solid rgba(180,83,9,.4)", borderRadius: 10, background: "rgba(180,83,9,.04)", display: "grid", gap: 8, maxWidth: 520 }}>
+                    <input type="hidden" name="publicId" value={publicId} />
+                    <p style={{ fontSize: 12.5, color: "#6a4a00", lineHeight: 1.5 }}>Withdraws the proposal from the client: every secure link stops working and the status becomes withdrawn. Versions, the stored PDF and the activity trail are kept. You can restore it later.</p>
+                    <input style={input} name="reason" placeholder="Reason (optional, internal)" />
+                    <label style={{ fontSize: 12.5, color: "var(--ink-dim)", display: "flex", gap: 8, alignItems: "center" }}><input type="checkbox" name="confirm" required /> I understand</label>
+                    <button type="submit" style={{ ...mono, fontSize: 10, padding: ".5rem .8rem", borderRadius: 8, border: "none", background: "#B45309", color: "#fff", cursor: "pointer", justifySelf: "start" }}>Withdraw</button>
+                  </form>
+                </details>
+              )}
+              <ConfirmDelete
+                action={deleteProposalAction} hidden={{ publicId }} label="Delete proposal"
+                text={releasedOnce ? "Permanently deletes this proposal with its versions, stored PDF, links and activity." : "Permanently deletes this draft proposal, its line items, links and activity. It was never released to the client."}
+                guard={releasedOnce ? { reason: `It was released${head.signed_at ? " and signed" : ""} by the client.`, expectName: publicId, what: "the proposal number" } : null}
+              />
+            </div>
           ) : (
             <form action={restoreProposalAction} style={{ marginLeft: "auto" }}>
               <input type="hidden" name="publicId" value={publicId} />

@@ -211,7 +211,9 @@ export async function deleteProposalAction(formData: FormData) {
   await requireOps();
   const publicId = String(formData.get("publicId") ?? "");
   if (!publicId || formData.get("confirm") !== "on") return;
-  const ok = await attempt("Draft proposal deleted.", () => deleteProposal(ADMIN_SECRET, publicId));
+  // typing the proposal number unlocks the forced delete of a released / signed proposal
+  const force = String(formData.get("confirm_name") ?? "").trim().toUpperCase() === publicId.toUpperCase();
+  const ok = await attempt(force ? "Proposal deleted permanently, including its released record." : "Draft proposal deleted.", () => deleteProposal(ADMIN_SECRET, publicId, force));
   revalidatePath("/ops/proposals"); revalidatePath("/ops/clients"); revalidatePath("/ops");
   if (ok) redirect("/ops/proposals");
   revalidatePath(`/ops/proposals/${publicId}`);
