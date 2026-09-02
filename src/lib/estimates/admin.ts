@@ -231,3 +231,21 @@ export interface LineItemRow {
   optional: boolean; selected: boolean; recurring: boolean; pending_review: boolean;
   client_visible: boolean; sort_order: number;
 }
+
+/* ---- corrected flow (docs/PODOS_PRIVATE_ESTIMATOR_DATA_FLOW.md §4) ---- */
+
+/** Convert the client's saved product selections into catalog line items. */
+export const importSelections = (secret: string, publicId: string) =>
+  rpc<number>("import_selections", { p_admin_secret: secret, p_public_id: publicId });
+
+/** Snapshot + lock the current version and release the formal proposal to the client. */
+export const releaseProposal = (secret: string, publicId: string) =>
+  rpc<boolean>("release_proposal", { p_admin_secret: secret, p_public_id: publicId });
+
+/** Show/hide the client's Sign CTA (signature_requested <-> released). */
+export const setSignatureState = (secret: string, publicId: string, enabled: boolean) =>
+  rpc<boolean>("set_signature_state", { p_admin_secret: secret, p_public_id: publicId, p_enabled: enabled });
+
+/** Send a submitted configuration back to the client for changes (re-opens editing). */
+export const requestRevision = (secret: string, publicId: string, note?: string) =>
+  rpc<boolean>("request_revision", { p_admin_secret: secret, p_public_id: publicId, p_note: note ?? null });

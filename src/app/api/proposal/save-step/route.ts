@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { VIEWER_COOKIE, saveSelection } from "@/lib/proposals/access";
+import { VIEWER_COOKIE, previewEstimate, saveSelection } from "@/lib/proposals/access";
 
 /**
  * POST /api/proposal/save-step — autosave one configuration step.
@@ -27,5 +27,10 @@ export async function POST(req: Request) {
   }
 
   const ok = await saveSelection(session, step, body.payload);
-  return Response.json({ ok }, { status: ok ? 200 : 400 });
+  if (!ok) return Response.json({ ok: false }, { status: 400 });
+
+  // The live estimate is computed in the database from the saved selections —
+  // the browser only animates what comes back (no client-side money math).
+  const estimate = await previewEstimate(session);
+  return Response.json({ ok: true, estimate });
 }

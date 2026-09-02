@@ -1,235 +1,175 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { revalidatePath } from "next/cache";
-import {
-  VIEWER_COOKIE,
-  sessionProposal,
-  signViaSession,
-} from "@/lib/proposals/access";
+import { ArrowRight, Clock3, ListChecks, ShieldCheck, Boxes, FileText, Send, Lock } from "lucide-react";
+import { VIEWER_COOKIE, getSelections, sessionProposal } from "@/lib/proposals/access";
+import { STEPS } from "@/lib/proposals/steps";
+import ClientBar from "@/components/private/ClientBar";
+import s from "@/components/private/private.module.css";
 
 /**
- * /client/proposals/[publicId] — the clean, session-gated client workspace.
+ * /client/proposals/[publicId] — the client WELCOME (redesign brief §6).
  *
- * No token and NO internal id in this URL: [publicId] is the human-readable
- * proposal id (POD-EST-2026-NNNN; docs/estimator/03-ROUTE-ARCHITECTURE), and
- * access requires the HttpOnly viewer session set by the invitation exchange.
- * Missing/expired/revoked session, or a session for a DIFFERENT proposal,
- * all render the same 404 (no oracle).
- *
- * Workspace v1 = utility rail (per the founder mockup: logo, proposal no.,
- * version, CONFIDENTIAL, viewer identity, exit) + the proposal document +
- * identity-attached signing. The 14-step configurator canvas is Phase B
- * (docs/private-estimator/CLIENT_FLOW_ARCHITECTURE.md).
+ * "PODOS prepared a confidential infrastructure planning experience for you."
+ * Prepared-for card, what the configurator does, time to complete, progress
+ * preview, confidentiality note, one primary CTA. No approval, no signature —
+ * the formal proposal (and its sign step) lives on /proposal once released.
+ * Session-bound to exactly one proposal; anything else is a uniform 404.
  */
 
 export const metadata: Metadata = {
-  title: "Private proposal | PODOS AI",
+  title: "Your PODOS configuration workspace",
   robots: { index: false, follow: false, nocache: true },
 };
-
 export const dynamic = "force-dynamic";
 
-const mono: React.CSSProperties = {
-  fontSize: 10.5,
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  color: "var(--ink-faint)",
-};
-
 const PUBLIC_ID_RE = /^POD-EST-\d{4}-\d{4}$/;
+const RELEASED = new Set(["released", "signature_requested", "client_signed", "signed", "countersigned", "completed"]);
+const HERO = "/visuals/menu/hero-pod-schematic.webp";
 
-function usd(cents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
-
-export default async function ProposalWorkspace({
-  params,
-}: {
-  params: Promise<{ publicId: string }>;
-}) {
+export default async function ClientWelcome({ params }: { params: Promise<{ publicId: string }> }) {
   const { publicId } = await params;
   if (!PUBLIC_ID_RE.test(publicId)) notFound();
 
   const jar = await cookies();
   const session = jar.get(VIEWER_COOKIE)?.value ?? "";
   if (!session) notFound();
-
   const p = await sessionProposal(session);
-  if (!p) notFound();
+  if (!p || p.public_id !== publicId) notFound();
 
-  // The session is scoped to exactly one proposal; bind it to the URL so a
-  // valid session for proposal A can never render at proposal B's address.
-  // Mismatch is a uniform 404.
-  if (p.public_id !== publicId) notFound();
+  const selections = await getSelections(session);
+  const done = STEPS.filter((st) => {
+    const payload = selections[st.id] as Record<string, unknown> | undefined;
+    return !!payload && Object.values(payload).some((v) => v !== "" && v != null);
+  }).length;
+  const pct = Math.round((done / STEPS.length) * 100);
+  const released = RELEASED.has(p.status);
+  const submitted = p.status === "client_submitted" || p.status === "engineering_review" || p.status === "commercial_review" || p.status === "approved";
+  const heroExists = existsSync(path.join(process.cwd(), "public", HERO));
+  const preparedFor = p.company ? `${p.client_name} / ${p.company}` : p.client_name;
 
-  const expires = p.expires_at ? new Date(p.expires_at) : null;
-
-  async function sign(formData: FormData) {
-    "use server";
-    const name = String(formData.get("signerName") ?? "").trim();
-    const title = String(formData.get("signerTitle") ?? "").trim();
-    if (!name) return;
-    const jar2 = await cookies();
-    const tok = jar2.get(VIEWER_COOKIE)?.value ?? "";
-    if (!tok) return;
-    await signViaSession(tok, name, title || undefined);
-    revalidatePath(`/client/proposals/${publicId}`);
-  }
+  const cta = released
+    ? { href: `/client/proposals/${publicId}/proposal`, label: "View your proposal" }
+    : submitted
+      ? { href: `/client/proposals/${publicId}/configure?step=review`, label: "Review your submission" }
+      : done > 0
+        ? { href: `/client/proposals/${publicId}/configure`, label: "Resume configuration" }
+        : { href: `/client/proposals/${publicId}/configure`, label: "Begin configuration" };
 
   return (
-    <div style={{ background: "var(--paper)", minHeight: "100vh" }}>
-      {/* ---- utility rail: NOT the marketing nav ---- */}
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "1rem",
-          flexWrap: "wrap",
-          padding: "0.7rem clamp(1rem, 3vw, 2rem)",
-          borderBottom: "1px solid var(--edge)",
-          background: "var(--panel)",
-        }}
-      >
-        <Image src="/logo.png" alt="PODOS AI" width={64} height={22} priority sizes="64px" style={{ height: 22, width: "auto" }} />
-        <span style={mono}>{p.estimate_no} · v1</span>
-        <span
-          style={{
-            ...mono,
-            color: "var(--brand-deep)",
-            border: "1px solid rgba(37,99,235,.35)",
-            background: "rgba(37,99,235,.06)",
-            borderRadius: 999,
-            padding: "0.2rem 0.6rem",
-          }}
-        >
-          Confidential
-        </span>
-        <span style={{ ...mono, marginLeft: "auto" }}>{p.viewer_email}</span>
-        {expires && <span style={mono}>Valid until {expires.toLocaleDateString("en-US")}</span>}
-        <a href={`/client/proposals/${publicId}/configure`} style={{ ...mono, color: "var(--brand)" }}>
-          Configure
-        </a>
-        <a href={`/api/proposal/${publicId}/pdf`} target="_blank" rel="noopener" style={{ ...mono, color: "var(--brand)" }}>
-          Download PDF
-        </a>
-        <a href="mailto:info@podosai.com" style={{ ...mono, color: "var(--brand)" }}>
-          Help
-        </a>
-      </header>
+    <div className={`${s.root} ${s.field}`}>
+      <ClientBar publicId={publicId} project={p.project_name} preparedFor={preparedFor} />
 
-      <main style={{ maxWidth: 900, margin: "0 auto", padding: "clamp(28px, 5vw, 56px) 1.25rem" }}>
-        <p style={mono}>
-          Prepared for {p.client_name}
-          {p.company ? ` · ${p.company}` : ""}
-        </p>
-        <h1 className="t-headline" style={{ marginTop: "0.6rem", maxWidth: "20ch" }}>
-          {p.project_name ?? "Your PODOS deployment proposal"}
-        </h1>
-
-        <section
-          style={{
-            marginTop: "2rem",
-            border: "1px solid var(--edge)",
-            borderRadius: 14,
-            background: "var(--panel)",
-            padding: "1.6rem",
-            boxShadow: "0 1px 2px rgba(15,23,42,.04), 0 18px 50px -30px rgba(15,23,42,.25)",
-          }}
-        >
-          <p style={mono}>Preliminary estimate</p>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(1.9rem, 4.5vw, 2.9rem)",
-              fontWeight: 800,
-              letterSpacing: "-0.04em",
-              color: "var(--ink-strong)",
-              marginTop: "0.35rem",
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {usd(p.one_time_low_cents)} – {usd(p.one_time_high_cents)}
-          </p>
-          {p.recurring_cents > 0 && (
-            <p style={{ fontSize: 14, color: "var(--ink-dim)", marginTop: "0.45rem" }}>
-              + {usd(p.recurring_cents)} / year support
-            </p>
-          )}
-
-          {p.line_items?.length > 0 && (
-            <div style={{ marginTop: "1.3rem", borderTop: "1px solid var(--edge)", paddingTop: "1rem" }}>
-              <p style={mono}>Line items</p>
-              <div style={{ display: "grid", gap: "0.4rem", marginTop: "0.6rem" }}>
-                {p.line_items.map((li, i) => (
-                  <div key={`${li.label}-${i}`} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", fontSize: 13.5 }}>
-                    <span style={{ color: "var(--ink-dim)" }}>{li.label}</span>
-                    <span style={{ fontVariantNumeric: "tabular-nums", color: "var(--ink-strong)" }}>{usd(li.amount)}</span>
-                  </div>
-                ))}
+      <main style={{ maxWidth: 1680, margin: "0 auto", padding: "clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 3vw, 2rem)" }}>
+        <div className={`${s.rise} ${s.twoCol}`}>
+          {/* ---- welcome card (dominant) ---- */}
+          <section className={`${s.panel} ${s.panelLift}`} style={{ padding: "clamp(1.6rem, 3vw, 2.8rem)", position: "relative", overflow: "hidden" }}>
+            <div className={heroExists ? s.heroSplit : undefined} style={{ display: "grid", gap: "2rem", alignItems: "center" }}>
+              <div>
+                <p className={`${s.label} ${s.labelBrand}`} style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <Boxes size={14} strokeWidth={1.75} aria-hidden /> Private client configurator
+                </p>
+                <h1 className={s.display} style={{ marginTop: "0.9rem", maxWidth: "16ch" }}>
+                  Welcome to your PODOS configuration workspace
+                </h1>
+                <div style={{ width: 52, height: 3, borderRadius: 999, background: "linear-gradient(90deg, var(--brand), var(--cyan))", marginTop: "1rem" }} aria-hidden />
+                <p className={s.body} style={{ marginTop: "1.1rem", maxWidth: "52ch", fontSize: "1.02rem" }}>
+                  This guided configurator helps you define the ideal modular AI infrastructure
+                  deployment for your performance, scale, and operational requirements. PODOS
+                  prepared it for {p.company ?? p.client_name}
+                  {p.project_name ? ` — ${p.project_name}` : ""}.
+                </p>
               </div>
+              {heroExists && (
+                <div style={{ position: "relative", aspectRatio: "16 / 10", borderRadius: 14, overflow: "hidden", background: "var(--canvas)", border: "1px solid var(--edge-faint)" }}>
+                  <Image src={HERO} alt="Technical elevation of a PODOS modular pod with airflow paths" fill sizes="(max-width: 900px) 100vw, 40vw" style={{ objectFit: "contain" }} priority />
+                </div>
+              )}
             </div>
-          )}
-        </section>
 
-        {/* ---- signing: attached to the verified viewer identity ---- */}
-        {p.signed_at ? (
-          <p style={{ ...mono, color: "#15803D", marginTop: "1.2rem" }}>
-            Signed by {p.signer_name} on {new Date(p.signed_at).toLocaleDateString("en-US")}
-          </p>
-        ) : (
-          <form
-            action={sign}
-            style={{
-              marginTop: "1.4rem",
-              border: "1px solid var(--edge)",
-              borderRadius: 12,
-              background: "var(--panel)",
-              padding: "1.1rem 1.2rem",
-              display: "grid",
-              gap: "0.7rem",
-              maxWidth: 520,
-            }}
-          >
-            <p style={{ ...mono, color: "var(--brand-deep)" }}>Acknowledge and accept</p>
-            <p style={{ fontSize: 12.5, color: "var(--ink-dim)", lineHeight: 1.6 }}>
-              Acceptance is recorded against your verified access ({p.viewer_email}). This is a
-              preliminary-estimate acknowledgement, not a provider-certified signature.
+            {/* info tiles */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0.9rem", marginTop: "2rem" }}>
+              <Tile icon={<Clock3 size={18} strokeWidth={1.75} />} label="Estimated completion time">
+                <p className={s.headline} style={{ fontSize: "1.6rem" }}>10–15 <span style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--ink-dim)" }}>min</span></p>
+                <p className={s.help}>Save and resume anytime — progress is kept for you.</p>
+              </Tile>
+              <Tile icon={<ListChecks size={18} strokeWidth={1.75} />} label="You will configure">
+                <ul style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 12px", listStyle: "none", padding: 0, margin: "0.3rem 0 0", fontSize: 13, color: "var(--ink-dim)" }}>
+                  {["Platform", "Compute", "Cooling", "Power", "Network", "Deployment", "Support", "Site"].map((x) => (
+                    <li key={x} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ width: 6, height: 6, borderRadius: 999, background: "var(--brand)" }} aria-hidden /> {x}
+                    </li>
+                  ))}
+                </ul>
+              </Tile>
+              <Tile icon={<ShieldCheck size={18} strokeWidth={1.75} />} label="Your progress">
+                <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                  <p className={s.headline} style={{ fontSize: "1.6rem" }}>{pct}%</p>
+                  <span className={s.help} style={{ marginTop: 0 }}>{done} of {STEPS.length} steps</span>
+                </div>
+                <div className={s.progress} style={{ marginTop: 10 }} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+                  <div className={s.progressFill} style={{ width: `${pct}%` }} />
+                </div>
+              </Tile>
+            </div>
+
+            <Link href={cta.href} className={`${s.btn} ${s.btnPrimary}`} style={{ marginTop: "1.8rem", width: "100%", minHeight: 56, fontSize: "1.05rem" }}>
+              <ArrowRight size={20} strokeWidth={2} aria-hidden /> {cta.label}
+            </Link>
+            <p className={s.help} style={{ textAlign: "center", marginTop: "0.8rem", display: "flex", justifyContent: "center", alignItems: "center", gap: 6 }}>
+              <Lock size={12} strokeWidth={2} aria-hidden /> Secure private link — configuration data is encrypted and confidential.
             </p>
-            <input name="signerName" required placeholder="Full name" style={{ padding: "0.65rem 0.75rem", borderRadius: 10, border: "1px solid var(--edge-bright)", fontSize: 14.5, fontFamily: "inherit" }} />
-            <input name="signerTitle" placeholder="Title (optional)" style={{ padding: "0.65rem 0.75rem", borderRadius: 10, border: "1px solid var(--edge-bright)", fontSize: 14.5, fontFamily: "inherit" }} />
-            <button type="submit" style={{ padding: "0.8rem 1rem", borderRadius: 10, background: "var(--brand-gradient)", color: "#fff", fontWeight: 600, fontSize: 14.5, border: "none", cursor: "pointer" }}>
-              Sign and accept →
-            </button>
-          </form>
-        )}
+          </section>
 
-        <p
-          style={{
-            fontSize: 12.5,
-            lineHeight: 1.65,
-            color: "var(--ink-faint)",
-            marginTop: "2rem",
-            maxWidth: "70ch",
-            borderLeft: "2px solid var(--edge-bright)",
-            paddingLeft: "0.9rem",
-          }}
-        >
-          Preliminary configuration estimate prepared for {p.client_name}. Not a quote, offer, or
-          contract. Final pricing, schedule, performance and scope remain subject to engineering
-          review, site validation, equipment availability, applicable taxes, freight, permitting
-          requirements and the executed agreement.
-        </p>
+          {/* ---- what happens next ---- */}
+          <aside className={s.panel} style={{ padding: "1.4rem" }}>
+            <p className={s.title} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <FileText size={18} strokeWidth={1.75} color="var(--brand)" aria-hidden /> What happens next
+            </p>
+            <ol style={{ listStyle: "none", padding: 0, margin: "1.1rem 0 0", display: "grid", gap: "1.1rem" }}>
+              <NextStep n={1} icon={<Boxes size={18} strokeWidth={1.75} />} title="Configure" text="Tailor each component to match your technical and operational requirements." />
+              <NextStep n={2} icon={<FileText size={18} strokeWidth={1.75} />} title="Review" text="Review your configuration summary, specifications, and preliminary estimate." />
+              <NextStep n={3} icon={<Send size={18} strokeWidth={1.75} />} title="Submit" text="Submit for engineering review. PODOS returns a formal proposal." />
+            </ol>
+          </aside>
+        </div>
 
-        <p style={{ ...mono, marginTop: "2.2rem" }}>
-          Confidential — prepared for {p.company ?? p.client_name} · {p.viewer_email} · access is recorded
+        {/* security strip */}
+        <p style={{ display: "flex", justifyContent: "center", gap: "1.4rem", flexWrap: "wrap", marginTop: "2rem", fontSize: 12.5, color: "var(--ink-faint)" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--brand-deep)", fontWeight: 600 }}><ShieldCheck size={14} strokeWidth={2} aria-hidden /> Enterprise-grade security</span>
+          <span>Data encrypted in transit and at rest</span>
+          <span>Access limited to authorized recipients only</span>
         </p>
       </main>
     </div>
+  );
+}
+
+function Tile({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ border: "1px solid var(--edge)", borderRadius: 14, background: "var(--paper)", padding: "1rem 1.1rem" }}>
+      <p className={s.label} style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--ink-dim)" }}>
+        <span style={{ color: "var(--brand)" }}>{icon}</span> {label}
+      </p>
+      <div style={{ marginTop: "0.6rem" }}>{children}</div>
+    </div>
+  );
+}
+
+function NextStep({ n, icon, title, text }: { n: number; icon: React.ReactNode; title: string; text: string }) {
+  return (
+    <li style={{ display: "grid", gridTemplateColumns: "44px 1fr", gap: "0.8rem" }}>
+      <span className={s.iconTile}>{icon}</span>
+      <div>
+        <p style={{ fontWeight: 700, fontSize: 14.5, color: "var(--ink-strong)", display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ width: 20, height: 20, borderRadius: 999, background: "var(--brand)", color: "#fff", fontSize: 11, display: "grid", placeItems: "center" }}>{n}</span> {title}
+        </p>
+        <p className={s.help} style={{ marginTop: 3, fontSize: 13, lineHeight: 1.5 }}>{text}</p>
+      </div>
+    </li>
   );
 }

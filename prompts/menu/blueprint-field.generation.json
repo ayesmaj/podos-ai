@@ -1,0 +1,33 @@
+{
+  "created_at": "2026-09-02T01:58:52.236Z",
+  "model": "gpt-image-2",
+  "prompt": "Create a website background texture in a 16:9 frame. A uniform porcelain white surface (#F7F8FA) with a very faint cobalt blueprint grid of hairline lines (#2563EB at about 6% opacity): major squares about one twelfth of the frame width with fainter minor subdivisions. A subtle soft radial light: the center is a touch brighter porcelain and the corners fall off very gently to a slightly cooler porcelain-gray (#EEF1F5). Absolutely no objects, no shapes, no text, no logos, no vignette darker than a whisper, no noise, no gradients other than the gentle radial light. Flat, calm, clean, orthographic; the grid stays perfectly straight and parallel to the frame edges.",
+  "prompt_source": "C:\\Users\\smadj\\Documents\\podos-ai\\public\\visuals\\menu\\blueprint-field.prompt.txt",
+  "request": {
+    "size": "1792x1008",
+    "quality": "high",
+    "format": "webp",
+    "background": "opaque",
+    "compression": 88,
+    "n": 1
+  },
+  "outputs": [
+    "C:\\Users\\smadj\\Documents\\podos-ai\\public\\visuals\\menu\\blueprint-field.webp"
+  ],
+  "usage": {
+    "input_tokens": 155,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 155
+    },
+    "output_tokens": 4934,
+    "output_tokens_details": {
+      "image_tokens": 4934,
+      "text_tokens": 0
+    },
+    "total_tokens": 5089
+  },
+  "revised_prompts": [
+    null
+  ]
+}

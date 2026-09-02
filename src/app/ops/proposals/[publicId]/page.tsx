@@ -5,6 +5,9 @@ import { requireOps } from "@/lib/ops/session";
 import { ADMIN_SECRET, getProposalFull, listCatalog, usd } from "@/lib/estimates/admin";
 import OpsShell from "@/components/ops/OpsShell";
 import LineItemEditor, { type Item, type CatalogOption } from "./LineItemEditor";
+import { importClientSelections, releaseToClient, sendBackForRevision, toggleSignature } from "./actions";
+import { Download, Eye, Import, PenLine, Send, Undo2 } from "lucide-react";
+import { STEPS, STEP_CATEGORY } from "@/lib/proposals/steps";
 
 /**
  * /ops/proposals/[publicId] — proposal detail (master brief 7.5 + 8).
@@ -33,6 +36,7 @@ interface ProposalFull {
   };
   version: { id: string; rev: number; status: string; locked_at: string | null } | null;
   line_items: Item[];
+  selections: Record<string, Record<string, unknown>>;
   invitations: { invitation_id: string; recipient_email: string; access_policy: string; issued_at: string; expires_at: string; revoked: boolean; exchanged_at: string | null }[];
   viewers: { email: string; total_sessions: number; last_view_at: string | null; first_view_at: string | null }[];
   activity: { at: string; actor: string; event: string }[];
@@ -46,6 +50,13 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
   const data = (await getProposalFull(ADMIN_SECRET, publicId)) as ProposalFull | null;
   if (!data?.head) notFound();
   const { head, version, line_items, invitations, viewers, activity } = data;
+  const selections = data.selections ?? {};
+  const released = ["released", "signature_requested", "client_signed", "signed", "countersigned", "completed"].includes(head.status);
+  const chosen = Object.entries(STEP_CATEGORY).flatMap(([step]) => {
+    const sku = selections[step]?.sku as string | undefined;
+    return sku ? [{ step, label: STEPS.find((x) => x.id === step)?.title ?? step, sku }] : [];
+  });
+  const stepsSaved = Object.keys(selections).length;
   const catalog = (await listCatalog(ADMIN_SECRET)) ?? [];
   const catalogOptions: CatalogOption[] = catalog.map((c) => ({ sku: c.sku, name: c.name, category: c.category, price_cents: c.price_cents }));
   const locked = !!version?.locked_at;
@@ -56,9 +67,29 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
       title={head.company ?? head.client_name}
       actions={
         <>
-          <a href={`/api/proposal/${publicId}/pdf`} target="_blank" rel="noopener" style={{ ...mono, fontSize: 11, padding: ".5rem .8rem", borderRadius: 8, textDecoration: "none", border: "1px solid var(--brand)", background: "var(--brand-wash)", color: "var(--brand-deep)" }}>
-            Preview PDF
+          <Link href={`/ops/proposals/${publicId}/preview`} style={{ ...mono, fontSize: 11, padding: ".5rem .8rem", borderRadius: 8, textDecoration: "none", border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <Eye size={13} aria-hidden /> Preview as client
+          </Link>
+          <a href={`/api/proposal/${publicId}/pdf`} target="_blank" rel="noopener" style={{ ...mono, fontSize: 11, padding: ".5rem .8rem", borderRadius: 8, textDecoration: "none", border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <Download size={13} aria-hidden /> PDF
           </a>
+          {!locked && (
+            <form action={releaseToClient}>
+              <input type="hidden" name="publicId" value={publicId} />
+              <button type="submit" style={{ ...mono, fontSize: 11, padding: ".5rem .9rem", borderRadius: 8, border: "none", background: "var(--brand-gradient)", color: "#fff", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <Send size={13} aria-hidden /> Release proposal
+              </button>
+            </form>
+          )}
+          {released && (
+            <form action={toggleSignature}>
+              <input type="hidden" name="publicId" value={publicId} />
+              <input type="hidden" name="enable" value={head.status === "signature_requested" ? "0" : "1"} />
+              <button type="submit" style={{ ...mono, fontSize: 11, padding: ".5rem .9rem", borderRadius: 8, border: "1px solid var(--brand)", background: head.status === "signature_requested" ? "var(--panel)" : "var(--brand-wash)", color: "var(--brand-deep)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <PenLine size={13} aria-hidden /> {head.status === "signature_requested" ? "Disable signature" : "Enable signature"}
+              </button>
+            </form>
+          )}
           <Link href="/ops/proposals" style={{ ...mono, fontSize: 11, color: "var(--ink-faint)", textDecoration: "none" }}>← All proposals</Link>
         </>
       }
@@ -83,6 +114,53 @@ export default async function ProposalDetail({ params }: { params: Promise<{ pub
 
         {/* right rail */}
         <div style={{ display: "grid", gap: "1.2rem", position: "sticky", top: "1rem" }}>
+          {/* ---- client configuration (live view of the client's workspace) ---- */}
+          <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.1rem 1.2rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+              <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)" }}>Client configuration</p>
+              <span style={{ ...mono, fontSize: 9, color: "var(--ink-faint)" }}>{stepsSaved} / {STEPS.length - 1} steps saved</span>
+            </div>
+            <div style={{ height: 5, borderRadius: 999, background: "var(--canvas)", marginTop: 8, overflow: "hidden" }} aria-hidden>
+              <div style={{ width: `${Math.min(100, Math.round((stepsSaved / (STEPS.length - 1)) * 100))}%`, height: "100%", background: "linear-gradient(90deg, var(--brand), var(--cyan))" }} />
+            </div>
+            {(() => {
+              const pr = selections.project ?? {}; const site = selections.site ?? {};
+              const facts: [string, unknown][] = [["Pods", pr.pod_quantity], ["Capacity (MW)", pr.required_capacity_mw], ["Workload", pr.workload], ["Go-live", pr.target_golive], ["Site", site.site_name ?? site.address]];
+              const shown = facts.filter(([, v]) => v !== undefined && v !== null && v !== "");
+              return shown.length > 0 ? (
+                <div style={{ display: "grid", gap: 4, marginTop: 10 }}>
+                  {shown.map(([k, v]) => <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}><span style={{ color: "var(--ink-faint)" }}>{k}</span><span style={{ color: "var(--ink-strong)", fontWeight: 600 }}>{String(v)}</span></div>)}
+                </div>
+              ) : <p style={{ fontSize: 12.5, color: "var(--ink-faint)", marginTop: 8 }}>The client has not started configuring yet.</p>;
+            })()}
+            {chosen.length > 0 && (
+              <div style={{ marginTop: 10, display: "grid", gap: 4 }}>
+                {chosen.map((c) => <div key={c.step} style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}><span style={{ color: "var(--ink-faint)" }}>{c.label}</span><span style={{ ...mono, fontSize: 9.5, color: "var(--brand-deep)" }}>{c.sku}</span></div>)}
+              </div>
+            )}
+            {!locked && (
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+                {chosen.length > 0 && (
+                  <form action={importClientSelections}>
+                    <input type="hidden" name="publicId" value={publicId} />
+                    <button type="submit" style={{ ...mono, fontSize: 9.5, padding: ".45rem .7rem", borderRadius: 8, border: "1px solid var(--brand)", background: "var(--brand-wash)", color: "var(--brand-deep)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <Import size={12} aria-hidden /> Import selections as line items
+                    </button>
+                  </form>
+                )}
+                {["client_submitted", "engineering_review", "commercial_review"].includes(head.status) && (
+                  <form action={sendBackForRevision} style={{ display: "flex", gap: 6 }}>
+                    <input type="hidden" name="publicId" value={publicId} />
+                    <input name="note" placeholder="Note to client (optional)" style={{ padding: ".4rem .6rem", borderRadius: 8, border: "1px solid var(--edge-bright)", fontSize: 12, fontFamily: "inherit", minWidth: 160 }} />
+                    <button type="submit" style={{ ...mono, fontSize: 9.5, padding: ".45rem .7rem", borderRadius: 8, border: "1px solid var(--edge-bright)", background: "var(--panel)", color: "var(--ink-dim)", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <Undo2 size={12} aria-hidden /> Request revision
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
+          </section>
+
           <section style={{ border: "1px solid var(--edge)", borderRadius: 12, background: "var(--panel)", padding: "1.1rem 1.2rem" }}>
             <p style={{ ...mono, fontSize: 10, color: "var(--brand-deep)" }}>Preliminary total</p>
             <p style={{ fontFamily: "var(--font-display)", fontSize: "1.5rem", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--ink-strong)", marginTop: 4, fontVariantNumeric: "tabular-nums" }}>

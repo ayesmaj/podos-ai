@@ -1,0 +1,33 @@
+{
+  "created_at": "2026-09-02T01:57:59.455Z",
+  "model": "gpt-image-2",
+  "prompt": "PURPOSE: menu card illustration for the commissioning service, acceptance testing of a placed pod.\nSUBJECT: one PODOS pod in straight front elevation (long low enclosure about 3.5 by 1 units, rounded end caps, six side panels, roof panel band, skid base with leveling feet), all doors closed. Three test-probe instruments attached to the pod: (1) electrical: a small handheld meter box with a round dial (needle and tick marks, no numerals) connected by a cobalt lead to a service port on the left end cap; (2) thermal: a small probe body connected by a cyan lead to a roof vent near the middle; (3) network: a small tester box connected by a cyan lead to a port on the right end cap. Each instrument carries a small green acceptance indicator dot, and a fourth green dot sits on the pod's right end cap.\nFLOW: cobalt lead for electrical, cyan leads for thermal and network, each ending in a small arrowhead at its pod connection.\nCOMPOSITION: pod centered spanning about 74% of the frame width, instruments arranged around it without touching the frame edges. 4:3 frame.\n\nSTYLE — PODOS technical menu-illustration family (apply exactly; identical across every card)\nClean orthographic technical illustration in the manner of an engineering elevation drawing, produced as a premium product-menu card image.\nPROJECTION: strict orthographic straight-on view. Zero perspective: no camera angle, no vanishing points, no foreshortening, no isometric or three-quarter rotation. All parallel edges stay parallel; horizontal edges are perfectly horizontal.\nBACKGROUND: uniform porcelain white (#F7F8FA) covered by a faint cobalt blueprint grid of hairline-thin lines (major squares about one tenth of the image width, with fainter minor subdivisions). The grid is very light, roughly 8% opacity, and fades slightly toward the image edges. No other background element: no floor plane, no horizon, no room, no walls, no landscape, no sky.\nEQUIPMENT RENDER: matte black to dark graphite surfaces (#111317 to #2A2E35) with soft matte shading, no gloss, no mirror reflections. Panel seams, vents, louvers, fasteners, handles, rails and internal detail are drawn as thin light-gray construction lines (#9AA3AD) and slightly lighter graphite faces. Small mechanical detail is crisp and believable, like a manufacturer's specification drawing.\nFLOW GRAPHICS: cobalt blue (#2563EB) for primary / supply / power / incoming paths; cyan (#22D3EE) for secondary / return / data / exhaust paths. Paths are clean straight lines with right-angle bends and small solid triangular arrowheads, flat color, no glow, no gradient, no neon. Use green (#22C55E) only as a small enabled / online indicator dot or bar, and only where the subject description explicitly asks for it.\nGROUNDING: one soft, restrained, slightly blurred shadow directly beneath the equipment on the porcelain surface. Subtle, low contrast, no long cast shadows.\nCOMPOSITION: exactly one concept per image, centered, fully inside the frame, never cropped, with an empty margin of about 12% of the frame on every side. Keep the whole subject group compact and readable at card size.\nPROPORTION SYSTEM (keep identical across the family): a standard 42U server rack is drawn about 1 unit wide and 2.6 units tall on slim leveling feet; floor-standing support cabinets (CDU, UPS, switchgear, CRAC) share the same 2.6-unit height or a clean half height; the PODOS pod is a long low enclosure about 3.5 units long and 1 unit tall with softly rounded end caps, a low raised roof-panel array along the top edge, six equal flat side panels separated by thin seams, and a black skid base frame with small leveling feet.\nMOOD: flat, precise, diagrammatic, quiet, premium engineering documentation.\nEXCLUDE: text, letters, numbers, labels, dimension callouts, logos, wordmarks, watermarks, people, hands, environment, sky, floor tiles, isometric or three-quarter angles, perspective, photorealistic stock-photo rendering, dramatic lighting, lens effects, sci-fi glow, neon, purple or pink tones, orange, duplicate subjects, clutter, cropped edges.",
+  "prompt_source": "C:\\Users\\smadj\\Documents\\podos-ai\\public\\visuals\\menu\\svc-commission.prompt.txt",
+  "request": {
+    "size": "1600x1200",
+    "quality": "high",
+    "format": "webp",
+    "background": "opaque",
+    "compression": 88,
+    "n": 1
+  },
+  "outputs": [
+    "C:\\Users\\smadj\\Documents\\podos-ai\\public\\visuals\\menu\\svc-commission.webp"
+  ],
+  "usage": {
+    "input_tokens": 904,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 904
+    },
+    "output_tokens": 6774,
+    "output_tokens_details": {
+      "image_tokens": 6774,
+      "text_tokens": 0
+    },
+    "total_tokens": 7678
+  },
+  "revised_prompts": [
+    null
+  ]
+}

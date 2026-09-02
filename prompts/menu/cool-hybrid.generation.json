@@ -1,0 +1,33 @@
+{
+  "created_at": "2026-09-02T01:51:24.393Z",
+  "model": "gpt-image-2",
+  "prompt": "PURPOSE: menu card illustration for hybrid liquid plus air cooling.\nSUBJECT: side elevation section of one 42U rack (1 unit wide, 2.6 tall) with eight server nodes each carrying a thin cold plate, plus a rear-door heat exchanger mounted on the rack's rear (right) face: a full-height thin door panel filled with a fine coil-and-fin pattern drawn in construction lines. Further right, a short facility loop connection: two pipe stubs with small valve bodies coming from a wall-connection plate.\nFLOW: internal cold-plate loop: cobalt supply manifold with branch arrowheads into each cold plate, cyan return manifold with branch arrowheads out. The rear-door heat exchanger receives a cobalt facility supply pipe at its bottom and a cyan facility return pipe at its top, both from the connection plate. Server exhaust air passes through the rear door: draw four short cyan airflow arrows exiting the rear door horizontally to the right.\nCOMPOSITION: rack with rear door and facility connection as one centered group, about 68% of the frame width. 4:3 frame.\n\nSTYLE — PODOS technical menu-illustration family (apply exactly; identical across every card)\nClean orthographic technical illustration in the manner of an engineering elevation drawing, produced as a premium product-menu card image.\nPROJECTION: strict orthographic straight-on view. Zero perspective: no camera angle, no vanishing points, no foreshortening, no isometric or three-quarter rotation. All parallel edges stay parallel; horizontal edges are perfectly horizontal.\nBACKGROUND: uniform porcelain white (#F7F8FA) covered by a faint cobalt blueprint grid of hairline-thin lines (major squares about one tenth of the image width, with fainter minor subdivisions). The grid is very light, roughly 8% opacity, and fades slightly toward the image edges. No other background element: no floor plane, no horizon, no room, no walls, no landscape, no sky.\nEQUIPMENT RENDER: matte black to dark graphite surfaces (#111317 to #2A2E35) with soft matte shading, no gloss, no mirror reflections. Panel seams, vents, louvers, fasteners, handles, rails and internal detail are drawn as thin light-gray construction lines (#9AA3AD) and slightly lighter graphite faces. Small mechanical detail is crisp and believable, like a manufacturer's specification drawing.\nFLOW GRAPHICS: cobalt blue (#2563EB) for primary / supply / power / incoming paths; cyan (#22D3EE) for secondary / return / data / exhaust paths. Paths are clean straight lines with right-angle bends and small solid triangular arrowheads, flat color, no glow, no gradient, no neon. Use green (#22C55E) only as a small enabled / online indicator dot or bar, and only where the subject description explicitly asks for it.\nGROUNDING: one soft, restrained, slightly blurred shadow directly beneath the equipment on the porcelain surface. Subtle, low contrast, no long cast shadows.\nCOMPOSITION: exactly one concept per image, centered, fully inside the frame, never cropped, with an empty margin of about 12% of the frame on every side. Keep the whole subject group compact and readable at card size.\nPROPORTION SYSTEM (keep identical across the family): a standard 42U server rack is drawn about 1 unit wide and 2.6 units tall on slim leveling feet; floor-standing support cabinets (CDU, UPS, switchgear, CRAC) share the same 2.6-unit height or a clean half height; the PODOS pod is a long low enclosure about 3.5 units long and 1 unit tall with softly rounded end caps, a low raised roof-panel array along the top edge, six equal flat side panels separated by thin seams, and a black skid base frame with small leveling feet.\nMOOD: flat, precise, diagrammatic, quiet, premium engineering documentation.\nEXCLUDE: text, letters, numbers, labels, dimension callouts, logos, wordmarks, watermarks, people, hands, environment, sky, floor tiles, isometric or three-quarter angles, perspective, photorealistic stock-photo rendering, dramatic lighting, lens effects, sci-fi glow, neon, purple or pink tones, orange, duplicate subjects, clutter, cropped edges.",
+  "prompt_source": "C:\\Users\\smadj\\Documents\\podos-ai\\public\\visuals\\menu\\cool-hybrid.prompt.txt",
+  "request": {
+    "size": "1600x1200",
+    "quality": "high",
+    "format": "webp",
+    "background": "opaque",
+    "compression": 88,
+    "n": 1
+  },
+  "outputs": [
+    "C:\\Users\\smadj\\Documents\\podos-ai\\public\\visuals\\menu\\cool-hybrid.webp"
+  ],
+  "usage": {
+    "input_tokens": 885,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 885
+    },
+    "output_tokens": 6774,
+    "output_tokens_details": {
+      "image_tokens": 6774,
+      "text_tokens": 0
+    },
+    "total_tokens": 7659
+  },
+  "revised_prompts": [
+    null
+  ]
+}

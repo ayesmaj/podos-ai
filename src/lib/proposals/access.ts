@@ -181,3 +181,26 @@ export async function getSelections(session: string): Promise<Record<string, unk
   const r = await rpc<Record<string, unknown>>("get_selections", { p_session: session });
   return r ?? {};
 }
+
+/** Server-computed preliminary estimate for the session's saved selections. */
+export interface EstimatePreview {
+  pods: number;
+  multiplier: number;
+  low_cents: number;
+  high_cents: number;
+  recurring_cents: number;
+  items: { step: string; sku: string; name: string; recurring: boolean; extended_cents: number; pending: boolean }[];
+}
+export async function previewEstimate(session: string): Promise<EstimatePreview | null> {
+  return rpc<EstimatePreview>("preview_estimate", { p_session: session });
+}
+
+/** Submit the configuration for PODOS review (intake-only; never a signature). */
+export async function submitConfiguration(
+  session: string
+): Promise<{ ok: boolean; reference?: string; submitted_at?: string; reason?: string } | null> {
+  return rpc<{ ok: boolean; reference?: string; submitted_at?: string; reason?: string }>(
+    "submit_configuration",
+    { p_session: session }
+  );
+}

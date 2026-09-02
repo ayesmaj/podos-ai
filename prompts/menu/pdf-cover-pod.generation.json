@@ -1,0 +1,33 @@
+{
+  "created_at": "2026-09-02T01:57:53.119Z",
+  "model": "gpt-image-2",
+  "prompt": "PURPOSE: PDF proposal cover illustration. Real title text will be placed above the pod in the top third of the page, so the top 30% of the frame must stay empty apart from the faint grid.\nSUBJECT: one PODOS pod in a flat parallel front-three-quarter axonometric technical view, long side dominant, one rounded end cap and the roof visible: matte black with construction-line detail, six side panels, roof panel array, skid base with leveling feet, doors closed.\nACCENTS: a thin cobalt line along the skid base rail and two small cobalt service ports on the visible end cap. No flow arrows.\nCOMPOSITION: 3:2 frame. Pod centered horizontally, placed in the lower 60% of the frame with a soft ground shadow, spanning about 66% of the frame width so that at least 15% of the width stays empty on both the left and the right. Top 30% copy-safe and empty.\n\nSTYLE — PODOS technical illustration family, axonometric variant (used only for the hero and the PDF cover; everything except the projection matches the orthographic cards)\nClean technical illustration in the manner of an engineering drawing, produced as a premium website / document asset.\nPROJECTION: flat parallel axonometric three-quarter view (isometric-style). No vanishing points, no foreshortening, no camera lens: all parallel edges stay parallel and receding faces keep their true proportion. It must read as a drafted technical drawing, not a photograph or a 3D render with a camera.\nBACKGROUND: uniform porcelain white (#F7F8FA) covered by a faint cobalt blueprint grid of hairline-thin lines (major squares about one tenth of the image width, with fainter minor subdivisions). The grid is very light, roughly 8% opacity, fades slightly toward the edges, and stays flat and orthogonal to the frame (it is a paper grid, not a ground plane in perspective). No other background element: no floor plane, no horizon, no room, no landscape, no sky.\nEQUIPMENT RENDER: matte black to dark graphite surfaces (#111317 to #2A2E35) with soft matte shading, no gloss, no mirror reflections. Panel seams, vents, louvers, fasteners and rails are drawn as thin light-gray construction lines (#9AA3AD) and slightly lighter graphite faces. Detail is crisp and believable, like a manufacturer's specification drawing.\nFLOW GRAPHICS: cobalt blue (#2563EB) for primary / supply / incoming paths; cyan (#22D3EE) for secondary / return / exhaust paths. Clean straight arrows with small solid triangular heads, flat color, no glow, no gradient, no neon.\nGROUNDING: one soft, restrained, slightly blurred shadow directly beneath the equipment. Subtle, low contrast, no long cast shadows.\nPODOS POD GEOMETRY (approved, do not alter): a long low enclosure about 3.5 units long and 1 unit tall with softly rounded end caps, a low raised roof-panel array running along the top, six equal flat side panels separated by thin seams, a black skid base frame with small leveling feet. Doors closed; no interior visible.\nMOOD: flat, precise, diagrammatic, quiet, premium engineering documentation.\nEXCLUDE: text, letters, numbers, labels, dimension callouts, logos, wordmarks, watermarks, people, hands, environment, sky, floor tiles, perspective with vanishing points, photorealistic stock-photo rendering, dramatic lighting, lens effects, sci-fi glow, neon, purple or pink tones, orange, duplicate subjects, clutter, cropped edges.",
+  "prompt_source": "C:\\Users\\smadj\\Documents\\podos-ai\\public\\visuals\\menu\\pdf-cover-pod.prompt.txt",
+  "request": {
+    "size": "1536x1024",
+    "quality": "high",
+    "format": "png",
+    "background": "opaque",
+    "compression": null,
+    "n": 1
+  },
+  "outputs": [
+    "C:\\Users\\smadj\\Documents\\podos-ai\\public\\visuals\\menu\\pdf-cover-pod.png"
+  ],
+  "usage": {
+    "input_tokens": 751,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 751
+    },
+    "output_tokens": 5488,
+    "output_tokens_details": {
+      "image_tokens": 5488,
+      "text_tokens": 0
+    },
+    "total_tokens": 6239
+  },
+  "revised_prompts": [
+    null
+  ]
+}
